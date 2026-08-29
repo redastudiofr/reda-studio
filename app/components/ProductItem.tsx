@@ -11,6 +11,7 @@ import {useNearViewport} from '~/lib/useNearViewport';
 import {getProductVideo} from '~/lib/media';
 import {parseRating} from '~/lib/rating';
 import {StarRating} from '~/components/StarRating';
+import {useT} from '~/lib/i18n';
 
 type GridProduct =
   | CollectionItemFragment
@@ -25,9 +26,11 @@ export function ProductItem({
   product: GridProduct;
   loading?: 'eager' | 'lazy';
 }) {
+  const t = useT();
   const variantUrl = useVariantUrl(product.handle);
   const {ref, near} = useNearViewport<HTMLDivElement>();
   const image = product.featuredImage;
+  const soldOut = !product.availableForSale;
 
   const images = 'images' in product ? product.images?.nodes ?? [] : [];
   const altImage = images.find((img) => img.id !== image?.id);
@@ -37,7 +40,10 @@ export function ProductItem({
     'compareAtPriceRange' in product
       ? product.compareAtPriceRange?.minVariantPrice
       : undefined;
-  const onSale = compareAt && Number(compareAt.amount) > Number(price.amount);
+  // A struck-through price and a "sale" tag are both a promotional push —
+  // wrong for something the customer cannot actually buy right now.
+  const onSale =
+    !soldOut && compareAt && Number(compareAt.amount) > Number(price.amount);
 
   // Only shown when the shop actually publishes review metafields — never a
   // placeholder or invented score.
@@ -47,9 +53,17 @@ export function ProductItem({
       : null;
 
   return (
-    <Link className="product-card" prefetch="intent" to={variantUrl}>
+    <Link
+      className={`product-card ${soldOut ? 'product-card--sold-out' : ''}`}
+      prefetch="intent"
+      to={variantUrl}
+    >
       <div className="product-card__media" ref={ref}>
-        {onSale && <span className="badge-sale">sale</span>}
+        {soldOut ? (
+          <span className="badge-sold-out">{t('product.soldOut')}</span>
+        ) : (
+          onSale && <span className="badge-sale">{t('product.saleBadge')}</span>
+        )}
         {video && near ? (
           <video
             className="product-card__img product-card__img--main"

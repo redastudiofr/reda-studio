@@ -200,6 +200,28 @@
   text-transform: capitalize;
 }
 
+/* Same slot as .badge-sale — the two never show at once, so one card only
+   ever carries one tag. Muted rather than the sale badge's paper-on-ink, so
+   it reads as a status, not an invitation. */
+.badge-sold-out {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 1;
+  background: var(--color-muted);
+  color: var(--color-paper);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  text-transform: capitalize;
+}
+
+/* The photograph itself fades back too, so the card reads as unavailable at
+   a glance rather than only via the small badge in the corner. */
+.product-card--sold-out .product-card__img--main {
+  opacity: 0.45;
+}
+
 /*
 * --------------------------------------------------
 * Header
