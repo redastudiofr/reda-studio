@@ -1,6 +1,8 @@
 import {useEffect, useState} from 'react';
 import {CloseIcon} from '~/components/Icons';
 import {lockScroll, unlockScroll} from '~/lib/scrollLock';
+import {normalizePhone} from '~/lib/phone';
+import {NEWSLETTER_PROMO_CODE} from '~/lib/newsletterPromo';
 import {useT} from '~/lib/i18n';
 
 const STORAGE_KEY = 'reda-studio-newsletter-seen';
@@ -24,11 +26,10 @@ const LEGACY_STORAGE_KEY = 'reda-studio-newsletter-subscribed';
 const COOKIE_NAME = 'reda_newsletter_seen';
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 
-const PROMO_CODE = 'REDA10';
 const OPEN_DELAY_MS = 1200;
 
 /**
- * Welcome pop-up offering -10% in exchange for an email address.
+ * Welcome pop-up offering -10% in exchange for a phone number.
  *
  * Shown **once per visitor**: the flag is written the moment it opens and
  * again when it closes, so it never comes back — whether the visitor
@@ -38,8 +39,9 @@ const OPEN_DELAY_MS = 1200;
  * rules; only clearing the browser's site data resets both.
  *
  * Posts through the same real /newsletter endpoint as the footer sign-up
- * (Shopify's own customer form), so every address lands in the store's
- * customer list — see docs/emails-newsletter.md. The promo code only appears
+ * (Shopify's own customer form), so every number lands in the store's
+ * customer list — and, once configured, also in a Notion database kept just
+ * for these — see docs/emails-newsletter.md. The promo code only appears
  * once that submission actually succeeds.
  */
 /*
@@ -95,7 +97,9 @@ function markSeen() {
 
 export function NewsletterPopup() {
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [status, setStatus] = useState<
+    'idle' | 'loading' | 'done' | 'error' | 'invalid'
+  >('idle');
   const t = useT();
 
   useEffect(() => {
@@ -133,15 +137,24 @@ export function NewsletterPopup() {
   }
 
   async function submit(form: HTMLFormElement) {
-    const email = (form.elements.namedItem('email') as HTMLInputElement)?.value;
-    if (!email) return;
+    const raw = (form.elements.namedItem('phone') as HTMLInputElement)?.value;
+    if (!raw) return;
+
+    // Checked here, before the request, so a mistyped number never reaches
+    // the network — and again on the server, since a client check alone can
+    // always be bypassed.
+    const phone = normalizePhone(raw);
+    if (!phone) {
+      setStatus('invalid');
+      return;
+    }
 
     setStatus('loading');
     try {
       const body = new URLSearchParams({
         form_type: 'customer',
         utf8: '✓',
-        'contact[email]': email,
+        'contact[phone]': phone,
         // Tagged as coming from the pop-up so the two sign-up points can be
         // told apart in the store's customer list.
         source: 'popup',
@@ -189,7 +202,7 @@ export function NewsletterPopup() {
           {status === 'done' ? (
             <div className="popup__code">
               <p className="popup__code-label">{t('popup.codeLabel')}</p>
-              <p className="popup__code-value">{PROMO_CODE}</p>
+              <p className="popup__code-value">{NEWSLETTER_PROMO_CODE}</p>
               <p className="popup__code-hint">{t('popup.codeHint')}</p>
             </div>
           ) : (
@@ -197,16 +210,22 @@ export function NewsletterPopup() {
               <p className="popup__text">{t('popup.text')}</p>
               <form className="popup__form" onSubmit={onSubmit}>
                 <input
-                  type="email"
-                  name="email"
-                  placeholder={t('news.placeholder')}
-                  aria-label={t('news.emailLabel')}
-                  autoComplete="email"
+                  type="tel"
+                  name="phone"
+                  placeholder={t('popup.phonePlaceholder')}
+                  aria-label={t('popup.phoneLabel')}
+                  autoComplete="tel"
+                  inputMode="tel"
                   required
                 />
                 <button type="submit" className="btn btn--full" disabled={status === 'loading'}>
                   {status === 'loading' ? '…' : t('popup.cta')}
                 </button>
+                {status === 'invalid' && (
+                  <p className="form-error" role="alert">
+                    {t('popup.invalidPhone')}
+                  </p>
+                )}
                 {status === 'error' && (
                   <p className="form-error" role="alert">
                     {t('news.error')}

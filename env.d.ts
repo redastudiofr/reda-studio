@@ -5,3 +5,13 @@
 
 // Enhance TypeScript's built-in typings.
 import '@total-typescript/ts-reset';
+
+declare global {
+  interface Env {
+    // Optional: mirrors each pop-up phone sign-up into a Notion database.
+    // Unset in every environment until docs/emails-newsletter.md's Notion
+    // section is followed — see app/routes/newsletter.tsx.
+    NOTION_API_KEY?: string;
+    NOTION_PHONE_DATABASE_ID?: string;
+  }
+}

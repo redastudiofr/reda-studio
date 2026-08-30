@@ -154,9 +154,12 @@ export const en = {
   'news.error': 'something went wrong, please try again.',
   'popup.title': '-10% off your first order',
   'popup.text':
-    'leave your email and your promo code appears right after. quick, simple, no spam.',
+    'leave your phone number and your promo code appears right after. quick and simple.',
   'popup.cta': 'get my -10% now',
-  'popup.fineprint': 'no spam. exclusive offers and private sales only.',
+  'popup.fineprint': 'exclusive offers by SMS only. unsubscribe anytime, reply STOP.',
+  'popup.phonePlaceholder': 'phone number',
+  'popup.phoneLabel': 'phone number',
+  'popup.invalidPhone': 'please enter a valid phone number.',
   'popup.codeLabel': 'your promo code',
   'popup.codeHint': 'valid on your next order.',
 
@@ -397,10 +400,13 @@ export const fr: Record<TranslationKey, string> = {
   'news.error': 'une erreur est survenue, réessayez.',
   'popup.title': '-10 % sur votre première commande',
   'popup.text':
-    'laissez votre e-mail et votre code promo apparaît juste après. rapide, simple, sans spam.',
+    'laissez votre numéro de téléphone et votre code promo apparaît juste après. rapide et simple.',
   'popup.cta': 'obtenir mes -10 %',
   'popup.fineprint':
-    'pas de spam. uniquement des offres exclusives et des ventes privées.',
+    'offres exclusives par sms uniquement. désinscription à tout moment en répondant stop.',
+  'popup.phonePlaceholder': 'numéro de téléphone',
+  'popup.phoneLabel': 'numéro de téléphone',
+  'popup.invalidPhone': 'veuillez saisir un numéro de téléphone valide.',
   'popup.codeLabel': 'votre code promo',
   'popup.codeHint': 'valable sur votre prochaine commande.',
 
