@@ -1486,6 +1486,21 @@ html {
   color: var(--color-muted);
 }
 
+/* Below the scrolling rows, not above them — an invitation to add to the
+   pile reads better after seeing what's already there. */
+.reviews__cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  text-align: center;
+}
+
+.reviews__cta p {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
 .reviews__rows {
   width: 100%;
   display: flex;

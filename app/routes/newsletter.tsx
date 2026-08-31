@@ -2,6 +2,7 @@ import type {Route} from './+types/newsletter';
 import {normalizePhone} from '~/lib/phone';
 import {NEWSLETTER_PROMO_CODE} from '~/lib/newsletterPromo';
 import {localeFromRequest} from '~/lib/i18n/locale';
+import {sendNotificationEmail} from '~/lib/email';
 
 /** Sign-up points allowed to tag themselves, so the tag stays a closed set. */
 const SOURCES = new Set(['popup', 'footer']);
@@ -16,9 +17,10 @@ const SOURCES = new Set(['popup', 'footer']);
  * pop-up now asks for a phone number. Each ends up in Shopify Admin →
  * Clients, tagged `newsletter` plus its origin (`newsletter-popup` /
  * `newsletter-footer`) — how to read, filter and export that list is written
- * up in docs/emails-newsletter.md. A phone number is additionally recorded
- * in a Notion database, once `NOTION_API_KEY` and `NOTION_PHONE_DATABASE_ID`
- * are set — same doc, "Configurer l'envoi vers Notion".
+ * up in docs/emails-newsletter.md. A phone number is additionally mirrored
+ * into a Notion database and by e-mail, once the relevant environment
+ * variables are set — same doc, "Configurer l'envoi vers Notion" and
+ * docs/store-notifications.md.
  */
 export async function action({request, context}: Route.ActionArgs) {
   if (request.method !== 'POST') {
@@ -57,9 +59,7 @@ export async function action({request, context}: Route.ActionArgs) {
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: shopifyBody.toString(),
     }),
-    phone
-      ? recordPhoneInNotion({phone, request, context})
-      : Promise.resolve(),
+    phone ? mirrorPhoneSignup({phone, request, context}) : Promise.resolve(),
   ]);
 
   if (shopifyResult.status === 'rejected') {
@@ -73,19 +73,43 @@ export async function action({request, context}: Route.ActionArgs) {
 }
 
 /**
- * Best-effort copy of a collected phone number into Notion, so it can be
- * read without opening Shopify Admin. Silent no-op until the two Oxygen
- * environment variables below are set — a marketing pop-up must never fail a
- * real sign-up because an optional mirror isn't configured yet — and any
- * Notion error is logged, not thrown, for the same reason.
+ * Best-effort copies of a collected phone number — into Notion and by
+ * e-mail — run in parallel, each independent of the other. Both are silent
+ * no-ops until their own environment variables are set: a marketing pop-up
+ * must never fail a real sign-up because an optional mirror isn't configured
+ * yet, so every error here is logged, never thrown.
  */
-async function recordPhoneInNotion({
+async function mirrorPhoneSignup({
   phone,
   request,
   context,
 }: {
   phone: string;
   request: Request;
+  context: Route.ActionArgs['context'];
+}) {
+  const locale = localeFromRequest(request);
+  await Promise.allSettled([
+    recordPhoneInNotion({phone, locale, context}),
+    sendNotificationEmail({
+      env: context.env,
+      subject: 'Nouveau numéro collecté — pop-up',
+      text: [
+        `Téléphone : ${phone}`,
+        `Langue : ${locale}`,
+        `Code promo : ${NEWSLETTER_PROMO_CODE}`,
+      ].join('\n'),
+    }),
+  ]);
+}
+
+async function recordPhoneInNotion({
+  phone,
+  locale,
+  context,
+}: {
+  phone: string;
+  locale: string;
   context: Route.ActionArgs['context'];
 }) {
   const token = context.env.NOTION_API_KEY;
@@ -104,7 +128,7 @@ async function recordPhoneInNotion({
         parent: {database_id: databaseId},
         properties: {
           'Téléphone': {title: [{text: {content: phone}}]},
-          'Langue': {select: {name: localeFromRequest(request)}},
+          'Langue': {select: {name: locale}},
           'Code promo': {rich_text: [{text: {content: NEWSLETTER_PROMO_CODE}}]},
         },
       }),

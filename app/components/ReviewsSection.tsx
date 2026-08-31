@@ -1,3 +1,4 @@
+import {Link} from 'react-router';
 import type {Review} from '~/data/reviews';
 import {StarRating} from '~/components/StarRating';
 import {useT} from '~/lib/i18n';
@@ -142,15 +143,25 @@ export function ReviewsSection({
   heading,
   subheading,
   reviews,
+  // Threaded through from the product page so the "write a review" link can
+  // arrive with the product already filled in — see ProductReviews.tsx. Left
+  // unset on the homepage, where there's no single product to attach it to.
+  productTitle,
 }: {
   heading: string;
   subheading?: string;
   reviews: Review[];
+  productTitle?: string;
 }) {
+  const t = useT();
   if (!reviews.length) return null;
 
   const rows: Review[][] = [[], [], []];
   reviews.forEach((review, index) => rows[index % rows.length].push(review));
+
+  const writeReviewHref = productTitle
+    ? `/reviews?product=${encodeURIComponent(productTitle)}`
+    : '/reviews';
 
   return (
     <section className="reviews">
@@ -169,6 +180,13 @@ export function ReviewsSection({
             duration={ROWS[index].duration}
           />
         ))}
+      </div>
+
+      <div className="reviews__cta">
+        <p>{t('reviews.ctaText')}</p>
+        <Link to={writeReviewHref} className="btn btn--outline">
+          {t('reviews.ctaButton')}
+        </Link>
       </div>
     </section>
   );

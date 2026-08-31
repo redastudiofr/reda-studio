@@ -15,6 +15,7 @@ export function ProductReviews({
     <ReviewsSection
       heading={t('reviews.forProduct', {product: productTitle.toLowerCase()})}
       reviews={reviews}
+      productTitle={productTitle}
     />
   );
 }

@@ -10,8 +10,9 @@ Shopify**, via le formulaire client natif de la boutique (`/contact`,
 C'est voulu : Shopify gère déjà le consentement, la désinscription et la
 suppression sur demande (RGPD). Dupliquer les données ailleurs créerait un
 deuxième fichier à sécuriser et à tenir à jour, pour rien. Un numéro est en
-plus copié dans une base Notion — voir plus bas — pour le consulter sans
-ouvrir Shopify Admin ; ce n'est jamais la seule copie.
+plus copié dans une base Notion — voir plus bas — et par e-mail à
+redastudio.fr@gmail.com — voir `docs/store-notifications.md` — pour le
+consulter sans ouvrir Shopify Admin ; ce n'est jamais la seule copie.
 
 Le numéro est normalisé côté serveur avant l'envoi (`app/lib/phone.ts`) :
 « 06 12 34 56 78 », « 06.12.34.56.78 » ou « +33 6 12 34 56 78 » deviennent

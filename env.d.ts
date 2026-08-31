@@ -13,5 +13,10 @@ declare global {
     // section is followed — see app/routes/newsletter.tsx.
     NOTION_API_KEY?: string;
     NOTION_PHONE_DATABASE_ID?: string;
+
+    // Optional: sends the review form and each pop-up phone sign-up to
+    // redastudio.fr@gmail.com by e-mail — see docs/store-notifications.md
+    // and app/lib/email.ts.
+    RESEND_API_KEY?: string;
   }
 }

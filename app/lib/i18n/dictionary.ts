@@ -115,6 +115,27 @@ export const en = {
     'honest words from the reda studio community, on pieces made to last.',
   'reviews.forProduct': 'reviews for {product}',
   'reviews.verified': 'verified review',
+  'reviews.ctaText': 'seen it, worn it, loved it?',
+  'reviews.ctaButton': 'write a review',
+
+  // — write a review —
+  'reviewForm.title': 'write a review',
+  'reviewForm.intro': 'tell us what you thought — we read every one.',
+  'reviewForm.name': 'name',
+  'reviewForm.email': 'email',
+  'reviewForm.rating': 'rating',
+  'reviewForm.product': 'product (optional)',
+  'reviewForm.productPlaceholder': 'e.g. money knit — grey',
+  'reviewForm.text': 'your review',
+  'reviewForm.submit': 'send my review',
+  'reviewForm.sending': 'sending…',
+  'reviewForm.thanksTitle': 'thank you',
+  'reviewForm.thanks': 'your review has been sent — we read every one.',
+  'reviewForm.error': 'something went wrong, please try again.',
+  'reviewForm.unavailable':
+    'this form isn’t receiving submissions right now — write to us instead.',
+  'reviewForm.missingFields': 'please fill in every required field.',
+  'reviewForm.contactLink': 'contact page',
 
   // — help / faq —
   'faq.eyebrow': 'support',
@@ -361,6 +382,27 @@ export const fr: Record<TranslationKey, string> = {
     'des mots sincères de la communauté reda studio, sur des pièces faites pour durer.',
   'reviews.forProduct': 'avis sur {product}',
   'reviews.verified': 'avis vérifié',
+  'reviews.ctaText': 'vous l’avez porté ?',
+  'reviews.ctaButton': 'laisser un avis',
+
+  // — laisser un avis —
+  'reviewForm.title': 'laisser un avis',
+  'reviewForm.intro': 'dites-nous ce que vous en avez pensé — on lit chaque avis.',
+  'reviewForm.name': 'nom',
+  'reviewForm.email': 'e-mail',
+  'reviewForm.rating': 'note',
+  'reviewForm.product': 'produit (facultatif)',
+  'reviewForm.productPlaceholder': 'ex. money knit — grey',
+  'reviewForm.text': 'votre avis',
+  'reviewForm.submit': 'envoyer mon avis',
+  'reviewForm.sending': 'envoi…',
+  'reviewForm.thanksTitle': 'merci',
+  'reviewForm.thanks': 'votre avis a bien été envoyé — nous lisons chacun d’entre eux.',
+  'reviewForm.error': 'une erreur est survenue, réessayez.',
+  'reviewForm.unavailable':
+    'ce formulaire ne reçoit pas encore de réponses — écrivez-nous plutôt.',
+  'reviewForm.missingFields': 'merci de remplir tous les champs requis.',
+  'reviewForm.contactLink': 'page contact',
 
   // — aide / faq —
   'faq.eyebrow': 'assistance',
