@@ -2,6 +2,7 @@ import {NavLink, Link} from 'react-router';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import {InstagramIcon, TiktokIcon} from '~/components/Icons';
 import {INSTAGRAM_URL} from '~/lib/social';
+import {STORE_NOTIFICATION_EMAIL} from '~/lib/email';
 import {useT} from '~/lib/i18n';
 import type {TranslationKey} from '~/lib/i18n';
 import {Newsletter} from '~/components/Newsletter';
@@ -43,6 +44,13 @@ export function Footer({header}: FooterProps) {
             {shopName.toLowerCase()}
           </Link>
           <p className="site-footer__blurb">{t('footer.blurb')}</p>
+          {/* The one real, verified piece of legal-contact info the footer
+              can show today — the rest (SIRET, phone, address) lives on
+              /legal/legal-notice, clearly marked "à compléter" rather than
+              guessed. See app/data/legal.ts. */}
+          <a className="site-footer__email" href={`mailto:${STORE_NOTIFICATION_EMAIL}`}>
+            {STORE_NOTIFICATION_EMAIL}
+          </a>
           <div className="site-footer__social">
             <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <InstagramIcon />

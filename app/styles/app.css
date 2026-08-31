@@ -2066,6 +2066,14 @@ html {
   max-width: 34ch;
 }
 
+.site-footer__email {
+  display: inline-block;
+  font-size: 0.82rem;
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .site-footer__social {
   display: flex;
   gap: 0.9rem;
@@ -4136,6 +4144,54 @@ html {
   width: 0.35rem;
   height: 1px;
   background: var(--color-ink);
+}
+
+/* A definition list for the sections that read as a form — "éditeur du
+   site", "nous contacter" — rather than as prose. */
+.legal__fields {
+  margin-top: 1.25rem;
+  max-width: 34rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.legal__field {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem 1.5rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.legal__field dt {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+
+.legal__field dd {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-ink);
+  text-align: right;
+}
+
+/*
+ * A value still to be filled in — never mistaken for real data. Dashed
+ * rather than solid, lower contrast than the rest of the page: it should
+ * read as unfinished at a glance, the way a form field does before anyone
+ * has typed into it.
+ */
+.legal__field dd[data-placeholder='true'] {
+  color: var(--color-muted);
+  font-style: italic;
+  border-bottom: 1px dashed var(--color-muted);
+  padding-bottom: 0.1rem;
+}
+
+.legal__cta {
+  margin-top: 1.5rem;
+  display: inline-flex;
 }
 
 .legal__foot {

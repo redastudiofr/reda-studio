@@ -7,13 +7,34 @@
  * France. The Admin policies still exist and are what Shopify's own checkout
  * links to — keep the two in step (see docs/legal-pages.md).
  *
- * Passages naming the company — registered name, address, SIREN, VAT number,
- * publication director, support email — are **absent, not written**. They were
- * removed rather than guessed, and docs/legal-pages.md lists exactly which
- * sentences and which two sections have to come back once those details are
- * known. Until then, wherever the text used to give an email address it sends
- * the customer to the contact page, which is real and works.
+ * The Legal Notice (`legal-notice`) is written in French rather than English,
+ * unlike the other four documents — "mentions légales" is a specific French
+ * legal filing, not a genre that translates, and every field it names (SIREN,
+ * SIRET, TVA intracommunautaire) is a French concept with no English
+ * equivalent to translate it into.
+ *
+ * Every fact it states — the hosting, the payment provider, which cookies are
+ * set, what data the site actually collects — was verified against this
+ * codebase, not assumed. What could **not** be verified this way — the
+ * registered company name, its legal form, its address, its SIREN/SIRET, its
+ * VAT number, its phone number, who its legal representative is — is left as
+ * a bracketed placeholder (`[à compléter]`) rather than guessed. The
+ * renderer below gives placeholders a visibly different style specifically so
+ * one can never be mistaken for real data. See docs/legal-pages.md for the
+ * complete list and what replaces each one.
  */
+
+export type LegalField = {
+  label: string;
+  /**
+   * The real value, or a bracketed placeholder such as "[à compléter]" —
+   * anything matching `/^\[.*\]$/` renders with the "still to fill in" style
+   * instead of as real data. See the module doc above.
+   */
+  value: string;
+  /** Renders `value` as a link (a mailto:, typically) when set. */
+  href?: string;
+};
 
 export type LegalSection = {
   heading: string;
@@ -21,6 +42,10 @@ export type LegalSection = {
   body: string[];
   /** Optional bullet list rendered after the paragraphs. */
   list?: string[];
+  /** Label/value pairs — for a block that reads as a form, not prose. */
+  fields?: LegalField[];
+  /** An optional link/button at the end of the section. */
+  cta?: {label: string; to: string};
 };
 
 export type LegalDocument = {
@@ -263,7 +288,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
       {
         heading: 'who is responsible',
         body: [
-          `The company operating this store is the data controller for the personal data collected through it. For any question about your data, write to us from the contact page and we will answer.`,
+          `The company operating this store is the data controller for the personal data collected through it — see our Legal Notice for its full registered identity. For any question about your data, write to us from the contact page and we will answer.`,
         ],
       },
       {
@@ -313,7 +338,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
       {
         heading: 'cookies',
         body: [
-          `We use cookies that are strictly necessary for the site to work — your cart and your session — which do not require consent. Analytics cookies are only set if you accept them, and you can change your mind at any time from your browser settings.`,
+          `We use cookies that are strictly necessary for the site to work — your cart, your session and your language preference. We also use Shopify's own built-in analytics to understand visits and orders on this store; we do not use any third-party advertising pixel (Meta, TikTok, Google Ads or similar). You can block cookies from your browser settings at any time, though this may affect the cart.`,
           `The newsletter pop-up records that it has been shown, in your browser only. That record never leaves your device and tells us nothing about you.`,
         ],
       },
@@ -322,34 +347,110 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
 
   {
     handle: 'legal-notice',
-    title: 'legal notice',
-    navLabel: 'legal notice',
-    intro: 'Hosting, intellectual property and dispute resolution.',
+    title: 'mentions légales',
+    navLabel: 'mentions légales',
+    intro:
+      "L'éditeur du site, l'hébergement, le paiement, la propriété intellectuelle et les données personnelles.",
     updated: 'August 2026',
     sections: [
       {
-        heading: 'hosting',
-        body: [
-          `This site is hosted on Shopify Oxygen by Shopify International Limited, Victoria Buildings, 1–2 Haddington Road, Dublin 4, D04 XN32, Ireland.`,
+        heading: 'éditeur du site',
+        body: [`Le présent site est édité par :`],
+        fields: [
+          {label: 'Nom / raison sociale', value: '[à compléter]'},
+          {label: 'Nom commercial', value: 'Reda Studio'},
+          {label: 'Forme juridique', value: '[à compléter]'},
+          {label: 'Siège social', value: '[à compléter]'},
+          {label: 'SIREN', value: '[à compléter]'},
+          {label: 'SIRET', value: '[à compléter]'},
+          {
+            label: 'Numéro de TVA intracommunautaire',
+            value: '[à compléter, si applicable]',
+          },
+          {label: 'Représentant légal', value: '[à compléter]'},
+          {label: 'Directeur de la publication', value: '[à compléter]'},
+          {
+            label: 'Contact',
+            value: 'redastudio.fr@gmail.com',
+            href: 'mailto:redastudio.fr@gmail.com',
+          },
+          {label: 'Téléphone', value: '[à compléter]'},
         ],
       },
       {
-        heading: 'intellectual property',
+        heading: 'hébergement',
         body: [
-          `The whole of this site — its structure, texts, photographs, logos and garment designs — is protected by intellectual property law and belongs to reda studio unless stated otherwise. Any reproduction without written permission is prohibited.`,
+          `Ce site est hébergé sur Shopify Oxygen, l'infrastructure d'hébergement fournie par Shopify International Limited, Victoria Buildings, 1–2 Haddington Road, Dublin 4, D04 XN32, Irlande.`,
+          `La plateforme de commerce en ligne — prise de commande, paiement et gestion des expéditions — est fournie par Shopify Inc. et ses filiales.`,
         ],
       },
       {
-        heading: 'personal data',
+        heading: 'paiement',
         body: [
-          `How we handle personal data is set out in full in our Privacy Policy.`,
+          `Les paiements effectués sur ce site sont traités de manière sécurisée par Shopify Payments. Reda Studio ne stocke ni ne traite directement les données de carte bancaire : elles sont transmises directement à ce prestataire de paiement.`,
         ],
       },
       {
-        heading: 'mediation and online dispute resolution',
+        heading: 'propriété intellectuelle',
         body: [
-          `In accordance with article L.612-1 of the French Consumer Code, you may refer a dispute to a consumer mediator free of charge. The European Commission also provides an online dispute resolution platform at ec.europa.eu/consumers/odr.`,
+          `L'ensemble des éléments présents sur le site Reda Studio, notamment les textes, photographies, images, logos, graphismes, icônes, éléments visuels, produits et mise en page, est protégé par les dispositions applicables en matière de propriété intellectuelle.`,
+          `Toute reproduction, représentation, modification, adaptation ou exploitation, totale ou partielle, de ces éléments sans autorisation préalable est interdite, sauf dans les cas prévus par la loi.`,
         ],
+      },
+      {
+        heading: 'données personnelles',
+        body: [
+          `Dans le cadre du fonctionnement du site, Reda Studio est amené à collecter et traiter certaines données personnelles, uniquement dans les cas suivants :`,
+        ],
+        list: [
+          'commandes et livraison — nom, adresse, e-mail et téléphone, transmis à notre transporteur pour l’expédition',
+          'paiement — traité directement par Shopify Payments ; Reda Studio n’accède à aucune donnée bancaire',
+          'service client et avis clients — informations transmises via la page contact ou le formulaire d’avis, pour répondre à une demande ou publier un retour d’expérience',
+          'newsletter et offres — e-mail ou numéro de téléphone laissés volontairement, pour l’envoi d’offres commerciales, uniquement avec le consentement de la personne concernée',
+          'sécurité — données techniques nécessaires au bon fonctionnement du site et à la prévention des abus',
+        ],
+      },
+      {
+        heading: 'données personnelles — vos droits',
+        body: [
+          `Ces données sont conservées le temps nécessaire à ces finalités, dans le respect du Règlement Général sur la Protection des Données (RGPD). Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de vos données, ainsi que du droit de retirer à tout moment votre consentement aux communications marketing.`,
+          `Le détail complet — ce qui est collecté, pourquoi, combien de temps et avec qui c'est partagé — figure dans notre Politique de confidentialité. Pour exercer ces droits, écrivez-nous à redastudio.fr@gmail.com ou depuis la page contact.`,
+        ],
+      },
+      {
+        heading: 'cookies',
+        body: [
+          `Ce site utilise des cookies strictement nécessaires à son fonctionnement — panier, session de navigation et préférence de langue — qui ne nécessitent pas de consentement.`,
+          `Il utilise également l'outil de mesure d'audience natif fourni par Shopify, pour nos propres statistiques de visites et de commandes. Aucun pixel publicitaire tiers (Meta, TikTok, Google Ads ou équivalent) n'est utilisé à ce jour.`,
+          `Vous pouvez configurer votre navigateur pour refuser les cookies à tout moment ; certaines fonctionnalités, notamment le panier, peuvent alors ne plus fonctionner correctement.`,
+        ],
+      },
+      {
+        heading: 'responsabilité',
+        body: [
+          `Reda Studio s'efforce de maintenir les informations présentes sur ce site aussi exactes et à jour que possible. Ces informations — notamment les produits, les prix et les délais — peuvent néanmoins évoluer sans préavis.`,
+          `Reda Studio ne saurait être tenu responsable des interruptions temporaires du site liées à la maintenance, à des causes techniques ou à des événements indépendants de sa volonté.`,
+        ],
+      },
+      {
+        heading: 'médiation et résolution des litiges en ligne',
+        body: [
+          `Conformément à l'article L.612-1 du Code de la consommation, vous pouvez recourir gratuitement à un médiateur de la consommation en cas de litige. La Commission européenne met également à disposition une plateforme de résolution des litiges en ligne, accessible à l'adresse ec.europa.eu/consumers/odr.`,
+        ],
+      },
+      {
+        heading: 'nous contacter',
+        body: [`Une question sur ces mentions, une commande ou vos données ?`],
+        fields: [
+          {
+            label: 'Email',
+            value: 'redastudio.fr@gmail.com',
+            href: 'mailto:redastudio.fr@gmail.com',
+          },
+          {label: 'Téléphone', value: '[à compléter]'},
+          {label: 'Adresse', value: '[à compléter]'},
+        ],
+        cta: {label: 'écrire depuis la page contact', to: '/contact'},
       },
     ],
   },

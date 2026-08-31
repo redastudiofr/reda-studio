@@ -77,6 +77,9 @@ export default function LegalPage() {
   );
 }
 
+/** A value still to be filled in reads as "[à compléter]" — see app/data/legal.ts. */
+const PLACEHOLDER_PATTERN = /^\[.*\]$/;
+
 function Section({section}: {section: LegalSection}) {
   return (
     <section className="legal__section">
@@ -90,6 +93,30 @@ function Section({section}: {section: LegalSection}) {
             <li key={entry}>{entry}</li>
           ))}
         </ul>
+      )}
+      {section.fields && (
+        <dl className="legal__fields">
+          {section.fields.map((field) => {
+            const isPlaceholder = PLACEHOLDER_PATTERN.test(field.value);
+            return (
+              <div className="legal__field" key={field.label}>
+                <dt>{field.label}</dt>
+                <dd data-placeholder={isPlaceholder ? 'true' : undefined}>
+                  {field.href && !isPlaceholder ? (
+                    <a href={field.href}>{field.value}</a>
+                  ) : (
+                    field.value
+                  )}
+                </dd>
+              </div>
+            );
+          })}
+        </dl>
+      )}
+      {section.cta && (
+        <Link to={section.cta.to} className="btn btn--outline legal__cta">
+          {section.cta.label}
+        </Link>
       )}
     </section>
   );

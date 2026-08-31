@@ -18,35 +18,73 @@ reasons: they are versioned with the code and reviewable in a diff, and Shopify
 has no slot at all for a French *mentions légales*, which a site selling into
 France is required to publish.
 
-## ⚠ What is missing, and where it goes back
+## The Legal Notice (`/legal/legal-notice`) is in French, not English
 
-Everything naming the company was **removed rather than guessed**, pending the
-real details. Nothing on the pages is wrong today — but two things are absent
-that French law requires a site selling to consumers to publish, so this list
-is the work still to do, not a nicety:
+Unlike the other four documents. "Mentions légales" is a specific French legal
+filing (LCEN article 6-III), not a genre that translates, and every field it
+requires — SIREN, SIRET, TVA intracommunautaire — is a French concept with no
+English equivalent worth inventing. Its own `title`/`navLabel`/`intro` in
+`app/data/legal.ts` are French for the same reason; the shared page chrome
+around it (the "documents" sidebar, "last updated") stays English, same as on
+every other legal page.
 
-**Two whole sections were deleted from the Legal Notice** (`handle:
-'legal-notice'` in `app/data/legal.ts`, which now starts at *hosting*):
+## ⚠ What is still missing, and how it's marked
 
-- **site publisher** — registered company name, registered address, SIREN,
-  intra-community VAT number, contact address
-- **publication director** — the name of the person responsible for
-  publication
+The Legal Notice's **éditeur du site** and **nous contacter** sections read as
+a form (`fields` on a `LegalSection` — see the type in `app/data/legal.ts`),
+one row per fact. Every row that could be verified from this codebase is
+filled in for real; every row that could not was left as a bracketed
+placeholder, `[à compléter]`, rather than guessed. The renderer
+(`app/routes/legal.$handle.tsx`) detects that bracket and gives it a visibly
+different style — dashed underline, muted, italic — so it can never be
+mistaken for a real answer at a glance. Still to complete:
+
+- **Nom / raison sociale** — the registered company name
+- **Forme juridique** — SASU, SARL, EI, etc.
+- **Siège social** — the registered address
+- **SIREN** and **SIRET**
+- **Numéro de TVA intracommunautaire** — if the company charges VAT
+- **Représentant légal** — the legal representative's name
+- **Directeur de la publication** — who's responsible for what's published
+- **Téléphone** — appears twice (éditeur du site, nous contacter)
+- **Adresse** (nous contacter) — the same siège social, or a different
+  service address if there is one
+
+Already real, not placeholders: **Nom commercial** (Reda Studio) and
+**Contact / Email** (redastudio.fr@gmail.com, also now the one linked from the
+footer — see `STORE_NOTIFICATION_EMAIL` in `app/lib/email.ts`, the same
+address the review form and the pop-up's phone sign-ups already mail to).
+
+To fill in a blank: open `app/data/legal.ts`, find the `fields` array under
+`heading: 'éditeur du site'` or `heading: 'nous contacter'`, and replace the
+`[à compléter]` string with the real value. Nothing else needs to change — the
+dashed placeholder styling only applies to strings shaped like `[...]`, so a
+real value renders as ordinary text automatically.
 
 **One sentence was shortened**, in Terms & Conditions § *who we are*. It used
 to open by naming the operating company, its address, its registration and its
 VAT number before defining "we" and "you". It now only defines the terms.
 
-**One sentence was rewritten**, in Privacy Policy § *who is responsible*. It
-named the controller and its address; it now says "the company operating this
-store", which is true but does not identify it. The GDPR expects the controller
-to be identified by name.
+**One sentence in Privacy Policy § *who is responsible*** says "the company
+operating this store" rather than naming it, and now points to the Legal
+Notice for the full identity — which is accurate today (a page that says so
+honestly) and becomes fully accurate the moment the Legal Notice's blanks are
+filled, with nothing further to change here.
 
 **Five places used to give a support email address** and now send the customer
 to the contact page instead — Terms § *complaints and disputes*, Shipping §
 *wrong address, failed delivery*, Returns § *how to return*, and Privacy in both
 *who is responsible* and *your rights*. Those read perfectly well as they are;
 change them back only if you would rather publish an address than a form.
+
+**The cookies sections (Privacy, and the Legal Notice) were checked against
+what the site actually loads**, not assumed: this storefront runs Shopify
+Hydrogen's own built-in `Analytics.Provider` (first-party, reports to this
+store's own Shopify Admin) and nothing else — no Google Analytics, no Meta
+Pixel, no TikTok Pixel, verified by grep across `app/`. Both documents say so
+plainly, and neither claims cookies are gated behind a consent banner, because
+none is implemented (`withPrivacyBanner: false` in `app/root.tsx`) — a
+consent banner is a real feature to build, not a sentence to write.
 
 While you are there, read the documents. They are written from how this store
 actually operates — 1 to 3 business days to ship, 48 hours in France, 30 days
