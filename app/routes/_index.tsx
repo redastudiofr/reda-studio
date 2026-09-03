@@ -35,7 +35,7 @@ export function links() {
     {
       rel: 'preload',
       as: 'image',
-      href: '/images/hero-desktop1.webp',
+      href: '/images/hero-desktop2.webp',
       media: '(min-width: 48em)',
     },
   ];
@@ -77,9 +77,9 @@ export default function Homepage() {
     <div className="home">
       <AnimatedHero
         imageMobileSrc="/images/hero3-mobile.webp"
-        imageDesktopSrc="/images/hero-desktop1.webp"
+        imageDesktopSrc="/images/hero-desktop2.webp"
         imageMobileAlt="A man from behind in a reda studio t-shirt and jeans, looking out over a rooftop pool and the city skyline"
-        imageDesktopAlt="Two men in reda studio checked overshirts and black shorts, against a brick facade"
+        imageDesktopAlt="Three men in reda studio buy happiness sweaters and jeans, getting ready in a Parisian apartment"
         eyebrow={t('home.eyebrow')}
         title="reda studio"
         description={t('home.tagline')}
