@@ -41,7 +41,8 @@ const glassButtonClassName =
 export function AnimatedHero({
   imageMobileSrc,
   imageDesktopSrc,
-  imageAlt,
+  imageMobileAlt,
+  imageDesktopAlt,
   eyebrow,
   title,
   description,
@@ -50,7 +51,11 @@ export function AnimatedHero({
 }: {
   imageMobileSrc: string;
   imageDesktopSrc: string;
-  imageAlt: string;
+  // Split rather than one shared `imageAlt`: mobile and desktop are free to
+  // be two entirely different photographs, not just two crops of the same
+  // one, so only a description per image is ever accurate.
+  imageMobileAlt: string;
+  imageDesktopAlt: string;
   eyebrow?: string;
   title: ReactNode;
   description?: string;
@@ -85,7 +90,7 @@ export function AnimatedHero({
       >
         <img
           src={imageMobileSrc}
-          alt={imageAlt}
+          alt={imageMobileAlt}
           fetchPriority="high"
           loading="eager"
           decoding="async"
@@ -93,7 +98,7 @@ export function AnimatedHero({
         />
         <img
           src={imageDesktopSrc}
-          alt={imageAlt}
+          alt={imageDesktopAlt}
           fetchPriority="high"
           loading="eager"
           decoding="async"
