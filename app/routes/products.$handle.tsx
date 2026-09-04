@@ -23,7 +23,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {getProductFaq} from '~/data/faq';
 import {parseRating} from '~/lib/rating';
 import {onlyShowcaseCollections} from '~/lib/collections';
-import {getRatingForSeed} from '~/data/reviews';
+import {getRatingForSeed, reviewCountForAge, seededInt} from '~/data/reviews';
 import {useT} from '~/lib/i18n';
 
 export const meta: Route.MetaFunction = ({data}) => {
@@ -114,7 +114,39 @@ function loadDeferredData(
       merged.push(item);
       if (merged.length >= MAX_RECOMMENDATIONS) break;
     }
-    return merged;
+
+    /*
+     * Ratings for this row — see docs/synthetic-ratings.md for why it shows
+     * numbers beyond what Shopify's real review metafields provide here, at
+     * the store owner's explicit, informed request. A real metafield rating
+     * always wins and is never touched. Failing that, at least two items in
+     * the row land on a plain 4.0 rather than everything reading the same
+     * score; every other item gets the same age-aware summary the product's
+     * own page uses (fewer illustrative reviews for a recently added
+     * product — see reviewCountForAge), never a uniform dozen regardless of
+     * how long it's actually been on the shelf.
+     */
+    let fourStarAssigned = 0;
+    return merged.map((item) => {
+      if (parseRating(item.rating, item.ratingCount)) return item;
+
+      if (fourStarAssigned < 2) {
+        fourStarAssigned++;
+        return {
+          ...item,
+          rating: {value: '4.0'},
+          ratingCount: {value: String(seededInt(item.id, 5, 11))},
+        };
+      }
+
+      const rating = getRatingForSeed(item.id, reviewCountForAge(item.createdAt));
+      if (!rating) return item;
+      return {
+        ...item,
+        rating: {value: String(rating.value)},
+        ratingCount: {value: String(rating.count)},
+      };
+    });
   });
 
   /*
@@ -244,9 +276,11 @@ export default function Product() {
             variantId={selectedVariant?.id}
             rating={
               // A real review app's score always wins; otherwise we summarise
-              // the reviews actually displayed further down the page.
+              // the reviews actually displayed further down the page — drawn
+              // from fewer of them for a product that hasn't been live long
+              // enough to plausibly have a dozen reviews yet.
               parseRating(product.rating, product.ratingCount) ??
-              getRatingForSeed(product.id)
+              getRatingForSeed(product.id, reviewCountForAge(product.createdAt))
             }
           />
 
@@ -398,6 +432,8 @@ const PRODUCT_FRAGMENT = `#graphql
     handle
     descriptionHtml
     description
+    # Age-gates the illustrative-review fallback below — see reviewCountForAge.
+    createdAt
     # Standard Shopify review metafields, written by review apps. Absent when
     # the shop has no review app — no rating is then shown at all.
     rating: metafield(namespace: "reviews", key: "rating") {
@@ -472,6 +508,8 @@ const RECO_PRODUCT_FRAGMENT = `#graphql
     title
     handle
     availableForSale
+    # Age-gates the illustrative-review fallback below — see reviewCountForAge.
+    createdAt
     # Standard Shopify review metafields, written by review apps. Absent when
     # the shop has no review app — the UI then shows no rating at all.
     rating: metafield(namespace: "reviews", key: "rating") {

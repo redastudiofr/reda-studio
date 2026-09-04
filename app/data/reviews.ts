@@ -165,6 +165,27 @@ function hashString(input: string): number {
   return Math.abs(hash >>> 0);
 }
 
+/** A stable number in [min, max] for a given seed — reviews.ts's hash, reusable. */
+export function seededInt(seed: string, min: number, max: number): number {
+  return min + (hashString(seed) % (max - min + 1));
+}
+
+/**
+ * How many reviews a product's rating summary should be drawn from, based on
+ * how long it's existed. A product added recently hasn't had time to
+ * accumulate real reviews yet, so its summary says so — a small handful, or
+ * none at all — instead of defaulting to the same dozen every product shows
+ * regardless of age.
+ */
+export function reviewCountForAge(createdAt?: string | null): number {
+  if (!createdAt) return 12;
+  const ageDays = (Date.now() - new Date(createdAt).getTime()) / 86_400_000;
+  if (ageDays < 7) return 0;
+  if (ageDays < 21) return 3;
+  if (ageDays < 45) return 7;
+  return 12;
+}
+
 /**
  * Picks a stable subset of reviews from an identifier (a product id, say).
  * The result is identical across renders, which avoids hydration mismatches
