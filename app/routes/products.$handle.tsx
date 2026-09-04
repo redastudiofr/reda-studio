@@ -104,7 +104,12 @@ function loadDeferredData(
       ...(recos?.productRecommendations ?? []),
       ...(fallback?.products?.nodes ?? []),
     ]) {
-      if (!item || seen.has(item.id) || item.handle === handle) continue;
+      // Recommending something the visitor can't actually buy defeats the
+      // point of the row, so an out-of-stock product is skipped rather than
+      // shown with a "sold out" badge here.
+      if (!item || seen.has(item.id) || item.handle === handle || !item.availableForSale) {
+        continue;
+      }
       seen.add(item.id);
       merged.push(item);
       if (merged.length >= MAX_RECOMMENDATIONS) break;
