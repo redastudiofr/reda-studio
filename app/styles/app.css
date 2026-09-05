@@ -3147,6 +3147,72 @@ html {
 }
 
 /*
+* "Your Product Worn" — same rail mechanics as the recommendations row just
+* above (touch slider on mobile, a fixed grid on desktop): there are always
+* exactly four clips, so unlike .related-rail this one never needs to trim
+* an overflow — four is also exactly what fits the grid below.
+*/
+.pdp__worn h2 {
+  padding: 0;
+}
+
+.worn-rail {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin-inline: -1rem;
+  padding-inline: 1rem;
+}
+
+.worn-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.worn-rail__item {
+  flex: 0 0 62%;
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+@media (min-width: 40em) {
+  .worn-rail__item {
+    flex-basis: 38%;
+  }
+}
+
+@media (min-width: 64em) {
+  .worn-rail {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.25rem;
+    overflow: visible;
+    scroll-snap-type: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .worn-rail__item {
+    flex: none;
+  }
+}
+
+/* object-fit crops rather than stretches, so a source that isn't exactly
+   9:16 is never distorted — just cropped to fit, the same trade-off the
+   product gallery already makes. */
+.worn-rail__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  background: var(--color-tile);
+}
+
+/*
 * "La vision Reda Studio"
 *
 * Editorial statement blocks: five aligned columns on desktop, a horizontal

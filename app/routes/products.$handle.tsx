@@ -12,6 +12,7 @@ import {
 import {ProductGallery} from '~/components/ProductGallery';
 import {ProductPurchase} from '~/components/ProductPurchase';
 import {ProductDescription} from '~/components/ProductDescription';
+import {ProductWornVideos} from '~/components/ProductWornVideos';
 import {VisionSection} from '~/components/VisionSection';
 import {CollectionShowcase} from '~/components/CollectionShowcase';
 import {BundleOffer} from '~/components/BundleOffer';
@@ -325,6 +326,11 @@ export default function Product() {
           </div>
         </aside>
       </div>
+
+      {/* Directly under the FAQ, in document order — the FAQ itself lives in
+          the narrow sticky column above, but a multi-video row needs the
+          page's full width, which only starts here, once that column ends. */}
+      <ProductWornVideos />
 
       <Suspense fallback={null}>
         <Await resolve={recommended}>
