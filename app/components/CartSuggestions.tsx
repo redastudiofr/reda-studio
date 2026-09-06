@@ -9,6 +9,7 @@ import type {
 import type {loader as rootLoader} from '~/root';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import type {CartLayout} from '~/components/CartMain';
+import {isPreorderHandle} from '~/lib/preorder';
 import {useT} from '~/lib/i18n';
 
 /** How many suggestions the drawer offers before it starts nagging. */
@@ -47,7 +48,12 @@ export function CartSuggestions({
         {(data: CartSuggestionsQuery | null) => {
           const products = (data?.products?.nodes ?? [])
             .filter(
-              (product) => product.availableForSale && !inCart.has(product.id),
+              (product) =>
+                product.availableForSale &&
+                !inCart.has(product.id) &&
+                // Never suggest a pre-order-only product straight into the
+                // cart from here — see app/lib/preorder.ts.
+                !isPreorderHandle(product.handle),
             )
             .slice(0, MAX_SUGGESTIONS);
 

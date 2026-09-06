@@ -7,6 +7,7 @@ import {AddToCartButton} from '~/components/AddToCartButton';
 import {BuyNowButton} from '~/components/BuyNowButton';
 import {QuantitySelector} from '~/components/QuantitySelector';
 import {ProductSizeGuide, type SizeEntry} from '~/components/ProductSizeGuide';
+import {PreorderForm} from '~/components/PreorderForm';
 import {StarRating} from '~/components/StarRating';
 import {useAside} from '~/components/Aside';
 import type {ProductRating} from '~/lib/rating';
@@ -33,6 +34,7 @@ export function ProductPurchase({
   shortDescription,
   variantId,
   rating,
+  preorder = false,
 }: {
   title: string;
   price?: MoneyV2;
@@ -44,6 +46,9 @@ export function ProductPurchase({
   shortDescription: string;
   variantId?: string;
   rating?: ProductRating | null;
+  // Scoped to exactly one product (app/lib/preorder.ts) — every other
+  // product renders exactly as before, this prop simply defaults to false.
+  preorder?: boolean;
 }) {
   const {open: openAside} = useAside();
   const [quantity, setQuantity] = useState(1);
@@ -98,35 +103,46 @@ export function ProductPurchase({
 
       {shortDescription && <p className="buybox__blurb">{shortDescription}</p>}
 
-      <div className={`buybox__stock ${stock.className}`}>
-        <span className="buybox__stock-dot" />
-        {stock.label}
-      </div>
+      {preorder ? (
+        // No stock badge, size picker or quantity selector — there is
+        // nothing to pick yet, only interest to register. See
+        // app/components/PreorderForm.tsx and app/lib/preorder.ts.
+        <div className="buybox__actions">
+          <PreorderForm productTitle={title} />
+        </div>
+      ) : (
+        <>
+          <div className={`buybox__stock ${stock.className}`}>
+            <span className="buybox__stock-dot" />
+            {stock.label}
+          </div>
 
-      <ProductForm productOptions={productOptions} />
+          <ProductForm productOptions={productOptions} />
 
-      <ProductSizeGuide sizes={sizes} />
+          <ProductSizeGuide sizes={sizes} />
 
-      <QuantitySelector
-        value={quantity}
-        onChange={setQuantity}
-        max={quantityAvailable}
-        disabled={!available}
-      />
+          <QuantitySelector
+            value={quantity}
+            onChange={setQuantity}
+            max={quantityAvailable}
+            disabled={!available}
+          />
 
-      <div className="buybox__actions">
-        <AddToCartButton
-          className="btn btn--full btn--outline"
-          disabled={!available}
-          onClick={() => openAside('cart')}
-          lines={lines}
-        >
-          {available ? t('product.addToCart') : t('product.soldOut')}
-        </AddToCartButton>
-        <BuyNowButton disabled={!available} lines={lines}>
-          {t('product.buyNow')}
-        </BuyNowButton>
-      </div>
+          <div className="buybox__actions">
+            <AddToCartButton
+              className="btn btn--full btn--outline"
+              disabled={!available}
+              onClick={() => openAside('cart')}
+              lines={lines}
+            >
+              {available ? t('product.addToCart') : t('product.soldOut')}
+            </AddToCartButton>
+            <BuyNowButton disabled={!available} lines={lines}>
+              {t('product.buyNow')}
+            </BuyNowButton>
+          </div>
+        </>
+      )}
 
       <ul className="buybox__perks">
         <li>{t('product.perk.delivery')}</li>

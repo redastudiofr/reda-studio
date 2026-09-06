@@ -184,6 +184,26 @@ export const en = {
   'popup.codeLabel': 'your promo code',
   'popup.codeHint': 'valid on your next order.',
 
+  // — pre-order waitlist (royal longsleeve — white only, see app/lib/preorder.ts) —
+  'preorder.cta': 'pre-order',
+  'preorder.subtitle': 'be the first to know when the {product} is released.',
+  'preorder.emailLabel': 'email address',
+  'preorder.emailPlaceholder': 'enter your email',
+  'preorder.phoneLabel': 'phone number',
+  'preorder.phonePlaceholder': '+33 6 12 34 56 78',
+  'preorder.submit': 'join the waitlist',
+  'preorder.submitting': 'joining…',
+  'preorder.successTitle': 'you’re on the list.',
+  'preorder.successBody':
+    'we’ll let you know as soon as the {product} is available.',
+  'preorder.fineprint':
+    'no order is placed now. we’ll only reach out when it launches — with an exclusive offer for the waitlist.',
+  'preorder.errorRequired': 'enter your email or phone number.',
+  'preorder.errorEmail': 'please enter a valid email address.',
+  'preorder.errorPhone': 'please enter a valid phone number.',
+  'preorder.errorGeneric': 'something went wrong, please try again.',
+  'preorder.close': 'close',
+
   // — footer —
   'footer.blurb':
     'an independent streetwear house — premium, minimalist pieces made to last. fast delivery across france.',
@@ -451,6 +471,27 @@ export const fr: Record<TranslationKey, string> = {
   'popup.invalidPhone': 'veuillez saisir un numéro de téléphone valide.',
   'popup.codeLabel': 'votre code promo',
   'popup.codeHint': 'valable sur votre prochaine commande.',
+
+  // — liste d'attente précommande (royal longsleeve — white uniquement, voir app/lib/preorder.ts) —
+  'preorder.cta': 'précommander',
+  'preorder.subtitle':
+    'soyez averti·e dès la sortie du {product}.',
+  'preorder.emailLabel': 'adresse e-mail',
+  'preorder.emailPlaceholder': 'votre e-mail',
+  'preorder.phoneLabel': 'numéro de téléphone',
+  'preorder.phonePlaceholder': '+33 6 12 34 56 78',
+  'preorder.submit': 'rejoindre la liste d’attente',
+  'preorder.submitting': 'inscription…',
+  'preorder.successTitle': 'vous êtes sur la liste.',
+  'preorder.successBody':
+    'nous vous préviendrons dès que le {product} sera disponible.',
+  'preorder.fineprint':
+    'aucune commande n’est passée maintenant. nous vous contacterons uniquement au lancement — avec une offre exclusive réservée à la liste d’attente.',
+  'preorder.errorRequired': 'renseignez votre e-mail ou votre numéro de téléphone.',
+  'preorder.errorEmail': 'veuillez saisir une adresse e-mail valide.',
+  'preorder.errorPhone': 'veuillez saisir un numéro de téléphone valide.',
+  'preorder.errorGeneric': 'une erreur est survenue, réessayez.',
+  'preorder.close': 'fermer',
 
   // — pied de page —
   'footer.blurb':

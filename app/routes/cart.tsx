@@ -4,6 +4,7 @@ import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
 import {BUNDLE_ADD_ACTION, OFFER_DISCOUNT_CODE} from '~/lib/offers';
+import {PREORDER_BLOCKED_VARIANT_IDS} from '~/lib/preorder';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: `reda studio | cart`}];
@@ -47,6 +48,32 @@ async function withOfferDiscount(
   }
 }
 
+/**
+ * Blocks adding "Royal Longsleeve — White" to the cart while its pre-order
+ * is active (see app/lib/preorder.ts) — even from a request crafted
+ * straight against this action, bypassing the buy box entirely, which for
+ * that one product never renders an add-to-cart control in the first
+ * place. Every other product's lines pass through untouched.
+ */
+function rejectPreorderLines(
+  lines: Array<{merchandiseId?: string | null}> | undefined,
+) {
+  const blocked = lines?.some(
+    (line) => line.merchandiseId && PREORDER_BLOCKED_VARIANT_IDS.has(line.merchandiseId),
+  );
+  if (!blocked) return null;
+
+  return data(
+    {
+      cart: null,
+      errors: [{message: 'This product is available for pre-order only.'}],
+      warnings: [],
+      analytics: {cartId: undefined},
+    },
+    {status: 400},
+  );
+}
+
 export async function action({request, context}: Route.ActionArgs) {
   const {cart} = context;
 
@@ -62,9 +89,12 @@ export async function action({request, context}: Route.ActionArgs) {
   let result: CartQueryDataReturn;
 
   switch (action) {
-    case CartForm.ACTIONS.LinesAdd:
+    case CartForm.ACTIONS.LinesAdd: {
+      const rejected = rejectPreorderLines(inputs.lines);
+      if (rejected) return rejected;
       result = await withOfferDiscount(cart, await cart.addLines(inputs.lines));
       break;
+    }
     /*
      * Pair add: both lines in one request. The offer's code is attached
      * afterwards by `withOfferDiscount`, like every other line mutation.
@@ -76,6 +106,8 @@ export async function action({request, context}: Route.ActionArgs) {
     case BUNDLE_ADD_ACTION: {
       // A custom action's inputs are untyped, so the lines are narrowed here.
       const bundleLines = inputs.lines as Parameters<typeof cart.addLines>[0];
+      const rejected = rejectPreorderLines(bundleLines);
+      if (rejected) return rejected;
       result = await withOfferDiscount(cart, await cart.addLines(bundleLines));
       break;
     }

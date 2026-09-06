@@ -637,6 +637,19 @@ html {
   }
 }
 
+/* A dialog with no lifestyle image (e.g. PreorderForm) — single column at
+   every width, and narrower, so it reads as a form, not a half-empty
+   two-column card. */
+.popup--compact {
+  width: min(28rem, 100%);
+}
+
+@media (min-width: 40em) {
+  .popup--compact {
+    grid-template-columns: 1fr;
+  }
+}
+
 .popup__close {
   position: absolute;
   top: 0.85rem;
@@ -732,6 +745,22 @@ html {
 
 .popup__form input::placeholder {
   color: rgba(255, 255, 255, 0.45);
+}
+
+/* A labelled field (PreorderForm asks for two) — the newsletter pop-up's
+   single input never needed a visible label, so this builds on top of
+   .popup__form rather than replacing it. */
+.popup__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.popup__field-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .popup__form .btn {

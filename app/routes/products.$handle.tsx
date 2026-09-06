@@ -25,6 +25,7 @@ import {getProductFaq} from '~/data/faq';
 import {parseRating} from '~/lib/rating';
 import {onlyShowcaseCollections} from '~/lib/collections';
 import {getRatingForSeed, reviewCountForAge, seededInt} from '~/data/reviews';
+import {isPreorderHandle} from '~/lib/preorder';
 import {useT} from '~/lib/i18n';
 
 export const meta: Route.MetaFunction = ({data}) => {
@@ -178,9 +179,13 @@ function loadDeferredData(
       (data?.products?.nodes ?? [])
         .filter(
           (node) =>
-            // Never offer the product the customer is already looking at, and
-            // never offer something that can't be bought.
+            // Never offer the product the customer is already looking at,
+            // never offer something that can't be bought, and never offer a
+            // product that's pre-order only (see app/lib/preorder.ts) — this
+            // pair-add goes through the same cart action a direct add-to-cart
+            // would, so it's the same purchase, just one page removed.
             node.handle !== handle &&
+            !isPreorderHandle(node.handle) &&
             node.availableForSale &&
             node.variants?.nodes?.some((variant) => variant.availableForSale),
         )
@@ -243,6 +248,10 @@ export default function Product() {
 
   const available = Boolean(selectedVariant?.availableForSale);
 
+  // Scoped to exactly one product handle — see app/lib/preorder.ts. Every
+  // other product's buy box, bundle offer and cart behaviour is untouched.
+  const preorder = isPreorderHandle(product.handle);
+
   // Real size values for this product, with their live availability. Used by
   // the size guide; empty for products that have no size option at all.
   const sizeOption = productOptions.find((option) =>
@@ -275,6 +284,7 @@ export default function Product() {
             quantityAvailable={selectedVariant?.quantityAvailable ?? null}
             shortDescription={shortenDescription(description ?? '')}
             variantId={selectedVariant?.id}
+            preorder={preorder}
             rating={
               // A real review app's score always wins; otherwise we summarise
               // the reviews actually displayed further down the page — drawn
@@ -285,21 +295,25 @@ export default function Product() {
             }
           />
 
-          {/* Limited offer: this product plus a second one the customer picks. */}
-          <Suspense fallback={null}>
-            <Await resolve={pairChoices}>
-              {(choices) => (
-                <BundleOffer
-                  productTitle={title}
-                  productImage={product.images.nodes[0] ?? selectedVariant?.image}
-                  productPrice={selectedVariant?.price}
-                  productVariantId={selectedVariant?.id}
-                  choices={choices}
-                  available={available}
-                />
-              )}
-            </Await>
-          </Suspense>
+          {/* Limited offer: this product plus a second one the customer picks.
+              Skipped entirely during pre-order — it exists to add this exact
+              product to the cart, which is exactly what isn't allowed yet. */}
+          {!preorder && (
+            <Suspense fallback={null}>
+              <Await resolve={pairChoices}>
+                {(choices) => (
+                  <BundleOffer
+                    productTitle={title}
+                    productImage={product.images.nodes[0] ?? selectedVariant?.image}
+                    productPrice={selectedVariant?.price}
+                    productVariantId={selectedVariant?.id}
+                    choices={choices}
+                    available={available}
+                  />
+                )}
+              </Await>
+            </Suspense>
+          )}
 
           {/* Description, characteristics and FAQ sit in the right column,
               directly under the payment buttons. */}
