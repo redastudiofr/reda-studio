@@ -1,4 +1,6 @@
-import {useNearViewport} from '~/lib/useNearViewport';
+import {useEffect, useRef, useState, type RefObject} from 'react';
+import {useHorizontalRail} from '~/lib/useHorizontalRail';
+import {RailArrows} from '~/components/RailArrows';
 
 /**
  * "Your Product Worn" — vertical UGC/TikTok-style clips of the piece
@@ -6,64 +8,97 @@ import {useNearViewport} from '~/lib/useNearViewport';
  * photography: this is deliberately kept separate from the reviews section
  * further down the page.
  *
- * Videos are served from public/videos/worn and listed here — that's the
- * whole structure. Add or replace one by dropping the file in that folder
- * (with its poster, same name) and editing an entry below; nothing else in
- * the component depends on it. The brief calls for exactly four, always —
- * see docs/product-worn-videos.md before changing that number.
+ * The clips are the ones dropped into public/videos/worn/ with `ssstik` in
+ * their filename (from ssstik.io, a TikTok downloader) — that naming is
+ * exactly how source clips are told apart from anything else that ends up
+ * in that folder. Add a new one by dropping the file in unrenamed and
+ * adding its path below; nothing else in the component depends on it.
  */
-const VIDEOS: Array<{src: string; poster: string; label: string}> = [
-  {
-    src: '/videos/worn/worn-01.mp4',
-    poster: '/videos/worn/worn-01.webp',
-    label: 'reda studio piece worn, clip 1',
-  },
-  {
-    src: '/videos/worn/worn-02.mp4',
-    poster: '/videos/worn/worn-02.webp',
-    label: 'reda studio piece worn, clip 2',
-  },
-  {
-    src: '/videos/worn/worn-03.mp4',
-    poster: '/videos/worn/worn-03.webp',
-    label: 'reda studio piece worn, clip 3',
-  },
-  {
-    src: '/videos/worn/worn-04.mp4',
-    poster: '/videos/worn/worn-04.webp',
-    label: 'reda studio piece worn, clip 4',
-  },
+const VIDEO_FILES = [
+  'ssstik.io_@mr.flared_1788699148494.mp4',
+  'ssstik.io_@cvndido_1788700037319.mp4',
+  'ssstik.io_@deluneatelier_1788700286824.mp4',
+  'ssstik.io_@jovenclothing_1788700524218.mp4',
+  'ssstik.io_@shoticallmxney_1788700356010.mp4',
+  'ssstik.io_@shoticallmxney_1788700468111.mp4',
 ];
 
+const VIDEOS = VIDEO_FILES.map((file, index) => ({
+  src: `/videos/worn/${file}`,
+  label: `reda studio piece worn, clip ${index + 1}`,
+}));
+
 /**
- * A single clip. The source is only attached once the tile has scrolled
- * near the viewport — the section sits below the fold, and four videos are
- * not worth pulling on a page that hasn't been scrolled to yet. Once
- * attached, `autoPlay` (muted, so every browser allows it) starts it with no
- * play button and nothing else to click.
+ * A single clip. The list is rendered three times over (see
+ * useHorizontalRail's `loop`) so the rail can wrap seamlessly in both
+ * directions — every copy of a given clip points at the same URL, so the
+ * browser's own HTTP cache means it is only ever actually fetched once.
  */
 function WornVideoTile({
   src,
-  poster,
   label,
+  railRef,
 }: {
   src: string;
-  poster: string;
   label: string;
+  railRef: RefObject<HTMLDivElement | null>;
 }) {
-  const {ref, near} = useNearViewport<HTMLDivElement>('300px');
+  const itemRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [near, setNear] = useState(false);
+
+  // Attach the source once the tile is within about one rail's width of
+  // being visible — near enough that swiping to it feels instant, without
+  // pulling all eighteen tiles' worth of video the moment the section
+  // scrolls into view.
+  useEffect(() => {
+    const node = itemRef.current;
+    const root = railRef.current;
+    if (!node || !root) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setNear(true);
+          observer.disconnect();
+        }
+      },
+      {root, rootMargin: '0px 150%'},
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [railRef]);
+
+  // Only the clip(s) actually in view play — the rest sit paused so a
+  // triple-wrapped rail never has every copy of every clip decoding at once.
+  useEffect(() => {
+    const node = itemRef.current;
+    const root = railRef.current;
+    const video = videoRef.current;
+    if (!node || !root || !video) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      {root, threshold: [0, 0.6]},
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [railRef]);
 
   return (
-    <div className="worn-rail__item" ref={ref}>
+    <div className="worn-rail__item" ref={itemRef}>
       <video
+        ref={videoRef}
         className="worn-rail__video"
         src={near ? src : undefined}
-        poster={poster}
         aria-label={label}
         muted
         loop
         playsInline
-        autoPlay
         preload="none"
         draggable={false}
       />
@@ -72,7 +107,13 @@ function WornVideoTile({
 }
 
 export function ProductWornVideos() {
+  const {ref, scrollByCard} = useHorizontalRail<HTMLDivElement>({loop: true});
+
   if (!VIDEOS.length) return null;
+
+  // Three copies back to back so the rail can be scrolled infinitely in
+  // either direction — see useHorizontalRail's loop mode.
+  const looped = [...VIDEOS, ...VIDEOS, ...VIDEOS];
 
   return (
     <section className="pdp__worn" aria-labelledby="worn-heading">
@@ -80,12 +121,23 @@ export function ProductWornVideos() {
         Your Product Worn
       </h2>
 
-      {/* Same rail pattern as the recommendations row below — a touch
-          slider on mobile, a fixed grid on desktop (see .worn-rail). */}
-      <div className="worn-rail">
-        {VIDEOS.map((video) => (
-          <WornVideoTile key={video.src} {...video} />
-        ))}
+      <div className="rail-wrap">
+        <div className="worn-rail" ref={ref}>
+          {looped.map((video, index) => (
+            <WornVideoTile
+              key={`${video.src}-${index}`}
+              src={video.src}
+              label={video.label}
+              railRef={ref}
+            />
+          ))}
+        </div>
+        <RailArrows
+          onPrev={() => scrollByCard(-1)}
+          onNext={() => scrollByCard(1)}
+          prevLabel="Vidéo précédente"
+          nextLabel="Vidéo suivante"
+        />
       </div>
     </section>
   );

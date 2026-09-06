@@ -18,8 +18,8 @@ import {CollectionShowcase} from '~/components/CollectionShowcase';
 import {BundleOffer} from '~/components/BundleOffer';
 import type {SizeEntry} from '~/components/ProductSizeGuide';
 import {Accordion} from '~/components/Accordion';
-import {ProductItem} from '~/components/ProductItem';
 import {ProductReviews} from '~/components/ProductReviews';
+import {RelatedProductsRail} from '~/components/RelatedProductsRail';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {getProductFaq} from '~/data/faq';
 import {parseRating} from '~/lib/rating';
@@ -72,7 +72,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   return {product};
 }
 
-const MAX_RECOMMENDATIONS = 8;
+const MAX_RECOMMENDATIONS = 16;
 
 /**
  * Shopify's `productRecommendations` often returns fewer than a full row (and
@@ -93,7 +93,7 @@ function loadDeferredData(
         return null;
       }),
     context.storefront
-      .query(FALLBACK_PRODUCTS_QUERY, {variables: {first: 12}})
+      .query(FALLBACK_PRODUCTS_QUERY, {variables: {first: 30}})
       .catch((error: Error) => {
         console.error(error);
         return null;
@@ -334,24 +334,7 @@ export default function Product() {
 
       <Suspense fallback={null}>
         <Await resolve={recommended}>
-          {(items) =>
-            items.length ? (
-              <section className="pdp__related" aria-labelledby="related-heading">
-                <h2 className="pdp__section-title" id="related-heading">
-                  you may also like
-                </h2>
-                {/* Grid on desktop, touch slider on mobile — same markup, CSS
-                    switches between them (see .related-rail). */}
-                <div className="related-rail">
-                  {items.map((item) => (
-                    <div className="related-rail__item" key={item.id}>
-                      <ProductItem product={item} />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ) : null
-          }
+          {(items) => (items.length ? <RelatedProductsRail items={items} /> : null)}
         </Await>
       </Suspense>
 

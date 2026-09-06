@@ -3084,7 +3084,11 @@ html {
 /*
 * Recommendations
 *
-* Same markup both ways: a touch slider on mobile, a grid on desktop.
+* A real carousel at every breakpoint now — touch swipe/scroll-snap on
+* mobile and tablet, mouse-drag and arrow controls on desktop too (see
+* useHorizontalRail and .rail-arrow below). No fixed column count to trim
+* against: it just runs through however many in-stock products the loader
+* found.
 */
 .related-rail {
   display: flex;
@@ -3098,6 +3102,11 @@ html {
      margin exactly cancels .pdp's padding (no sideways page scroll). */
   margin-inline: -1rem;
   padding-inline: 1rem;
+  cursor: grab;
+}
+
+.related-rail:active {
+  cursor: grabbing;
 }
 
 .related-rail::-webkit-scrollbar {
@@ -3118,23 +3127,14 @@ html {
 
 @media (min-width: 64em) {
   .related-rail {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 1rem;
-    overflow: visible;
-    scroll-snap-type: none;
-    margin-inline: 0;
-    padding-inline: 0;
+    /* .pdp's own padding grows at this breakpoint (see .pdp above) — match it
+       so the bleed still lands exactly on the edge, nothing more. */
+    margin-inline: -1.5rem;
+    padding-inline: 1.5rem;
   }
 
   .related-rail__item {
-    flex: none;
-  }
-
-  /* A 6th+ card would break the 5-up rhythm, so trim the overflow on desktop
-     while the mobile rail still scrolls through all of them. */
-  .related-rail__item:nth-child(n + 6) {
-    display: none;
+    flex-basis: 22%;
   }
 }
 
@@ -3146,11 +3146,62 @@ html {
   padding: 0;
 }
 
+/* Shared by .related-rail and .worn-rail: the rail plus its two edge
+   buttons, positioned relative to this wrapper rather than the section
+   (which also contains the heading). */
+.rail-wrap {
+  position: relative;
+}
+
+.rail-arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--color-line);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  cursor: pointer;
+  opacity: 0.9;
+  transform: translateY(-50%);
+  transition: opacity 0.2s ease;
+}
+
+.rail-arrow:hover {
+  opacity: 1;
+}
+
+.rail-arrow:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rail-arrow--prev {
+  left: -1.25rem;
+}
+
+.rail-arrow--next {
+  right: -1.25rem;
+}
+
+/* Arrows are a desktop-only affordance — mobile and tablet rely on touch
+   swipe, where a floating button over the rail would only get in the way. */
+@media (min-width: 64em) {
+  .rail-arrow {
+    display: flex;
+  }
+}
+
 /*
 * "Your Product Worn" — same rail mechanics as the recommendations row just
-* above (touch slider on mobile, a fixed grid on desktop): there are always
-* exactly four clips, so unlike .related-rail this one never needs to trim
-* an overflow — four is also exactly what fits the grid below.
+* above, plus a seamless infinite loop (see useHorizontalRail's `loop`
+* option): swipe or drag past the last clip and the first one follows
+* straight on, and the same going backwards past the first.
 */
 .pdp__worn h2 {
   padding: 0;
@@ -3166,6 +3217,11 @@ html {
   -webkit-overflow-scrolling: touch;
   margin-inline: -1rem;
   padding-inline: 1rem;
+  cursor: grab;
+}
+
+.worn-rail:active {
+  cursor: grabbing;
 }
 
 .worn-rail::-webkit-scrollbar {
@@ -3186,17 +3242,12 @@ html {
 
 @media (min-width: 64em) {
   .worn-rail {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.25rem;
-    overflow: visible;
-    scroll-snap-type: none;
-    margin-inline: 0;
-    padding-inline: 0;
+    margin-inline: -1.5rem;
+    padding-inline: 1.5rem;
   }
 
   .worn-rail__item {
-    flex: none;
+    flex-basis: 23%;
   }
 }
 
