@@ -50,7 +50,10 @@ function WornVideoTile({
   // Attach the source once the tile is within about one rail's width of
   // being visible — near enough that swiping to it feels instant, without
   // pulling all eighteen tiles' worth of video the moment the section
-  // scrolls into view.
+  // scrolls into view. `autoPlay` below then takes it from there natively:
+  // once a clip has a source, the browser loads and plays it itself, no
+  // manual play()/pause() orchestration (and no risk of a race between
+  // "src just got attached" and "is this tile currently visible").
   useEffect(() => {
     const node = itemRef.current;
     const root = railRef.current;
@@ -68,27 +71,6 @@ function WornVideoTile({
     return () => observer.disconnect();
   }, [railRef]);
 
-  // Only the clip(s) actually in view play — the rest sit paused so a
-  // triple-wrapped rail never has every copy of every clip decoding at once.
-  useEffect(() => {
-    const node = itemRef.current;
-    const root = railRef.current;
-    const video = videoRef.current;
-    if (!node || !root || !video) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
-      },
-      {root, threshold: [0, 0.6]},
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [railRef]);
-
   return (
     <div className="worn-rail__item" ref={itemRef}>
       <video
@@ -96,6 +78,7 @@ function WornVideoTile({
         className="worn-rail__video"
         src={near ? src : undefined}
         aria-label={label}
+        autoPlay={near}
         muted
         loop
         playsInline

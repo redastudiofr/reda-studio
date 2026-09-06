@@ -71,10 +71,20 @@ Built on `useHorizontalRail` (`{loop: true}`):
 
 ## Playback
 
-`muted loop playsinline`, no play button. `preload="none"` and an
-IntersectionObserver (rooted at the rail, not the page) defer fetching a
-clip until it's within about one rail-width of being scrolled into view.
-A second observer — 0.6 intersection-ratio threshold — calls `play()`/
-`pause()` directly as each tile crosses in and out of view, so only the
-clip(s) actually on screen are ever decoding, not all eighteen tiles
-(six clips × three loop copies) at once.
+`autoPlay muted loop playsinline`, no play button — the browser handles
+loading and playing a clip itself the moment it has a source, natively,
+with no manual `play()`/`pause()` calls. `preload="none"` and an
+IntersectionObserver (rooted at the rail, not the page) defer attaching
+that source until a tile is within about one rail-width of being scrolled
+into view, so all eighteen tiles (six clips × three loop copies) aren't
+pulled the moment the section scrolls into view.
+
+An earlier version tried to also pause tiles once scrolled out of view
+(a second, threshold-based observer calling `play()`/`pause()` directly).
+That introduced a real race — the "is this tile visible" and "does this
+tile have a source yet" observers could disagree about ordering, leaving
+an autoplay-eligible clip stuck paused with nothing to ever re-trigger it
+— which is worse than the extra tiles left decoding in the background.
+`autoPlay` alone doesn't have that failure mode: a source becoming
+available and a tile playing are the same native step, not two things
+that can race.
