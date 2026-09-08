@@ -1,9 +1,10 @@
 import {Await, useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/_index';
-import {Suspense} from 'react';
+import {Suspense, useState} from 'react';
 import type {AllProductsQuery} from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 import {CollectionsSlider} from '~/components/CollectionsSlider';
+import {CollectionProductShowcase} from '~/components/CollectionProductShowcase';
 import {AnimatedHero} from '~/components/AnimatedHero';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
@@ -11,6 +12,11 @@ import {HomeReviews} from '~/components/HomeReviews';
 import {HelpFaq} from '~/components/HelpFaq';
 import {withoutHomeHiddenCollections} from '~/lib/collections';
 import {useT} from '~/lib/i18n';
+
+/** Products beyond this many are hidden on mobile behind "view more" — see
+ * .product-grid's nth-child rule in app.css, mobile-only there too, so
+ * desktop always shows the full grid exactly as before. */
+const MOBILE_INITIAL_PRODUCT_COUNT = 12;
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -29,17 +35,41 @@ export function links() {
     {
       rel: 'preload',
       as: 'image',
+      // The first of the two mobile photos that crossfade in the hero — see
+      // HERO_IMAGES_MOBILE below. Only this one needs preloading: it's the
+      // LCP element; the second only appears a few seconds later.
       href: '/images/hero3-mobile.webp',
       media: '(max-width: 47.99em)',
     },
     {
       rel: 'preload',
       as: 'image',
-      href: '/images/hero-desktop2.webp',
+      href: '/images/home-hero-desktop.jpg',
       media: '(min-width: 48em)',
     },
   ];
 }
+
+/**
+ * The mobile hero crossfades between these — see AnimatedHero's
+ * `imagesMobile`. Add a third by adding a third entry here; nothing else
+ * needs to change.
+ */
+const HERO_IMAGES_MOBILE = [
+  {
+    src: '/images/hero3-mobile.webp',
+    alt: 'A man from behind in a reda studio t-shirt and jeans, looking out over a rooftop pool and the city skyline',
+  },
+  {
+    src: '/images/home-hero-mobile-2.jpg',
+    alt: 'A man in a reda studio t-shirt and sweatpants leaning against a black Porsche, a horse behind him',
+  },
+];
+
+const HERO_IMAGE_DESKTOP = {
+  src: '/images/home-hero-desktop.jpg',
+  alt: 'A man in a reda studio t-shirt and sweatpants leaning against a black Porsche, a horse behind him',
+};
 
 export async function loader(args: Route.LoaderArgs) {
   const deferredData = loadDeferredData(args);
@@ -66,7 +96,22 @@ function loadDeferredData({context}: Route.LoaderArgs) {
       console.error(error);
       return null;
     });
-  return {allProducts};
+
+  // The "Automne Drop" showcase — real products from that one Shopify
+  // collection. See app/components/CollectionProductShowcase.tsx for how
+  // this feeds a reusable image + horizontal slider section; to add another
+  // collection later, query it the same way and render another
+  // <CollectionProductShowcase>.
+  const automneDrop = context.storefront
+    .query(COLLECTION_PRODUCTS_QUERY, {
+      variables: {handle: 'automne-drop', first: 20},
+    })
+    .catch((error: Error) => {
+      console.error(error);
+      return null;
+    });
+
+  return {allProducts, automneDrop};
 }
 
 export default function Homepage() {
@@ -76,10 +121,8 @@ export default function Homepage() {
   return (
     <div className="home">
       <AnimatedHero
-        imageMobileSrc="/images/hero3-mobile.webp"
-        imageDesktopSrc="/images/hero-desktop2.webp"
-        imageMobileAlt="A man from behind in a reda studio t-shirt and jeans, looking out over a rooftop pool and the city skyline"
-        imageDesktopAlt="Three men in reda studio buy happiness sweaters and jeans, getting ready in a Parisian apartment"
+        imagesMobile={HERO_IMAGES_MOBILE}
+        imageDesktop={HERO_IMAGE_DESKTOP}
         eyebrow={t('home.eyebrow')}
         title="reda studio"
         description={t('home.tagline')}
@@ -93,6 +136,22 @@ export default function Homepage() {
       <CollectionsSlider collections={data.collections} />
 
       <AllProducts products={data.allProducts} />
+
+      <Suspense fallback={null}>
+        <Await resolve={data.automneDrop}>
+          {(response) =>
+            response?.collection ? (
+              <CollectionProductShowcase
+                title={response.collection.title}
+                imageSrc="/images/collection-automne-drop.jpg"
+                imageAlt="Two men in reda studio pieces beside a white Ferrari Testarossa, in front of a château"
+                collectionHandle={response.collection.handle}
+                products={response.collection.products.nodes}
+              />
+            ) : null
+          }
+        </Await>
+      </Suspense>
 
       <HomeReviews />
 
@@ -111,6 +170,10 @@ function AllProducts({
   products: Promise<AllProductsQuery | null>;
 }) {
   const t = useT();
+  // Mobile-only — see .product-grid's nth-child rule in app.css, which is
+  // itself scoped to the same breakpoint. Desktop ignores this entirely and
+  // always renders every product, exactly as before.
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <section aria-labelledby="catalogue-heading">
@@ -123,15 +186,26 @@ function AllProducts({
         <Await resolve={products}>
           {(response) =>
             response ? (
-              <div className="product-grid">
-                {response.products.nodes.map((product, index) => (
-                  <ProductItem
-                    key={product.id}
-                    product={product}
-                    loading={index < 4 ? 'eager' : undefined}
-                  />
-                ))}
-              </div>
+              <>
+                <div className={`product-grid ${expanded ? 'product-grid--expanded' : ''}`}>
+                  {response.products.nodes.map((product, index) => (
+                    <ProductItem
+                      key={product.id}
+                      product={product}
+                      loading={index < 4 ? 'eager' : undefined}
+                    />
+                  ))}
+                </div>
+                {!expanded && response.products.nodes.length > MOBILE_INITIAL_PRODUCT_COUNT && (
+                  <button
+                    type="button"
+                    className="view-more-mobile"
+                    onClick={() => setExpanded(true)}
+                  >
+                    {t('home.viewMore')}
+                  </button>
+                )}
+              </>
             ) : null
           }
         </Await>
@@ -250,6 +324,90 @@ const ALL_PRODUCTS_QUERY = `#graphql
     products(first: $first, sortKey: UPDATED_AT, reverse: true) {
       nodes {
         ...HomeProduct
+      }
+    }
+  }
+` as const;
+
+/**
+ * Real products for one collection's homepage showcase — see
+ * CollectionProductShowcase. Same shape as HomeProduct above so ProductItem
+ * renders identically in both places; kept as its own query (rather than
+ * reusing ALL_PRODUCTS_QUERY) because it's scoped to one collection handle.
+ */
+const COLLECTION_PRODUCTS_QUERY = `#graphql
+  fragment ShowcaseMoney on MoneyV2 {
+    amount
+    currencyCode
+  }
+  fragment ShowcaseProduct on Product {
+    id
+    title
+    handle
+    availableForSale
+    priceRange {
+      minVariantPrice {
+        ...ShowcaseMoney
+      }
+    }
+    compareAtPriceRange {
+      minVariantPrice {
+        ...ShowcaseMoney
+      }
+    }
+    featuredImage {
+      id
+      url
+      altText
+      width
+      height
+    }
+    images(first: 2) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+    options {
+      name
+      optionValues {
+        name
+      }
+    }
+    variants(first: 20) {
+      nodes {
+        id
+        availableForSale
+        selectedOptions {
+          name
+          value
+        }
+        price {
+          ...ShowcaseMoney
+        }
+        compareAtPrice {
+          ...ShowcaseMoney
+        }
+      }
+    }
+  }
+  query CollectionProducts(
+    $handle: String!
+    $first: Int
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    collection(handle: $handle) {
+      id
+      handle
+      title
+      products(first: $first) {
+        nodes {
+          ...ShowcaseProduct
+        }
       }
     }
   }

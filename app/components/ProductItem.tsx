@@ -5,6 +5,7 @@ import type {
   CollectionItemFragment,
   RecoProductFragment,
   HomeProductFragment,
+  ShowcaseProductFragment,
 } from 'storefrontapi.generated';
 import {useVariantUrl} from '~/lib/variants';
 import {useNearViewport} from '~/lib/useNearViewport';
@@ -17,7 +18,8 @@ type GridProduct =
   | CollectionItemFragment
   | ProductItemFragment
   | RecoProductFragment
-  | HomeProductFragment;
+  | HomeProductFragment
+  | ShowcaseProductFragment;
 
 export function ProductItem({
   product,

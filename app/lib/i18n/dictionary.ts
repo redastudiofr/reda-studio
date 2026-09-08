@@ -39,6 +39,7 @@ export const en = {
   'home.ourStory': 'our story',
   'home.allProducts': 'all products',
   'home.viewAll': 'view all',
+  'home.viewMore': 'view more',
   'home.basics': 'our basics',
 
   // — collections —
@@ -325,6 +326,7 @@ export const fr: Record<TranslationKey, string> = {
   'home.ourStory': 'notre histoire',
   'home.allProducts': 'tous les produits',
   'home.viewAll': 'tout voir',
+  'home.viewMore': 'voir plus',
   'home.basics': 'nos basiques',
 
   // — collections —

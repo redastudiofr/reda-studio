@@ -950,8 +950,28 @@ html {
   height: 100%;
 }
 
-/* Mobile has its own portrait-framed shot (hero-mobile.webp, ~9:16), so a
-   centred cover is enough — no top-biased crop, which the shared landscape
+/* Stacked mobile photos crossfade via opacity — every img already fills the
+   exact same absolutely-positioned box (.hero__img), so switching which one
+   is at opacity: 1 can never shift the page or change the hero's height. A
+   single mobile photo (imagesMobile.length === 1) is simply always active,
+   so this costs nothing when there's nothing to rotate. */
+.hero__img--mobile {
+  opacity: 0;
+  transition: opacity 1200ms var(--ease-out-soft);
+}
+
+.hero__img--mobile.hero__img--active {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__img--mobile {
+    transition: none;
+  }
+}
+
+/* Mobile has its own portrait-framed shot(s) (~9:16), so a centred cover is
+   enough — no top-biased crop, which the shared landscape
    image used to need to keep the subjects in frame. */
 .hero__img--mobile {
   object-fit: cover;
@@ -1040,6 +1060,64 @@ html {
   grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem 0.4rem;
   padding: 0.75rem;
+}
+
+/* Homepage only (see AllProducts in app/routes/_index.tsx): the first six
+   rows (12 cards, matching the 2-up mobile grid) show up front, the rest
+   wait behind "view more" — mobile only, desktop's 4- and 5-up grids below
+   are never capped. A card re-entering via .product-grid--expanded restarts
+   its animation the same way — see @keyframes product-reveal. */
+@media (max-width: 47.99em) {
+  .product-grid:not(.product-grid--expanded) > *:nth-child(n + 13) {
+    display: none;
+  }
+
+  .product-grid--expanded > *:nth-child(n + 13) {
+    animation: product-reveal 480ms var(--ease-out-soft) both;
+  }
+}
+
+@keyframes product-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-grid--expanded > *:nth-child(n + 13) {
+    animation: none;
+  }
+}
+
+.view-more-mobile {
+  display: block;
+  width: calc(100% - 1.5rem);
+  margin: 0.5rem auto 0;
+  padding: 0.9rem 1.5rem;
+  font-size: 0.8rem;
+  text-transform: lowercase;
+  text-align: center;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 1px solid var(--color-ink);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.view-more-mobile:hover {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+@media (min-width: 48em) {
+  .view-more-mobile {
+    display: none;
+  }
 }
 
 @media (min-width: 48em) {
@@ -3290,6 +3368,117 @@ html {
   object-fit: cover;
   border-radius: 0.75rem;
   background: var(--color-tile);
+}
+
+/*
+* One collection's homepage showcase (see CollectionProductShowcase) — a
+* large photo linking to the collection, then a product rail built on the
+* same mechanics as .related-rail/.worn-rail above (drag on desktop, touch
+* swipe on mobile, arrows — see useHorizontalRail).
+*/
+.collection-feature {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.collection-feature__media {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+@media (min-width: 40em) {
+  .collection-feature__media {
+    aspect-ratio: 21 / 9;
+  }
+}
+
+.collection-feature__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 500ms var(--ease-out-soft);
+}
+
+.collection-feature__media:hover .collection-feature__img {
+  transform: scale(1.03);
+}
+
+.collection-feature__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.45) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+.collection-feature__title {
+  position: absolute;
+  left: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 1;
+  margin: 0;
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-transform: lowercase;
+  letter-spacing: 0.01em;
+}
+
+@media (min-width: 40em) {
+  .collection-feature__title {
+    left: 2rem;
+    bottom: 2rem;
+    font-size: 2rem;
+  }
+}
+
+.collection-feature__rail {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin-inline: -1rem;
+  padding-inline: 1rem;
+  cursor: grab;
+}
+
+.collection-feature__rail:active {
+  cursor: grabbing;
+}
+
+.collection-feature__rail::-webkit-scrollbar {
+  display: none;
+}
+
+.collection-feature__item {
+  flex: 0 0 44%;
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+@media (min-width: 40em) {
+  .collection-feature__item {
+    flex-basis: 30%;
+  }
+}
+
+@media (min-width: 64em) {
+  .collection-feature__rail {
+    margin-inline: -1.5rem;
+    padding-inline: 1.5rem;
+  }
+
+  .collection-feature__item {
+    flex-basis: 22%;
+  }
 }
 
 /*

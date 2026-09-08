@@ -1,13 +1,18 @@
-import {useEffect, useRef, type ReactNode} from 'react';
+import {useEffect, useRef, useState, type ReactNode} from 'react';
 import {Link} from 'react-router';
 import {motion} from 'framer-motion';
 import {useHeaderTone} from '~/lib/header-tone';
 
 type HeroCta = {text: string; href: string};
+type HeroImage = {src: string; alt: string};
 
 // Matches the fixed header's visual height so it flips from transparent to
 // solid exactly as its own bottom edge clears the hero, not before.
 const HEADER_OFFSET_PX = 56;
+
+// How long each mobile hero photo stays on screen before the next one
+// crossfades in. Desktop never rotates — one photo, full width.
+const MOBILE_ROTATION_MS = 6000;
 
 // Same stagger/entrance timing as the reference AnimatedHero component:
 // container staggers its children, each item slides up 20px while fading in.
@@ -32,30 +37,65 @@ const glassButtonClassName =
   'hero__cta inline-flex items-center justify-center border border-white/25 bg-white/10 px-6 py-3 text-[11px] uppercase tracking-[0.14em] backdrop-blur-sm transition-colors duration-200 hover:bg-white/20 sm:px-8 sm:py-4 sm:text-xs';
 
 /**
+ * The mobile photo(s): a stack of absolutely-positioned images (same box as
+ * the desktop one, see .hero__img), crossfading between them on a timer when
+ * there's more than one. A single image behaves exactly like before — no
+ * timer, no fade, just the photo.
+ *
+ * The crossfade is opacity-only on elements already filling the exact same
+ * fixed-height `.hero` box (see app.css), so a rotation can never shift the
+ * page or change the hero's height.
+ */
+function MobileHeroPhotos({images}: {images: HeroImage[]}) {
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    if (images.length < 2) return;
+    const timer = setInterval(() => {
+      setActive((current) => (current + 1) % images.length);
+    }, MOBILE_ROTATION_MS);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  return (
+    <>
+      {images.map((image, index) => (
+        <img
+          key={image.src}
+          src={image.src}
+          alt={image.alt}
+          fetchPriority={index === 0 ? 'high' : undefined}
+          loading={index === 0 ? 'eager' : 'lazy'}
+          decoding="async"
+          className={`hero__img hero__img--mobile ${index === active ? 'hero__img--active' : ''}`}
+        />
+      ))}
+    </>
+  );
+}
+
+/**
  * Homepage hero banner: full-bleed photo with a dark overlay, staggered
  * fade-in for eyebrow/title/description/buttons, and glass (blurred) CTA
  * buttons — adapted from the reference AnimatedHero pattern using
  * framer-motion, without the shadcn/radix Button layer this project doesn't
  * otherwise use.
+ *
+ * Desktop shows one static photo. Mobile can show one or several — pass more
+ * than one in `imagesMobile` and they crossfade automatically (see
+ * MobileHeroPhotos); pass exactly one and it behaves like a plain photo.
  */
 export function AnimatedHero({
-  imageMobileSrc,
-  imageDesktopSrc,
-  imageMobileAlt,
-  imageDesktopAlt,
+  imagesMobile,
+  imageDesktop,
   eyebrow,
   title,
   description,
   ctaButton,
   secondaryCta,
 }: {
-  imageMobileSrc: string;
-  imageDesktopSrc: string;
-  // Split rather than one shared `imageAlt`: mobile and desktop are free to
-  // be two entirely different photographs, not just two crops of the same
-  // one, so only a description per image is ever accurate.
-  imageMobileAlt: string;
-  imageDesktopAlt: string;
+  imagesMobile: HeroImage[];
+  imageDesktop: HeroImage;
   eyebrow?: string;
   title: ReactNode;
   description?: string;
@@ -88,17 +128,10 @@ export function AnimatedHero({
         animate={{opacity: 1, scale: 1}}
         transition={{duration: 1.3, ease: [0.16, 1, 0.3, 1]}}
       >
+        <MobileHeroPhotos images={imagesMobile} />
         <img
-          src={imageMobileSrc}
-          alt={imageMobileAlt}
-          fetchPriority="high"
-          loading="eager"
-          decoding="async"
-          className="hero__img hero__img--mobile"
-        />
-        <img
-          src={imageDesktopSrc}
-          alt={imageDesktopAlt}
+          src={imageDesktop.src}
+          alt={imageDesktop.alt}
           fetchPriority="high"
           loading="eager"
           decoding="async"
