@@ -3533,6 +3533,18 @@ html {
   display: none;
 }
 
+/* .rail-arrow sits *outside* its wrapper by default (-1.25rem), which works
+   on the product page because .pdp's own padding absorbs it. This section is
+   edge-to-edge, so out there the right-hand arrow hangs past the viewport and
+   gives the whole page 20px of horizontal scroll — keep both inside instead. */
+.collection-feature .rail-arrow--prev {
+  left: 0.25rem;
+}
+
+.collection-feature .rail-arrow--next {
+  right: 0.25rem;
+}
+
 .collection-feature__item {
   flex: 0 0 44%;
   scroll-snap-align: start;
