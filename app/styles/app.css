@@ -3445,8 +3445,10 @@ html {
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  margin-inline: -1rem;
-  padding-inline: 1rem;
+  /* No ambient page padding to cancel out here (unlike .related-rail inside
+     .pdp) — .collection-feature itself is edge-to-edge, so the rail insets
+     itself directly rather than bleeding past a parent that isn't there. */
+  padding-inline: 1.25rem;
   cursor: grab;
 }
 
@@ -3472,7 +3474,6 @@ html {
 
 @media (min-width: 64em) {
   .collection-feature__rail {
-    margin-inline: -1.5rem;
     padding-inline: 1.5rem;
   }
 
