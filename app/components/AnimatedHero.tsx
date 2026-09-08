@@ -47,13 +47,24 @@ const glassButtonClassName =
  * page or change the hero's height.
  */
 function MobileHeroPhotos({images}: {images: HeroImage[]}) {
+  // Starts at 0 on both server and client — anything clock-based in the
+  // initial state would risk disagreeing between the two (render and
+  // hydration don't happen at the same instant) and that's exactly the kind
+  // of mismatch that makes React discard and rebuild a tree. The clock only
+  // comes in once mounted, client-only, in the effect below.
   const [active, setActive] = useState(0);
 
   useEffect(() => {
     if (images.length < 2) return;
-    const timer = setInterval(() => {
-      setActive((current) => (current + 1) % images.length);
-    }, MOBILE_ROTATION_MS);
+    // Ticks every second and re-derives the index from the clock rather
+    // than counting up — so if this effect is ever torn down and set up
+    // again (a remount, a fast-refresh, React re-hydrating a mismatched
+    // subtree), the very next tick still lands on whichever photo is
+    // actually due right now instead of getting stuck restarting from 0.
+    const tick = () =>
+      setActive(Math.floor(Date.now() / MOBILE_ROTATION_MS) % images.length);
+    tick();
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, [images.length]);
 
