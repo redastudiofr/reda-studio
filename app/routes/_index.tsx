@@ -143,8 +143,9 @@ export default function Homepage() {
             response?.collection ? (
               <CollectionProductShowcase
                 title={response.collection.title}
-                imageSrc="/images/collection-automne-drop.jpg"
-                imageAlt="Two men in reda studio pieces beside a white Ferrari Testarossa, in front of a château"
+                description={response.collection.description}
+                imageSrc="/images/collection-automne-drop-portrait.jpg"
+                imageAlt="Two men in reda studio pieces beside a white Ferrari Testarossa, a doberman at their feet, in front of a château"
                 collectionHandle={response.collection.handle}
                 products={response.collection.products.nodes}
               />
@@ -404,6 +405,7 @@ const COLLECTION_PRODUCTS_QUERY = `#graphql
       id
       handle
       title
+      description
       products(first: $first) {
         nodes {
           ...ShowcaseProduct

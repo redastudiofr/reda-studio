@@ -999,7 +999,9 @@ html {
    win over layered ones no matter the source order. This rule is unlayered
    too and app.css loads after reset.css, so it takes precedence. */
 .hero__cta,
-.hero__cta:hover {
+.hero__cta:hover,
+.collection-feature__cta,
+.collection-feature__cta:hover {
   color: var(--color-paper);
   text-decoration: none;
 }
@@ -3409,18 +3411,43 @@ html {
   transform: scale(1.03);
 }
 
+/* Light — the brief is explicit about not darkening the photo too much —
+   but reaches further up than a single-line title needed to, now that the
+   description and button sit above it too. */
 .collection-feature__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.45) 0%, transparent 45%);
+  background: linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.18) 55%,
+    transparent 80%
+  );
   pointer-events: none;
 }
 
-.collection-feature__title {
+.collection-feature__caption {
   position: absolute;
   left: 1.25rem;
+  right: 1.25rem;
   bottom: 1.25rem;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+@media (min-width: 40em) {
+  .collection-feature__caption {
+    left: 2rem;
+    right: auto;
+    bottom: 2rem;
+    max-width: 26rem;
+  }
+}
+
+.collection-feature__title {
   margin: 0;
   color: #fff;
   font-size: 1.4rem;
@@ -3431,9 +3458,51 @@ html {
 
 @media (min-width: 40em) {
   .collection-feature__title {
-    left: 2rem;
-    bottom: 2rem;
     font-size: 2rem;
+  }
+}
+
+.collection-feature__description {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 40em) {
+  .collection-feature__description {
+    font-size: 0.95rem;
+  }
+}
+
+/* Same glass button as the homepage hero (see AnimatedHero's
+   glassButtonClassName) — border + translucent fill + blur, copied rather
+   than shared across components since the hero's version is built from
+   Tailwind utility classes local to that file. */
+.collection-feature__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.2rem;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.7rem;
+  text-transform: lowercase;
+  letter-spacing: 0.06em;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background-color 200ms var(--ease-out-soft);
+}
+
+.collection-feature__cta:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@media (min-width: 40em) {
+  .collection-feature__cta {
+    padding: 0.8rem 1.75rem;
+    font-size: 0.75rem;
   }
 }
 
