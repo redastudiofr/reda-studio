@@ -3,11 +3,22 @@
  * everywhere else — header, /collections, the product page showcase — they
  * just don't sit among the "our basics" tiles.
  *
+ * "automne drop" is here for a different reason than the others: it already
+ * has the full-width showcase further down the homepage (photo, name,
+ * description, its own product rail — see CollectionProductShowcase), so a
+ * small tile for it up in the carousel too would just be the same collection
+ * twice on one page.
+ *
  * Matching is done on the handle AND on the normalised title, so it keeps
  * working whatever Shopify's handle looks like ("summer-drop", "summerdrop",
  * a renamed title, and so on).
  */
-const HIDDEN_FROM_HOME = ['summer drop', 'all in drop', 'win drop'];
+const HIDDEN_FROM_HOME = [
+  'summer drop',
+  'all in drop',
+  'win drop',
+  'automne drop',
+];
 
 /**
  * The only collections shown in the "join the community" showcase closing each
