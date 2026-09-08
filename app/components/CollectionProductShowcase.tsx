@@ -22,7 +22,8 @@ import {useT} from '~/lib/i18n';
 export function CollectionProductShowcase({
   title,
   description,
-  imageSrc,
+  imageSrcMobile,
+  imageSrcDesktop,
   imageAlt,
   collectionHandle,
   products,
@@ -32,7 +33,12 @@ export function CollectionProductShowcase({
   // actually written one (see collections.$handle.tsx's own page, same
   // rule): nothing here invents copy that isn't in the store's own data.
   description?: string | null;
-  imageSrc: string;
+  // Two crops of the same shot, like the homepage hero: a portrait one for
+  // the tall mobile frame, a landscape one for the wide desktop frame, each
+  // close enough to its frame's ratio that `cover` barely has to crop. The
+  // <picture> below means only the matching one is ever downloaded.
+  imageSrcMobile: string;
+  imageSrcDesktop: string;
   imageAlt: string;
   collectionHandle: string;
   products: ShowcaseProductFragment[];
@@ -47,13 +53,16 @@ export function CollectionProductShowcase({
   return (
     <Reveal as="section" className="collection-feature" aria-labelledby={headingId}>
       <div className="collection-feature__media">
-        <img
-          src={imageSrc}
-          alt={imageAlt}
-          loading="lazy"
-          decoding="async"
-          className="collection-feature__img"
-        />
+        <picture>
+          <source media="(min-width: 40em)" srcSet={imageSrcDesktop} />
+          <img
+            src={imageSrcMobile}
+            alt={imageAlt}
+            loading="lazy"
+            decoding="async"
+            className="collection-feature__img"
+          />
+        </picture>
         <span className="collection-feature__overlay" aria-hidden="true" />
 
         <div className="collection-feature__caption">
