@@ -74,6 +74,19 @@ export function useHorizontalRail<T extends HTMLElement>({
     const node = ref.current;
     if (!node) return;
 
+    const onPointerMove = (e: PointerEvent) => {
+      const drag = dragState.current;
+      if (!drag.active) return;
+      const dx = e.clientX - drag.startX;
+      if (Math.abs(dx) > 3) drag.moved = true;
+      node.scrollLeft = drag.startScroll - dx;
+    };
+    const endDrag = () => {
+      dragState.current.active = false;
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', endDrag);
+      window.removeEventListener('pointercancel', endDrag);
+    };
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse') return;
       dragState.current = {
@@ -82,42 +95,36 @@ export function useHorizontalRail<T extends HTMLElement>({
         active: true,
         moved: false,
       };
-      node.setPointerCapture(e.pointerId);
-    };
-    const onPointerMove = (e: PointerEvent) => {
-      const drag = dragState.current;
-      if (!drag.active) return;
-      const dx = e.clientX - drag.startX;
-      if (Math.abs(dx) > 3) drag.moved = true;
-      node.scrollLeft = drag.startScroll - dx;
-    };
-    const endDrag = (e: PointerEvent) => {
-      if (!dragState.current.active) return;
-      dragState.current.active = false;
-      if (node.hasPointerCapture(e.pointerId)) {
-        node.releasePointerCapture(e.pointerId);
-      }
+      /*
+       * Tracked on the window rather than through setPointerCapture, which
+       * this used to call. Capturing the pointer here also retargets the
+       * click that follows to the rail itself — so a plain click on a
+       * product card inside it never reached the card's link, and nothing
+       * navigated. Window listeners keep the drag working past the rail's
+       * edges without touching where the click lands.
+       */
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', endDrag);
+      window.addEventListener('pointercancel', endDrag);
     };
     // A drag that actually moved the rail shouldn't also fire a click on
-    // whatever it was dragging over (e.g. a product card's link).
+    // whatever it was dragging over (e.g. a product card's link). Cleared
+    // once used, so a later click that follows no drag at all — a keyboard
+    // Enter on a focused card, say — is never swallowed by a stale flag.
     const onClickCapture = (e: MouseEvent) => {
       if (dragState.current.moved) {
+        dragState.current.moved = false;
         e.preventDefault();
         e.stopPropagation();
       }
     };
 
     node.addEventListener('pointerdown', onPointerDown);
-    node.addEventListener('pointermove', onPointerMove);
-    node.addEventListener('pointerup', endDrag);
-    node.addEventListener('pointercancel', endDrag);
     node.addEventListener('click', onClickCapture, true);
     return () => {
       node.removeEventListener('pointerdown', onPointerDown);
-      node.removeEventListener('pointermove', onPointerMove);
-      node.removeEventListener('pointerup', endDrag);
-      node.removeEventListener('pointercancel', endDrag);
       node.removeEventListener('click', onClickCapture, true);
+      endDrag();
     };
   }, []);
 

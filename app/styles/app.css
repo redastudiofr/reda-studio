@@ -902,12 +902,14 @@ html {
 * Révélation au scroll
 * --------------------------------------------------
 */
+/* Shorter and shallower than it was (650ms / 14px): sections should settle
+   into place, not travel. */
 .reveal {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(10px);
   transition:
-    opacity 650ms var(--ease-out-soft),
-    transform 650ms var(--ease-out-soft);
+    opacity 480ms var(--ease-out-soft),
+    transform 480ms var(--ease-out-soft);
 }
 
 .reveal--visible {
@@ -929,9 +931,11 @@ html {
 }
 
 @media (min-width: 48em) {
+  /* Was a full 100vh, which on a wide desktop screen stretched the photo
+     into a tall band you had to scroll past before seeing anything else. */
   .hero {
-    height: 100vh;
-    min-height: 680px;
+    height: 82vh;
+    min-height: 620px;
   }
 }
 
@@ -976,6 +980,28 @@ html {
 .hero__img--mobile {
   object-fit: cover;
   object-position: 50% 50%;
+}
+
+/*
+ * The scrim that keeps the hero caption readable.
+ *
+ * A separate layer above the photo, never opacity on the photo itself: the
+ * image keeps its own brightness and detail everywhere, and only the bottom
+ * of the frame — where the eyebrow, title, text and buttons actually sit —
+ * is darkened. The previous flat 55% black over the whole thing made a
+ * bright photograph look like a grey one.
+ */
+.hero__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.62) 0%,
+    rgba(0, 0, 0, 0.34) 28%,
+    rgba(0, 0, 0, 0.08) 55%,
+    transparent 78%
+  );
 }
 
 .hero__img--desktop {
@@ -1099,21 +1125,37 @@ html {
 .view-more-mobile {
   display: block;
   width: calc(100% - 1.5rem);
-  margin: 0.5rem auto 0;
-  padding: 0.9rem 1.5rem;
-  font-size: 0.8rem;
-  text-transform: lowercase;
+  margin: 0.75rem auto 0;
+  padding: 0.95rem 1.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
   text-align: center;
   background: var(--color-paper);
   color: var(--color-ink);
   border: 1px solid var(--color-ink);
-  border-radius: 6px;
+  border-radius: 2px;
   cursor: pointer;
+  transition:
+    background-color 260ms var(--ease-out-soft),
+    color 260ms var(--ease-out-soft),
+    box-shadow 260ms var(--ease-out-soft);
 }
 
 .view-more-mobile:hover {
   background: var(--color-ink);
   color: var(--color-paper);
+  box-shadow: var(--shadow-sm);
+}
+
+.view-more-mobile:active {
+  box-shadow: none;
+}
+
+.view-more-mobile:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
 }
 
 @media (min-width: 48em) {
@@ -1122,18 +1164,22 @@ html {
   }
 }
 
+/* One column fewer per breakpoint than before (was 4 then 5), so each
+   product photo is bigger and the grid reads as a lookbook rather than a
+   contact sheet. ProductItem's `sizes` attribute already assumes these
+   widths (33vw / 25vw), so it lines up exactly now. */
 @media (min-width: 48em) {
   .product-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.6rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
     padding: 1rem;
   }
 }
 
 @media (min-width: 64em) {
   .product-grid {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0.75rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
     padding: 1.25rem;
   }
 }
@@ -1161,12 +1207,21 @@ html {
   display: block;
 }
 
+/* Barely-there at rest, a touch more on hover — the card lifts off the page
+   instead of announcing itself. Shared elevation scale, see tailwind.css. */
 .product-card__media {
   position: relative;
   display: block;
   aspect-ratio: 1/1;
   background: var(--color-paper);
   overflow: hidden;
+  border-radius: 4px;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow 260ms var(--ease-out-soft);
+}
+
+.product-card:hover .product-card__media {
+  box-shadow: var(--shadow-sm);
 }
 
 .product-card__media img {
@@ -1343,12 +1398,14 @@ html {
   object-fit: cover;
   opacity: 0.88;
   transition:
-    transform 600ms var(--ease-out-soft),
+    transform 400ms var(--ease-out-soft),
     opacity 400ms var(--ease-out-soft);
 }
 
+/* One zoom for every image tile on the site — collections, showcase, shop
+   tiles, the collection banner. 2% over 400ms: noticed, not performed. */
 .collections-slider__tile:hover .collections-slider__media img {
-  transform: scale(1.04);
+  transform: scale(1.02);
   opacity: 1;
 }
 
@@ -1693,21 +1750,17 @@ html {
   background: var(--color-paper);
   border: 1px solid var(--color-line);
   border-radius: 0.75rem;
-  box-shadow:
-    0 1px 2px rgba(17, 17, 17, 0.04),
-    0 12px 24px -16px rgba(17, 17, 17, 0.18);
+  box-shadow: var(--shadow-sm);
   transition:
-    transform 450ms var(--ease-out-soft),
-    box-shadow 450ms var(--ease-out-soft),
-    border-color 450ms var(--ease-out-soft);
+    transform 300ms var(--ease-out-soft),
+    box-shadow 300ms var(--ease-out-soft),
+    border-color 300ms var(--ease-out-soft);
 }
 
 .review-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   border-color: #d8d8d4;
-  box-shadow:
-    0 1px 2px rgba(17, 17, 17, 0.05),
-    0 26px 44px -22px rgba(17, 17, 17, 0.28);
+  box-shadow: var(--shadow-md);
 }
 
 .review-card__stars {
@@ -3273,16 +3326,26 @@ html {
   height: 2.5rem;
   border-radius: 50%;
   border: 1px solid var(--color-line);
-  background: var(--color-bg);
+  /* Was var(--color-bg), which this project never defines — the button was
+     rendering transparent over whatever sat behind it. */
+  background: var(--color-paper);
   color: var(--color-ink);
   cursor: pointer;
-  opacity: 0.9;
+  box-shadow: var(--shadow-sm);
   transform: translateY(-50%);
-  transition: opacity 0.2s ease;
+  transition:
+    border-color 240ms var(--ease-out-soft),
+    box-shadow 240ms var(--ease-out-soft);
 }
 
 .rail-arrow:hover {
-  opacity: 1;
+  border-color: var(--color-ink);
+  box-shadow: var(--shadow-md);
+}
+
+.rail-arrow:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
 }
 
 .rail-arrow:disabled {
@@ -3394,6 +3457,7 @@ html {
   aspect-ratio: 3 / 4;
   overflow: hidden;
   border-radius: 8px;
+  box-shadow: var(--shadow-md);
 }
 
 @media (min-width: 40em) {
@@ -3408,11 +3472,11 @@ html {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 500ms var(--ease-out-soft);
+  transition: transform 400ms var(--ease-out-soft);
 }
 
 .collection-feature__media:hover .collection-feature__img {
-  transform: scale(1.03);
+  transform: scale(1.02);
 }
 
 /* Light — the brief is explicit about not darkening the photo too much —
@@ -3483,29 +3547,57 @@ html {
    glassButtonClassName) — border + translucent fill + blur, copied rather
    than shared across components since the hero's version is built from
    Tailwind utility classes local to that file. */
+/*
+ * The banner's call to action. Glass over the photograph, like the hero's
+ * buttons, but with the hover doing the work: the fill warms up, the border
+ * firms, and the whole thing rises a single pixel. One pixel is the point —
+ * enough to feel like a response, small enough that nothing jumps.
+ */
 .collection-feature__cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 0.2rem;
-  padding: 0.7rem 1.4rem;
-  font-size: 0.7rem;
-  text-transform: lowercase;
-  letter-spacing: 0.06em;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  transition: background-color 200ms var(--ease-out-soft);
+  margin-top: 0.35rem;
+  padding: 0.85rem 2rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  will-change: transform;
+  transition:
+    background-color 260ms var(--ease-out-soft),
+    border-color 260ms var(--ease-out-soft),
+    transform 260ms var(--ease-out-soft),
+    box-shadow 260ms var(--ease-out-soft);
 }
 
 .collection-feature__cta:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.75);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Settles back down under the finger — the press has to register as a press. */
+.collection-feature__cta:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+}
+
+.collection-feature__cta:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 3px;
 }
 
 @media (min-width: 40em) {
   .collection-feature__cta {
-    padding: 0.8rem 1.75rem;
+    padding: 0.95rem 2.4rem;
     font-size: 0.75rem;
   }
 }
@@ -3562,8 +3654,10 @@ html {
     padding-inline: 1.5rem;
   }
 
+  /* Wider than the 22% it started at — same reasoning as the grid above:
+     fewer, larger product photos on a big screen. */
   .collection-feature__item {
-    flex-basis: 22%;
+    flex-basis: 26%;
   }
 }
 
@@ -3770,11 +3864,11 @@ html {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 700ms var(--ease-out-soft);
+  transition: transform 400ms var(--ease-out-soft);
 }
 
 .showcase__tile:hover .showcase__media img {
-  transform: scale(1.04);
+  transform: scale(1.02);
 }
 
 .showcase__placeholder {
@@ -5050,11 +5144,11 @@ html {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 600ms var(--ease-out-soft);
+  transition: transform 400ms var(--ease-out-soft);
 }
 
 .shop-tile:hover .shop-tile__media img {
-  transform: scale(1.04);
+  transform: scale(1.02);
 }
 
 /* A collection with neither its own image nor a product still fills its tile
@@ -5152,7 +5246,7 @@ html {
   background: var(--color-paper);
   border: 1px solid var(--color-line);
   border-radius: 0.4rem;
-  box-shadow: 0 12px 32px rgb(0 0 0 / 8%);
+  box-shadow: var(--shadow-md);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-4px);

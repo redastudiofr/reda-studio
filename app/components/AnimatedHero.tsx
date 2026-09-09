@@ -135,9 +135,12 @@ export function AnimatedHero({
     <section className="hero" ref={sectionRef}>
       <motion.div
         className="hero__media"
-        initial={{opacity: 0, scale: 1.05}}
+        // Softened from 1.05/1.3s: a smaller, shorter push-in reads as
+        // considered rather than showy — and 5% over-scale briefly made the
+        // photo wider than the viewport on desktop.
+        initial={{opacity: 0, scale: 1.02}}
         animate={{opacity: 1, scale: 1}}
-        transition={{duration: 1.3, ease: [0.16, 1, 0.3, 1]}}
+        transition={{duration: 1, ease: [0.16, 1, 0.3, 1]}}
       >
         <MobileHeroPhotos images={imagesMobile} />
         <img
@@ -148,9 +151,9 @@ export function AnimatedHero({
           decoding="async"
           className="hero__img hero__img--desktop"
         />
-        {/* Lighter veil on mobile so the photo itself stays visible; the
-            larger desktop hero can afford the darker overlay for legibility. */}
-        <div className="absolute inset-0 bg-black/25 md:bg-black/55" />
+        {/* A gradient scrim over the photo, not opacity on the photo — see
+            .hero__scrim in app.css. */}
+        <div className="hero__scrim" />
       </motion.div>
 
       <motion.div
