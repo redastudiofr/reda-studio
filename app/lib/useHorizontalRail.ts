@@ -74,6 +74,17 @@ export function useHorizontalRail<T extends HTMLElement>({
     const node = ref.current;
     if (!node) return;
 
+    /*
+     * `scroll-snap-type: x mandatory` re-snaps the rail on every programmatic
+     * scrollLeft, so a drag would spring straight back to the card it started
+     * on unless it crossed half a card in one go — the rail never followed the
+     * cursor. Snapping is switched off for the duration of a mouse drag and
+     * restored on release, which is also when it's actually wanted: the rail
+     * then settles onto the nearest card. Touch scrolling is native and never
+     * comes through here, so it keeps snapping throughout.
+     */
+    let snapBeforeDrag = '';
+
     const onPointerMove = (e: PointerEvent) => {
       const drag = dragState.current;
       if (!drag.active) return;
@@ -82,6 +93,9 @@ export function useHorizontalRail<T extends HTMLElement>({
       node.scrollLeft = drag.startScroll - dx;
     };
     const endDrag = () => {
+      if (dragState.current.active) {
+        node.style.scrollSnapType = snapBeforeDrag;
+      }
       dragState.current.active = false;
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', endDrag);
@@ -95,6 +109,8 @@ export function useHorizontalRail<T extends HTMLElement>({
         active: true,
         moved: false,
       };
+      snapBeforeDrag = node.style.scrollSnapType;
+      node.style.scrollSnapType = 'none';
       /*
        * Tracked on the window rather than through setPointerCapture, which
        * this used to call. Capturing the pointer here also retargets the
