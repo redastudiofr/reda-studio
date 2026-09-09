@@ -1090,17 +1090,20 @@ html {
   padding: 0.75rem;
 }
 
-/* Homepage only (see AllProducts in app/routes/_index.tsx): the first six
-   rows (12 cards, matching the 2-up mobile grid) show up front, the rest
-   wait behind "view more" — mobile only, desktop's 4- and 5-up grids below
-   are never capped. A card re-entering via .product-grid--expanded restarts
-   its animation the same way — see @keyframes product-reveal. */
+/* Homepage only (see AllProducts in app/routes/_index.tsx): the first ten
+   rows (20 cards, matching the 2-up mobile grid) show up front, the rest
+   wait behind "view more" — mobile only, the desktop grids below are never
+   capped. Keep the 21 here in step with MOBILE_INITIAL_PRODUCT_COUNT in
+   that route; nth-child can't read a custom property, so this is the one
+   number that lives in two files. A card re-entering via
+   .product-grid--expanded restarts its animation — see @keyframes
+   product-reveal. */
 @media (max-width: 47.99em) {
-  .product-grid:not(.product-grid--expanded) > *:nth-child(n + 13) {
+  .product-grid:not(.product-grid--expanded) > *:nth-child(n + 21) {
     display: none;
   }
 
-  .product-grid--expanded > *:nth-child(n + 13) {
+  .product-grid--expanded > *:nth-child(n + 21) {
     animation: product-reveal 480ms var(--ease-out-soft) both;
   }
 }

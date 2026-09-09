@@ -13,10 +13,17 @@ import {HelpFaq} from '~/components/HelpFaq';
 import {withoutHomeHiddenCollections} from '~/lib/collections';
 import {useT} from '~/lib/i18n';
 
-/** Products beyond this many are hidden on mobile behind "view more" — see
- * .product-grid's nth-child rule in app.css, mobile-only there too, so
- * desktop always shows the full grid exactly as before. */
-const MOBILE_INITIAL_PRODUCT_COUNT = 12;
+/**
+ * Products beyond this many are hidden on mobile behind "view more" — ten
+ * rows of the 2-up mobile grid.
+ *
+ * This number decides only whether the button is worth showing; what's
+ * actually hidden is `.product-grid`'s `nth-child(n + 21)` rule in app.css
+ * (mobile-only there too, so desktop always shows the full grid). nth-child
+ * can't read a custom property, so the two have to be changed together —
+ * the CSS rule carries the same warning.
+ */
+const MOBILE_INITIAL_PRODUCT_COUNT = 20;
 
 export const meta: Route.MetaFunction = () => {
   return [
