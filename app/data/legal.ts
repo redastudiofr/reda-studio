@@ -454,7 +454,11 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
             value: 'redastudio.fr@gmail.com',
             href: 'mailto:redastudio.fr@gmail.com',
           },
-          {label: 'Téléphone', value: '[à compléter]'},
+          {
+            label: 'Téléphone',
+            value: '06 50 39 83 11',
+            href: 'tel:+33650398311',
+          },
           {label: 'Adresse', value: '[à compléter]'},
         ],
         cta: {label: 'écrire depuis la page contact', to: '/contact'},
