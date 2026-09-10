@@ -151,9 +151,9 @@ export default function Homepage() {
               <CollectionProductShowcase
                 title={response.collection.title}
                 description={response.collection.description}
-                imageSrcMobile="/images/collection-automne-drop-portrait.jpg"
-                imageSrcDesktop="/images/collection-automne-drop.jpg"
-                imageAlt="Two men in reda studio pieces beside a white Ferrari Testarossa, a doberman at their feet, in front of a château"
+                imageSrcMobile="/images/collection-automne-drop-v2-mobile.jpg"
+                imageSrcDesktop="/images/collection-automne-drop-v2-desktop.jpg"
+                imageAlt="A man in a reda studio black tee and grey sweatpants on a wet autumn street"
                 collectionHandle={response.collection.handle}
                 products={response.collection.products.nodes}
               />
