@@ -1,7 +1,8 @@
-import {Await, useLoaderData, Link} from 'react-router';
+import {Await, useLoaderData, Link, data, type HeadersFunction} from 'react-router';
 import type {Route} from './+types/_index';
 import {Suspense, useState} from 'react';
 import type {AllProductsQuery} from 'storefrontapi.generated';
+import {heroCookie, heroIndexFromRequest} from '~/lib/heroImage';
 import {ProductItem} from '~/components/ProductItem';
 import {CollectionsSlider} from '~/components/CollectionsSlider';
 import {CollectionProductShowcase} from '~/components/CollectionProductShowcase';
@@ -33,21 +34,16 @@ export const meta: Route.MetaFunction = () => {
 };
 
 /**
- * Preload the hero image (LCP element on the homepage). Mobile and desktop
- * use different crops, so each preload is scoped with `media` to avoid
- * downloading both.
+ * Preload the hero image (LCP element on the homepage).
+ *
+ * Desktop only. `links` is static — it can't see which mobile photo this
+ * particular request picked (see HERO_IMAGES_MOBILE below), and preloading
+ * a fixed one would be wrong half the time, downloading a photo the page
+ * never shows. The mobile <img> carries fetchPriority="high" instead, and
+ * the preload scanner finds it in the HTML either way.
  */
 export function links() {
   return [
-    {
-      rel: 'preload',
-      as: 'image',
-      // The first of the two mobile photos that crossfade in the hero — see
-      // HERO_IMAGES_MOBILE below. Only this one needs preloading: it's the
-      // LCP element; the second only appears a few seconds later.
-      href: '/images/hero3-mobile.webp',
-      media: '(max-width: 47.99em)',
-    },
     {
       rel: 'preload',
       as: 'image',
@@ -58,9 +54,10 @@ export function links() {
 }
 
 /**
- * The mobile hero crossfades between these — see AnimatedHero's
- * `imagesMobile`. Add a third by adding a third entry here; nothing else
- * needs to change.
+ * The mobile hero shows exactly one of these per page load, alternating on
+ * every reload — the choice is made server-side from a cookie, see
+ * app/lib/heroImage.ts. Add a third entry and the rotation simply runs
+ * round three; nothing else needs to change.
  */
 const HERO_IMAGES_MOBILE = [
   {
@@ -78,10 +75,29 @@ const HERO_IMAGE_DESKTOP = {
   alt: 'A man in a reda studio t-shirt and sweatpants leaning against a black Porsche, a horse behind him',
 };
 
+/** Lets the loader's Set-Cookie (the hero alternation) reach the browser. */
+export const headers: HeadersFunction = ({loaderHeaders}) => loaderHeaders;
+
 export async function loader(args: Route.LoaderArgs) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
-  return {...deferredData, ...criticalData};
+
+  // Which mobile hero photo this load gets, and the cookie that hands the
+  // next load the other one. Decided here rather than in the browser so the
+  // HTML already carries the right photo — see app/lib/heroImage.ts.
+  const heroMobileIndex = heroIndexFromRequest(
+    args.request,
+    HERO_IMAGES_MOBILE.length,
+  );
+
+  return data(
+    {...deferredData, ...criticalData, heroMobileIndex},
+    {
+      headers: {
+        'Set-Cookie': heroCookie(heroMobileIndex, HERO_IMAGES_MOBILE.length),
+      },
+    },
+  );
 }
 
 async function loadCriticalData({context}: Route.LoaderArgs) {
@@ -128,7 +144,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <AnimatedHero
-        imagesMobile={HERO_IMAGES_MOBILE}
+        imageMobile={HERO_IMAGES_MOBILE[data.heroMobileIndex]}
         imageDesktop={HERO_IMAGE_DESKTOP}
         eyebrow={t('home.eyebrow')}
         title="reda studio"

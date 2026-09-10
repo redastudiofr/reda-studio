@@ -954,29 +954,14 @@ html {
   height: 100%;
 }
 
-/* Stacked mobile photos crossfade via opacity — every img already fills the
-   exact same absolutely-positioned box (.hero__img), so switching which one
-   is at opacity: 1 can never shift the page or change the hero's height. A
-   single mobile photo (imagesMobile.length === 1) is simply always active,
-   so this costs nothing when there's nothing to rotate. */
-.hero__img--mobile {
-  opacity: 0;
-  transition: opacity 1200ms var(--ease-out-soft);
-}
+/* Mobile has its own portrait-framed shot (~9:16), so a centred cover is
+   enough — no top-biased crop, which the shared landscape image used to
+   need to keep the subjects in frame.
 
-.hero__img--mobile.hero__img--active {
-  opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero__img--mobile {
-    transition: none;
-  }
-}
-
-/* Mobile has its own portrait-framed shot(s) (~9:16), so a centred cover is
-   enough — no top-biased crop, which the shared landscape
-   image used to need to keep the subjects in frame. */
+   There is exactly one of these in the document. The two mobile shots used
+   to be stacked here and crossfaded on a timer; now the server picks one
+   per page load (app/lib/heroImage.ts) and only that one is rendered, so
+   there's nothing to fade between and no opacity to manage. */
 .hero__img--mobile {
   object-fit: cover;
   object-position: 50% 50%;
