@@ -145,7 +145,19 @@ function loadDeferredData({context}: Route.LoaderArgs) {
       return null;
     });
 
-  return {allProducts, automneDrop, summer};
+  // "brest-seller" is the handle the collection actually has in Shopify —
+  // the typo is in the store, not here. Fix it in Shopify Admin and this
+  // string (plus the title override below) is what needs changing.
+  const bestSeller = context.storefront
+    .query(COLLECTION_PRODUCTS_QUERY, {
+      variables: {handle: 'brest-seller', first: 20},
+    })
+    .catch((error: Error) => {
+      console.error(error);
+      return null;
+    });
+
+  return {allProducts, automneDrop, summer, bestSeller};
 }
 
 export default function Homepage() {
@@ -201,9 +213,35 @@ export default function Homepage() {
                 imageSrcMobile="/images/collection-summer-mobile.jpg"
                 imageSrcDesktop="/images/collection-summer-desktop.jpg"
                 imageAlt="Two men in reda studio white tees and shorts on a sunlit Barcelona street corner"
-                // This shoot's own crops: 911x1701 and 1672x941.
-                mobileRatio="9 / 16"
+                // Same 3:4 mobile frame as Automne Drop — the mobile file is
+                // cropped to exactly that ratio, so the two sections are the
+                // same size on a phone with nothing trimmed at render.
+                mobileRatio="3 / 4"
                 desktopRatio="16 / 9"
+                collectionHandle={response.collection.handle}
+                products={response.collection.products.nodes}
+              />
+            ) : null
+          }
+        </Await>
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <Await resolve={data.bestSeller}>
+          {(response) =>
+            response?.collection ? (
+              <CollectionProductShowcase
+                // Shopify has this collection as "Brest seller" — a typo in
+                // the store's own data. Showing it verbatim would put that
+                // typo on the homepage, so the heading is set here until
+                // it's corrected in Shopify Admin.
+                title="best seller"
+                description={response.collection.description}
+                imageSrcMobile="/images/collection-best-seller-mobile.jpg"
+                imageSrcDesktop="/images/collection-best-seller-desktop.jpg"
+                imageAlt="A man in a reda studio white longsleeve and raw denim jeans on a Paris street"
+                mobileRatio="3 / 4"
+                desktopRatio="4 / 3"
                 collectionHandle={response.collection.handle}
                 products={response.collection.products.nodes}
               />

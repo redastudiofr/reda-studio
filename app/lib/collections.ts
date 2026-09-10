@@ -20,6 +20,10 @@ const HIDDEN_FROM_HOME = [
   'all in drop',
   'win drop',
   'automne drop',
+  // Both spellings: the collection is currently "brest seller" in Shopify
+  // (a typo in the store), and should keep being hidden once that's fixed.
+  'brest seller',
+  'best seller',
 ];
 
 /**

@@ -3433,6 +3433,17 @@ html {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  /* Air around each showcase so consecutive ones (Automne, Summer, Best
+     Seller) read as separate chapters rather than one long scroll. Adjacent
+     margins collapse, so the gap between two of them is this value, not
+     twice it. */
+  margin-block: 3.5rem;
+}
+
+@media (min-width: 48em) {
+  .collection-feature {
+    margin-block: 5.5rem;
+  }
 }
 
 /* Each frame is shaped close to the crop it shows (see the <picture> in

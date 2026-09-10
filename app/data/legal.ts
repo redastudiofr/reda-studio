@@ -359,7 +359,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
         fields: [
           {label: 'Nom / raison sociale', value: 'Reda Studio'},
           {label: 'Nom commercial', value: 'Reda Studio'},
-          {label: 'Forme juridique', value: '[à compléter]'},
+          {label: 'Forme juridique', value: 'Micro-entreprise'},
           {label: 'Siège social', value: '52 Rue Rémy Dumoncel'},
           {label: 'SIREN', value: '583 741 926'},
           {label: 'SIRET', value: '583 741 926 00047'},
