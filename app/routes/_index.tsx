@@ -211,7 +211,11 @@ export default function Homepage() {
               <CollectionProductShowcase
                 title={response.collection.title}
                 description={response.collection.description}
-                imageSrcMobile="/images/collection-summer-mobile.jpg"
+                // Renamed rather than overwritten: the previous file at
+                // collection-summer-mobile.jpg was a taller crop, and
+                // browsers that already had it cached kept serving that one
+                // — a new URL is the only reliable way to replace an image.
+                imageSrcMobile="/images/collection-summer-mobile-3x4.jpg"
                 imageSrcDesktop="/images/collection-summer-desktop.jpg"
                 imageAlt="Two men in reda studio white tees and shorts on a sunlit Barcelona street corner"
                 // Same 3:4 mobile frame as Automne Drop — the mobile file is
@@ -326,7 +330,13 @@ const HOME_COLLECTIONS_QUERY = `#graphql
   }
   query HomeCollections($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
-    collections(first: 10, sortKey: UPDATED_AT, reverse: true) {
+    # Fetched well above what the carousel shows, because
+    # withoutHomeHiddenCollections then removes several (the drops, and every
+    # collection that has its own showcase further down the page). At
+    # first: 10 those exclusions were eating into the ten most recently
+    # updated, so real categories — knit, short — silently never reached the
+    # carousel at all.
+    collections(first: 25, sortKey: UPDATED_AT, reverse: true) {
       nodes {
         ...HomeCollection
       }
