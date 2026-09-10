@@ -360,7 +360,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
           {label: 'Nom / raison sociale', value: 'Reda Studio'},
           {label: 'Nom commercial', value: 'Reda Studio'},
           {label: 'Forme juridique', value: '[à compléter]'},
-          {label: 'Siège social', value: '[à compléter]'},
+          {label: 'Siège social', value: '52 Rue Rémy Dumoncel'},
           {label: 'SIREN', value: '583 741 926'},
           {label: 'SIRET', value: '583 741 926 00047'},
           {
@@ -371,7 +371,6 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
             label: 'Représentants légaux',
             value: 'Alex Salvatico et Antoine Dubosque',
           },
-          {label: 'Directeur de la publication', value: '[à compléter]'},
           {
             label: 'Contact',
             value: 'redastudio.fr@gmail.com',
@@ -459,7 +458,7 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
             value: '06 50 39 83 11',
             href: 'tel:+33650398311',
           },
-          {label: 'Adresse', value: '[à compléter]'},
+          {label: 'Adresse', value: '52 Rue Rémy Dumoncel'},
         ],
         cta: {label: 'écrire depuis la page contact', to: '/contact'},
       },
