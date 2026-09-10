@@ -357,24 +357,31 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
         heading: 'éditeur du site',
         body: [`Le présent site est édité par :`],
         fields: [
-          {label: 'Nom / raison sociale', value: '[à compléter]'},
+          {label: 'Nom / raison sociale', value: 'Reda Studio'},
           {label: 'Nom commercial', value: 'Reda Studio'},
           {label: 'Forme juridique', value: '[à compléter]'},
           {label: 'Siège social', value: '[à compléter]'},
-          {label: 'SIREN', value: '[à compléter]'},
-          {label: 'SIRET', value: '[à compléter]'},
+          {label: 'SIREN', value: '583 741 926'},
+          {label: 'SIRET', value: '583 741 926 00047'},
           {
             label: 'Numéro de TVA intracommunautaire',
-            value: '[à compléter, si applicable]',
+            value: 'FR 74 583741926',
           },
-          {label: 'Représentant légal', value: '[à compléter]'},
+          {
+            label: 'Représentants légaux',
+            value: 'Alex Salvatico et Antoine Dubosque',
+          },
           {label: 'Directeur de la publication', value: '[à compléter]'},
           {
             label: 'Contact',
             value: 'redastudio.fr@gmail.com',
             href: 'mailto:redastudio.fr@gmail.com',
           },
-          {label: 'Téléphone', value: '[à compléter]'},
+          {
+            label: 'Téléphone',
+            value: '06 50 39 83 11',
+            href: 'tel:+33650398311',
+          },
         ],
       },
       {

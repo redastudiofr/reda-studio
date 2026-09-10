@@ -1,3 +1,4 @@
+import type {CSSProperties} from 'react';
 import {Link} from 'react-router';
 import type {ShowcaseProductFragment} from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
@@ -25,6 +26,8 @@ export function CollectionProductShowcase({
   imageSrcMobile,
   imageSrcDesktop,
   imageAlt,
+  mobileRatio,
+  desktopRatio,
   collectionHandle,
   products,
 }: {
@@ -40,6 +43,14 @@ export function CollectionProductShowcase({
   imageSrcMobile: string;
   imageSrcDesktop: string;
   imageAlt: string;
+  /*
+   * The frame each photo sits in, as a CSS aspect-ratio ("9 / 16"). Give
+   * each collection the ratio of its own crops and `cover` barely trims
+   * anything; leave them out and the frame falls back to Automne Drop's
+   * shape (see .collection-feature__media).
+   */
+  mobileRatio?: string;
+  desktopRatio?: string;
   collectionHandle: string;
   products: ShowcaseProductFragment[];
 }) {
@@ -50,9 +61,14 @@ export function CollectionProductShowcase({
 
   const headingId = `${collectionHandle}-heading`;
 
+  const frame = {
+    ...(mobileRatio ? {'--feature-ratio-mobile': mobileRatio} : {}),
+    ...(desktopRatio ? {'--feature-ratio-desktop': desktopRatio} : {}),
+  } as CSSProperties;
+
   return (
     <Reveal as="section" className="collection-feature" aria-labelledby={headingId}>
-      <div className="collection-feature__media">
+      <div className="collection-feature__media" style={frame}>
         <picture>
           <source media="(min-width: 40em)" srcSet={imageSrcDesktop} />
           <img

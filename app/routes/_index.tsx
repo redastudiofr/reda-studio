@@ -134,7 +134,18 @@ function loadDeferredData({context}: Route.LoaderArgs) {
       return null;
     });
 
-  return {allProducts, automneDrop};
+  // Same treatment for Summer — one more query, one more
+  // <CollectionProductShowcase>, exactly as that component was built for.
+  const summer = context.storefront
+    .query(COLLECTION_PRODUCTS_QUERY, {
+      variables: {handle: 'summer', first: 20},
+    })
+    .catch((error: Error) => {
+      console.error(error);
+      return null;
+    });
+
+  return {allProducts, automneDrop, summer};
 }
 
 export default function Homepage() {
@@ -170,6 +181,29 @@ export default function Homepage() {
                 imageSrcMobile="/images/collection-automne-drop-v2-mobile.jpg"
                 imageSrcDesktop="/images/collection-automne-drop-v2-desktop.jpg"
                 imageAlt="A man in a reda studio black tee and grey sweatpants on a wet autumn street"
+                mobileRatio="3 / 4"
+                desktopRatio="21 / 9"
+                collectionHandle={response.collection.handle}
+                products={response.collection.products.nodes}
+              />
+            ) : null
+          }
+        </Await>
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <Await resolve={data.summer}>
+          {(response) =>
+            response?.collection ? (
+              <CollectionProductShowcase
+                title={response.collection.title}
+                description={response.collection.description}
+                imageSrcMobile="/images/collection-summer-mobile.jpg"
+                imageSrcDesktop="/images/collection-summer-desktop.jpg"
+                imageAlt="Two men in reda studio white tees and shorts on a sunlit Barcelona street corner"
+                // This shoot's own crops: 911x1701 and 1672x941.
+                mobileRatio="9 / 16"
+                desktopRatio="16 / 9"
                 collectionHandle={response.collection.handle}
                 products={response.collection.products.nodes}
               />

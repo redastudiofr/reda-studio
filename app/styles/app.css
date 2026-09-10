@@ -3439,10 +3439,15 @@ html {
    CollectionProductShowcase): portrait 3:4 for the 1017x1547 mobile shot,
    wide 21:9 for the 2000x782 desktop one — so `cover` only ever trims a
    sliver instead of cutting the subjects out of the frame. */
+/* Each collection sets its own frame to match the crop of its own
+   photographs — see CollectionProductShowcase's ratio props. The defaults
+   here are Automne Drop's. Shaping the frame to the photo rather than the
+   other way round is what keeps `cover` trimming a sliver instead of
+   cutting heads and feet out of the picture. */
 .collection-feature__media {
   position: relative;
   display: block;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: var(--feature-ratio-mobile, 3 / 4);
   overflow: hidden;
   border-radius: 8px;
   box-shadow: var(--shadow-md);
@@ -3450,7 +3455,7 @@ html {
 
 @media (min-width: 40em) {
   .collection-feature__media {
-    aspect-ratio: 21 / 9;
+    aspect-ratio: var(--feature-ratio-desktop, 21 / 9);
   }
 }
 
