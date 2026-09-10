@@ -145,9 +145,10 @@ function loadDeferredData({context}: Route.LoaderArgs) {
       return null;
     });
 
-  // "brest-seller" is the handle the collection actually has in Shopify —
-  // the typo is in the store, not here. Fix it in Shopify Admin and this
-  // string (plus the title override below) is what needs changing.
+  // "brest-seller" is the handle the collection actually has in Shopify: the
+  // title was fixed to "Best seller" but the handle kept the typo, and
+  // renaming a handle changes the collection's public URL. If it is ever
+  // renamed, this string is the one line to change.
   const bestSeller = context.storefront
     .query(COLLECTION_PRODUCTS_QUERY, {
       variables: {handle: 'brest-seller', first: 20},
@@ -231,11 +232,7 @@ export default function Homepage() {
           {(response) =>
             response?.collection ? (
               <CollectionProductShowcase
-                // Shopify has this collection as "Brest seller" — a typo in
-                // the store's own data. Showing it verbatim would put that
-                // typo on the homepage, so the heading is set here until
-                // it's corrected in Shopify Admin.
-                title="best seller"
+                title={response.collection.title}
                 description={response.collection.description}
                 imageSrcMobile="/images/collection-best-seller-mobile.jpg"
                 imageSrcDesktop="/images/collection-best-seller-desktop.jpg"
