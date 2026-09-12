@@ -6,6 +6,7 @@ import {heroCookie, heroIndexFromRequest} from '~/lib/heroImage';
 import {ProductItem} from '~/components/ProductItem';
 import {CollectionsSlider} from '~/components/CollectionsSlider';
 import {CollectionProductShowcase} from '~/components/CollectionProductShowcase';
+import {CommunitySlider} from '~/components/CommunitySlider';
 import {AnimatedHero} from '~/components/AnimatedHero';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
@@ -15,16 +16,16 @@ import {withoutHomeHiddenCollections} from '~/lib/collections';
 import {useT} from '~/lib/i18n';
 
 /**
- * Products beyond this many are hidden on mobile behind "view more" — ten
+ * Products beyond this many are hidden on mobile behind "view more" — eight
  * rows of the 2-up mobile grid.
  *
  * This number decides only whether the button is worth showing; what's
- * actually hidden is `.product-grid`'s `nth-child(n + 21)` rule in app.css
+ * actually hidden is `.product-grid`'s `nth-child(n + 17)` rule in app.css
  * (mobile-only there too, so desktop always shows the full grid). nth-child
  * can't read a custom property, so the two have to be changed together —
  * the CSS rule carries the same warning.
  */
-const MOBILE_INITIAL_PRODUCT_COUNT = 20;
+const MOBILE_INITIAL_PRODUCT_COUNT = 16;
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -183,6 +184,8 @@ export default function Homepage() {
       <CollectionsSlider collections={data.collections} />
 
       <AllProducts products={data.allProducts} />
+
+      <CommunitySlider />
 
       <Suspense fallback={null}>
         <Await resolve={data.automneDrop}>
