@@ -15,12 +15,14 @@ back empty in the browser, and the section disappeared the moment React
 hydrated. The explicit list is the reliable version.
 
 - Any of `.jpg`, `.jpeg`, `.png`, `.webp`, `.avif`.
-- They're displayed as squares, cropped from the centre (`object-fit:
-  cover`), so every tile is exactly the same shape whatever you upload.
-  A roughly square or portrait crop survives that best; a very wide photo
-  loses its sides.
+- They're displayed in 9:16 portrait — TikTok / Reels shape — cropped from
+  the centre (`object-fit: cover`), so every tile is exactly the same shape
+  whatever you upload. A photo shot vertically on a phone fits with nothing
+  lost; a landscape one keeps only its middle strip, so crop it yourself
+  first if the subject isn't centred.
 - Around 1000-1400px on the long edge is plenty. Anything larger just costs
   the visitor bandwidth.
+- Clicking any photo opens the brand's Instagram in a new tab.
 - The order is the order of the list in `communityImages.ts`. Name the
   files `01-…`, `02-…` to keep the two in step.
 - The slider loops endlessly once there are three or more photos; with one

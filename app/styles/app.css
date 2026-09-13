@@ -3500,17 +3500,18 @@ html {
   display: none;
 }
 
-/* Two-and-a-bit tiles on a phone, so the row visibly continues past the
-   edge and invites the swipe. */
+/* Large enough to actually read the photo — a tile and a half on a phone,
+   so the row still visibly continues past the edge and invites the swipe. */
 .community__item {
-  flex: 0 0 42%;
+  flex: 0 0 62%;
   scroll-snap-align: start;
   min-width: 0;
+  display: block;
 }
 
 @media (min-width: 40em) {
   .community__item {
-    flex-basis: 26%;
+    flex-basis: 34%;
   }
 }
 
@@ -3520,21 +3521,86 @@ html {
     gap: 0.75rem;
   }
 
+  /* The cap matters on a wide monitor: 22% of 1600px would make a portrait
+     tile over 600px tall and turn the row into a wall. */
   .community__item {
-    flex-basis: 19%;
+    flex-basis: 22%;
+    max-width: 280px;
   }
 }
 
-/* Square, centre-cropped: whatever shape the uploaded photo is, every tile
-   in the row is identical. */
+/* 9:16, centre-cropped — the shape a phone shoots, and the shape these
+   photos were taken in. Whatever is uploaded, every tile in the row comes
+   out identical. */
 .community__img {
   display: block;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 9 / 16;
   object-fit: cover;
   border-radius: 6px;
   background: var(--color-tile);
   box-shadow: var(--shadow-xs);
+  transition:
+    transform 400ms var(--ease-out-soft),
+    box-shadow 260ms var(--ease-out-soft);
+}
+
+.community__item:hover .community__img {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-sm);
+}
+
+.community__item:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/*
+ * The photos rise in one after another when the section first scrolls into
+ * view. Driven off .reveal--visible, which the Reveal wrapper already sets —
+ * no second observer, and the delay only ever applies to the tiles you can
+ * see at that moment, so nothing off screen is animating to itself.
+ */
+@keyframes community-tile-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.community.reveal--visible .community__item {
+  animation: community-tile-in 520ms var(--ease-out-soft) both;
+}
+
+.community.reveal--visible .community__item:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.community.reveal--visible .community__item:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.community.reveal--visible .community__item:nth-child(4) {
+  animation-delay: 210ms;
+}
+
+.community.reveal--visible .community__item:nth-child(n + 5) {
+  animation-delay: 280ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .community.reveal--visible .community__item {
+    animation: none;
+  }
+
+  .community__img {
+    transition: none;
+  }
 }
 
 .community__socials {

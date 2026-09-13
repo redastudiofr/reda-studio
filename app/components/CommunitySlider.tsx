@@ -12,6 +12,10 @@ import {useHorizontalRail} from '~/lib/useHorizontalRail';
  * files in, they appear here. The section renders nothing at all while that
  * folder is empty, rather than leaving a titled but blank band on the page.
  *
+ * Every photo links to the brand's Instagram. Dragging the rail with a
+ * mouse doesn't follow that link: useHorizontalRail swallows the click that
+ * ends a drag, the same guard the product rails rely on.
+ *
  * Scrolling is the browser's own — an overflow-x rail with scroll-snap, the
  * same mechanics as every other rail on the site. That's deliberate for
  * touch: the browser decides whether a given gesture is a horizontal swipe
@@ -42,7 +46,14 @@ export function CommunitySlider() {
       <div className="rail-wrap">
         <div className="community__rail" ref={ref}>
           {tiles.map((image, index) => (
-            <div className="community__item" key={`${image.name}-${index}`}>
+            <a
+              className="community__item"
+              key={`${image.name}-${index}`}
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Voir la communauté reda studio sur Instagram"
+            >
               <img
                 src={image.src}
                 alt=""
@@ -51,7 +62,7 @@ export function CommunitySlider() {
                 draggable={false}
                 className="community__img"
               />
-            </div>
+            </a>
           ))}
         </div>
         <RailArrows
