@@ -1,14 +1,18 @@
 # "notre communauté" — the homepage photo slider
 
-Drop community photos in this folder and they appear in the slider on the
-homepage, under the products. Nothing else is needed: the list is built by
-globbing this folder at build time (see `app/lib/communityImages.ts`), so
-adding a file is the whole job.
-
+Community photos for the slider on the homepage, under the products.
 Nothing outside this folder is ever shown, which is the point — the
 hundreds of product and banner images in `public/images/` stay out of it.
 
 ## Adding photos
+
+Two steps: put the file here, then add a line for it in
+`app/lib/communityImages.ts`.
+
+It did briefly work off a glob of this folder, so that dropping a file in
+was the whole job — but the glob resolved during the server render and came
+back empty in the browser, and the section disappeared the moment React
+hydrated. The explicit list is the reliable version.
 
 - Any of `.jpg`, `.jpeg`, `.png`, `.webp`, `.avif`.
 - They're displayed as squares, cropped from the centre (`object-fit:
@@ -17,8 +21,8 @@ hundreds of product and banner images in `public/images/` stay out of it.
   loses its sides.
 - Around 1000-1400px on the long edge is plenty. Anything larger just costs
   the visitor bandwidth.
-- Filenames set the order — they're sorted alphabetically. Name them
-  `01-…`, `02-…` if you care which comes first.
+- The order is the order of the list in `communityImages.ts`. Name the
+  files `01-…`, `02-…` to keep the two in step.
 - The slider loops endlessly once there are three or more photos; with one
   or two it simply shows them.
 

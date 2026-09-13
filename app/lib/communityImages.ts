@@ -1,30 +1,35 @@
+import photo01 from '../assets/community/01-community.jpg';
+import photo02 from '../assets/community/02-community.webp';
+import photo03 from '../assets/community/03-community.jpg';
+import photo04 from '../assets/community/04-community.webp';
+import photo05 from '../assets/community/05-community.jpg';
+import photo06 from '../assets/community/06-community.webp';
+
 /**
  * The photos in the "notre communauté" slider.
  *
- * Everything in app/assets/community/ is picked up automatically — drop a
- * file in that folder and it appears in the slider on the next deploy, with
- * no code change. Nothing outside that folder is ever included, so the
- * years of product and banner shots living in public/images/ stay out of it.
+ * Listed one by one on purpose. This started as an `import.meta.glob` of the
+ * folder so that dropping a file in was the whole job — but the glob resolved
+ * during the server render and came back empty in the browser, so the section
+ * rendered into the HTML and then vanished the moment React hydrated. Plain
+ * static imports resolve identically on both sides, which is worth more than
+ * saving a line per photo.
+ *
+ * Adding a photo is therefore two steps: put the file in
+ * app/assets/community/, then add it here, in the order you want it shown.
  *
  * app/assets rather than public/: files here go through the build, which
  * fingerprints each URL. That matters because replacing a photo under the
  * same name in public/ leaves every browser that already cached it showing
  * the old one — a trap this site has already fallen into once.
  */
-const modules = import.meta.glob<string>(
-  '../assets/community/*.{jpg,jpeg,png,webp,avif}',
-  {eager: true, query: '?url', import: 'default'},
-);
-
 export type CommunityImage = {src: string; name: string};
 
-/**
- * Sorted by filename so the order is deterministic rather than whatever the
- * bundler happens to walk first — name the files 01-…, 02-… to arrange them.
- */
-export const COMMUNITY_IMAGES: CommunityImage[] = Object.entries(modules)
-  .map(([path, src]) => ({
-    src,
-    name: path.split('/').pop() ?? '',
-  }))
-  .sort((a, b) => a.name.localeCompare(b.name));
+export const COMMUNITY_IMAGES: CommunityImage[] = [
+  {src: photo01, name: '01'},
+  {src: photo02, name: '02'},
+  {src: photo03, name: '03'},
+  {src: photo04, name: '04'},
+  {src: photo05, name: '05'},
+  {src: photo06, name: '06'},
+];
