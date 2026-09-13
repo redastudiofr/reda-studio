@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState, type RefObject} from 'react';
+import {useAmbientVideo} from '~/lib/useAmbientVideo';
 import {useHorizontalRail} from '~/lib/useHorizontalRail';
 import {RailArrows} from '~/components/RailArrows';
 
@@ -47,6 +48,9 @@ function WornVideoTile({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [near, setNear] = useState(false);
 
+  // Stops this clip once it's off screen or the tab is hidden — see the hook.
+  useAmbientVideo(videoRef);
+
   // Attach the source once the tile is within about one rail's width of
   // being visible — near enough that swiping to it feels instant, without
   // pulling all eighteen tiles' worth of video the moment the section
@@ -84,6 +88,9 @@ function WornVideoTile({
         playsInline
         preload="none"
         draggable={false}
+        // Decorative background footage: there is no reason for the browser
+        // to ever float one of these over the page in its own window.
+        disablePictureInPicture
       />
     </div>
   );

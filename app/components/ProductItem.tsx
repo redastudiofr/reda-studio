@@ -1,3 +1,4 @@
+import {useRef} from 'react';
 import {Link} from 'react-router';
 import {Image, Money} from '@shopify/hydrogen';
 import type {
@@ -8,6 +9,7 @@ import type {
   ShowcaseProductFragment,
 } from 'storefrontapi.generated';
 import {useVariantUrl} from '~/lib/variants';
+import {useAmbientVideo} from '~/lib/useAmbientVideo';
 import {useNearViewport} from '~/lib/useNearViewport';
 import {getProductVideo} from '~/lib/media';
 import {parseRating} from '~/lib/rating';
@@ -31,6 +33,10 @@ export function ProductItem({
   const t = useT();
   const variantUrl = useVariantUrl(product.handle);
   const {ref, near} = useNearViewport<HTMLDivElement>();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  // A card that has swapped its photo for video stops playing once it's off
+  // screen or the tab is hidden, instead of running for the whole session.
+  useAmbientVideo(videoRef);
   const image = product.featuredImage;
   const soldOut = !product.availableForSale;
 
@@ -68,6 +74,7 @@ export function ProductItem({
         )}
         {video && near ? (
           <video
+            ref={videoRef}
             className="product-card__img product-card__img--main"
             autoPlay
             muted
@@ -75,6 +82,7 @@ export function ProductItem({
             playsInline
             preload="metadata"
             poster={video.previewImage?.url ?? image?.url}
+            disablePictureInPicture
           >
             {video.sources.map((source) => (
               <source key={source.url} src={source.url} type={source.mimeType} />
