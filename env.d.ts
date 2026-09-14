@@ -8,9 +8,10 @@ import '@total-typescript/ts-reset';
 
 declare global {
   interface Env {
-    // Optional: mirrors each pop-up phone sign-up into a Notion database.
-    // Unset in every environment until docs/emails-newsletter.md's Notion
-    // section is followed — see app/routes/newsletter.tsx.
+    // Required by the -15% pop-up: every phone sign-up is stored in this
+    // Notion database, and the pop-up stays hidden until both are set — see
+    // docs/emails-newsletter.md and app/routes/newsletter.tsx. Read on the
+    // server only; never sent to the browser.
     NOTION_API_KEY?: string;
     NOTION_PHONE_DATABASE_ID?: string;
 

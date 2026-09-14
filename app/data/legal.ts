@@ -378,8 +378,8 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
           },
           {
             label: 'Téléphone',
-            value: '06 50 39 83 11',
-            href: 'tel:+33650398311',
+            value: '06 50 39 83 10',
+            href: 'tel:+33650398310',
           },
         ],
       },
@@ -455,8 +455,8 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
           },
           {
             label: 'Téléphone',
-            value: '06 50 39 83 11',
-            href: 'tel:+33650398311',
+            value: '06 50 39 83 10',
+            href: 'tel:+33650398310',
           },
           {label: 'Adresse', value: '52 Rue Rémy Dumoncel'},
         ],

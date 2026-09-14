@@ -61,22 +61,40 @@ s'ouvre dans Excel ou Google Sheets.
 
 **Marketing** → **Créer une campagne** → *Shopify Email*, puis choisir le
 segment « Newsletter » comme destinataires. Le code promo distribué par le
-pop-up est `REDA10`.
+pop-up est `REDA15`.
 
-## Configurer l'envoi automatique vers Notion
+## Le pop-up -15 % et Notion
 
-Une base Notion a été créée pour recevoir chaque numéro dès qu'il est
-soumis : **[Numéros collectés — Pop-up](https://app.notion.com/p/355905927f8b4d5992248a0ec5d03d0e)**,
-dans l'espace « Reda Studio ». Elle est vide par défaut — rien n'y arrive
-tant que les deux étapes ci-dessous n'ont pas été faites. Le site continue
-sinon de fonctionner normalement : sans cette configuration, les numéros
-restent malgré tout dans Shopify Admin → Clients, comme décrit plus haut.
+Le pop-up de bienvenue propose **-15 %** (`REDA15`) en échange d'un numéro de
+téléphone. Chaque numéro est enregistré dans la base Notion
+**[Numéros collectés — Pop-up](https://app.notion.com/p/355905927f8b4d5992248a0ec5d03d0e)**,
+dans l'espace « Reda Studio », avec quatre colonnes : **Téléphone**, **Code
+promo**, **Langue** et **Date d'inscription** (remplie automatiquement par
+Notion).
+
+Ce qui se passe à la validation, entièrement côté serveur
+(`app/routes/newsletter.tsx`) :
+
+1. le numéro est normalisé (`+33612345678`) ;
+2. le serveur cherche ce numéro dans la base — **s'il y est déjà, aucune
+   nouvelle ligne n'est créée** (pas de doublon) et le code est simplement
+   réaffiché ;
+3. sinon une ligne est ajoutée ;
+4. **le code n'est affiché qu'une fois Notion confirmé**. Si Notion ne répond
+   pas ou refuse, le client voit un message d'erreur, jamais un faux succès ;
+5. une copie part ensuite dans Shopify Admin → Clients (balises `newsletter`,
+   `newsletter-popup`, `phone-optin`) et par e-mail, sans bloquer.
+
+**Tant que Notion n'est pas branché, le pop-up ne s'affiche pas du tout** :
+on ne promet pas un code qu'on ne peut pas enregistrer.
+
+### Brancher Notion (à faire une fois)
 
 1. **Créer l'intégration** — sur [notion.so/my-integrations](https://www.notion.so/my-integrations),
-   bouton *New integration*, l'associer à l'espace « Alexian's Notion »,
-   capacité *Insert content* seulement (pas besoin de plus). Copier le
-   **jeton secret** affiché à la fin — ne me le communique jamais, ni ici ni
-   ailleurs : il va directement à l'étape 3.
+   bouton *New integration*, l'associer à l'espace qui contient la base.
+   Capacités : **Read content** et **Insert content** — la lecture sert à
+   détecter les doublons. Copier le **jeton secret** affiché à la fin — ne le
+   communique jamais, ni ici ni ailleurs : il va directement à l'étape 3.
 2. **Partager la base avec l'intégration** — ouvrir la base ci-dessus → menu
    **···** en haut à droite → **Connexions** → ajouter l'intégration créée à
    l'étape 1.
@@ -86,17 +104,32 @@ restent malgré tout dans Shopify Admin → Clients, comme décrit plus haut.
 
    | Variable | Valeur |
    | --- | --- |
-   | `NOTION_API_KEY` | le jeton secret copié à l'étape 1 |
+   | `NOTION_API_KEY` | le jeton secret copié à l'étape 1 (cocher « secret ») |
    | `NOTION_PHONE_DATABASE_ID` | `355905927f8b4d5992248a0ec5d03d0e` |
 
-   Cet identifiant de base n'est pas secret ; le jeton, lui, ne doit être
-   collé que dans ce formulaire Shopify.
+   Puis redéployer. Le jeton n'est lu que par le serveur ; le navigateur ne
+   reçoit qu'un oui/non indiquant si le pop-up peut s'afficher.
 
-Une fois les deux variables présentes, chaque soumission du pop-up ajoute une
-ligne : le numéro, la langue du visiteur au moment de l'inscription, et le
-code promo distribué (`REDA10`). Un échec de cet envoi (jeton pas encore
-configuré, base pas encore partagée) est journalisé côté serveur mais ne fait
-jamais échouer l'inscription elle-même — Shopify reste la source de vérité.
+### Créer le code REDA15 dans Shopify (obligatoire)
+
+Sans cette étape, le code s'affiche mais le paiement le refuse.
+
+1. Shopify Admin → **Réductions** → **Créer une réduction** → **Montant de
+   réduction sur la commande**.
+2. Méthode : **Code de réduction** → `REDA15`.
+3. Valeur : **Pourcentage** → `15`.
+4. Utilisations : cocher **Limiter à une utilisation par client**.
+5. Enregistrer, et vérifier que la réduction est **Active**.
+
+Le bouton « appliquer à mon panier » du pop-up passe par `/discount/REDA15`,
+qui ajoute le code au panier Shopify du visiteur.
+
+### Quand le pop-up s'affiche
+
+- Jamais pour un visiteur qui s'est déjà inscrit (cookie d'un an + stockage
+  local, posés dès que Notion a confirmé).
+- Fermé avec la croix, le fond ou Échap : il ne revient pas pendant **7 jours**
+  (constante `DISMISS_DAYS` dans `app/components/NewsletterPopup.tsx`).
 
 ## Pourquoi pas une page « admin » sur le site ?
 

@@ -87,6 +87,9 @@ export async function loader(args: Route.LoaderArgs) {
     ...deferredData,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+    // Only a yes/no reaches the browser: whether the -15% pop-up has a Notion
+    // database to store numbers in. The token itself never leaves the server.
+    promoSignupEnabled: Boolean(env.NOTION_API_KEY && env.NOTION_PHONE_DATABASE_ID),
     shop: getShopAnalytics({
       storefront,
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,

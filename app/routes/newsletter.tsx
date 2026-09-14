@@ -1,26 +1,31 @@
 import type {Route} from './+types/newsletter';
 import {normalizePhone} from '~/lib/phone';
-import {NEWSLETTER_PROMO_CODE} from '~/lib/newsletterPromo';
+import {NEWSLETTER_PROMO_CODE, PROMO_SIGNUP_COOKIE} from '~/lib/newsletterPromo';
 import {localeFromRequest} from '~/lib/i18n/locale';
 import {sendNotificationEmail} from '~/lib/email';
 
 /** Sign-up points allowed to tag themselves, so the tag stays a closed set. */
 const SOURCES = new Set(['popup', 'footer']);
 
+const NOTION_VERSION = '2022-06-28';
+const NOTION_TIMEOUT_MS = 8000;
+const SIGNUP_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+
 /**
- * Resource route: forwards a newsletter sign-up to the Shopify store's
- * native customer form endpoint, server-side. Keeps the storefront free of
- * any third-party email integration. Returns a small JSON status; the
- * client component only cares whether it was accepted.
+ * Resource route behind both sign-up points. Everything here runs on the
+ * server: the Notion token is read from the environment and never reaches the
+ * browser.
  *
- * Two shapes come through here: the footer still asks for an e-mail, the
- * pop-up now asks for a phone number. Each ends up in Shopify Admin →
- * Clients, tagged `newsletter` plus its origin (`newsletter-popup` /
- * `newsletter-footer`) — how to read, filter and export that list is written
- * up in docs/emails-newsletter.md. A phone number is additionally mirrored
- * into a Notion database and by e-mail, once the relevant environment
- * variables are set — same doc, "Configurer l'envoi vers Notion" and
- * docs/store-notifications.md.
+ * - **Pop-up (-15%, phone number)** — Notion is the record. The number is
+ *   normalised, looked up in the Notion database, and added only if it isn't
+ *   there yet; the promo code is returned only once that has succeeded. If
+ *   Notion is unreachable or not configured the visitor gets an error, never
+ *   a code for a sign-up that wasn't saved. A copy then goes to Shopify's
+ *   customer list and by e-mail, best-effort.
+ * - **Footer (e-mail)** — unchanged: forwarded to the store's native customer
+ *   form, tagged `newsletter, newsletter-footer`.
+ *
+ * Setup, and how to read either list: docs/emails-newsletter.md.
  */
 export async function action({request, context}: Route.ActionArgs) {
   if (request.method !== 'POST') {
@@ -31,6 +36,18 @@ export async function action({request, context}: Route.ActionArgs) {
   const email = String(incoming.get('contact[email]') || '').trim();
   const rawPhone = String(incoming.get('contact[phone]') || '').trim();
   const phone = rawPhone ? normalizePhone(rawPhone) : null;
+  // The source is supplied by the browser, so it is matched against a fixed
+  // list instead of being trusted as-is.
+  const rawSource = String(incoming.get('source') || '').trim();
+  const source = SOURCES.has(rawSource) ? rawSource : null;
+
+  if (source === 'popup') {
+    // Checked again here: the pop-up's own check can always be bypassed.
+    if (!phone) {
+      return Response.json({ok: false, error: 'phone'}, {status: 400});
+    }
+    return popupSignup({phone, request, context});
+  }
 
   if (!email && !rawPhone) {
     return Response.json({ok: false, error: 'email ou téléphone requis'}, {status: 400});
@@ -39,47 +56,16 @@ export async function action({request, context}: Route.ActionArgs) {
     return Response.json({ok: false, error: 'téléphone invalide'}, {status: 400});
   }
 
-  // The source is supplied by the browser, so it is matched against a fixed
-  // list instead of being written into the customer record as-is.
-  const source = String(incoming.get('source') || '').trim();
-  const originTag = SOURCES.has(source) ? `, newsletter-${source}` : '';
-  const tags = `newsletter${originTag}${phone ? ', phone-optin' : ''}`;
-
-  const shopDomain = context.env.PUBLIC_STORE_DOMAIN;
-  const shopifyBody = new URLSearchParams({
-    form_type: 'customer',
-    utf8: '✓',
-    'contact[tags]': tags,
+  const accepted = await forwardToShopify({
+    context,
+    tags: `newsletter${source ? `, newsletter-${source}` : ''}${phone ? ', phone-optin' : ''}`,
+    field: phone ? 'phone' : 'email',
+    value: phone || email,
   });
-  shopifyBody.set(phone ? 'contact[phone]' : 'contact[email]', phone || email);
-
-  const [shopifyResult] = await Promise.allSettled([
-    fetch(`https://${shopDomain}/contact`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: shopifyBody.toString(),
-    }),
-    phone ? mirrorPhoneSignup({phone, request, context}) : Promise.resolve(),
-  ]);
-
-  if (shopifyResult.status === 'rejected') {
-    console.error('Newsletter forward failed', shopifyResult.reason);
-    return Response.json({ok: false}, {status: 502});
-  }
-
-  // Shopify redirects (302) on success; treat any non-5xx as accepted.
-  const accepted = shopifyResult.value.status < 500;
   return Response.json({ok: accepted}, {status: accepted ? 200 : 502});
 }
 
-/**
- * Best-effort copies of a collected phone number — into Notion and by
- * e-mail — run in parallel, each independent of the other. Both are silent
- * no-ops until their own environment variables are set: a marketing pop-up
- * must never fail a real sign-up because an optional mirror isn't configured
- * yet, so every error here is logged, never thrown.
- */
-async function mirrorPhoneSignup({
+async function popupSignup({
   phone,
   request,
   context,
@@ -88,56 +74,151 @@ async function mirrorPhoneSignup({
   request: Request;
   context: Route.ActionArgs['context'];
 }) {
+  const notion = notionSettings(context.env);
+  if (!notion) {
+    // The pop-up is hidden while this is unset (see root.tsx), so reaching
+    // this means a stale page or a hand-made request. Refusing is the only
+    // honest answer: there is nowhere to keep the number.
+    console.error('Promo pop-up: NOTION_API_KEY or NOTION_PHONE_DATABASE_ID is not set');
+    return Response.json({ok: false, error: 'unavailable'}, {status: 503});
+  }
+
   const locale = localeFromRequest(request);
-  await Promise.allSettled([
-    recordPhoneInNotion({phone, locale, context}),
-    sendNotificationEmail({
-      env: context.env,
-      subject: 'Nouveau numéro collecté — pop-up',
-      text: [
-        `Téléphone : ${phone}`,
-        `Langue : ${locale}`,
-        `Code promo : ${NEWSLETTER_PROMO_CODE}`,
-      ].join('\n'),
-    }),
-  ]);
-}
-
-async function recordPhoneInNotion({
-  phone,
-  locale,
-  context,
-}: {
-  phone: string;
-  locale: string;
-  context: Route.ActionArgs['context'];
-}) {
-  const token = context.env.NOTION_API_KEY;
-  const databaseId = context.env.NOTION_PHONE_DATABASE_ID;
-  if (!token || !databaseId) return;
-
+  let alreadyRegistered: boolean;
   try {
-    const res = await fetch('https://api.notion.com/v1/pages', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Notion-Version': '2022-06-28',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        parent: {database_id: databaseId},
-        properties: {
-          'Téléphone': {title: [{text: {content: phone}}]},
-          'Langue': {select: {name: locale}},
-          'Code promo': {rich_text: [{text: {content: NEWSLETTER_PROMO_CODE}}]},
-        },
-      }),
-    });
-    if (!res.ok) {
-      console.error('Notion phone record failed', res.status, await res.text());
+    alreadyRegistered = await isPhoneInNotion(notion, phone);
+    if (!alreadyRegistered) {
+      await addPhoneToNotion(notion, {phone, locale});
     }
   } catch (error) {
-    console.error('Notion phone record failed', error);
+    console.error('Promo pop-up: Notion request failed', error);
+    return Response.json({ok: false, error: 'storage'}, {status: 502});
+  }
+
+  // Secondary copies, only for a genuinely new number. Awaited so they aren't
+  // cut off when the response is sent, but their outcome never changes the
+  // answer: the number is already safe in Notion.
+  if (!alreadyRegistered) {
+    await Promise.allSettled([
+      forwardToShopify({
+        context,
+        tags: 'newsletter, newsletter-popup, phone-optin',
+        field: 'phone',
+        value: phone,
+      }),
+      sendNotificationEmail({
+        env: context.env,
+        subject: 'Nouveau numéro collecté — pop-up',
+        text: [
+          `Téléphone : ${phone}`,
+          `Langue : ${locale}`,
+          `Code promo : ${NEWSLETTER_PROMO_CODE}`,
+        ].join('\n'),
+      }),
+    ]);
+  }
+
+  const secure = new URL(request.url).protocol === 'https:' ? '; Secure' : '';
+  return Response.json(
+    {ok: true, code: NEWSLETTER_PROMO_CODE, alreadyRegistered},
+    {
+      headers: {
+        'Set-Cookie': `${PROMO_SIGNUP_COOKIE}=1; Path=/; Max-Age=${SIGNUP_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax${secure}`,
+      },
+    },
+  );
+}
+
+type NotionSettings = {token: string; databaseId: string};
+
+function notionSettings(env: Env): NotionSettings | null {
+  const token = env.NOTION_API_KEY;
+  const databaseId = env.NOTION_PHONE_DATABASE_ID;
+  return token && databaseId ? {token, databaseId} : null;
+}
+
+/**
+ * The duplicate check. Numbers are stored normalised (+33612345678), so
+ * "06 12 34 56 78" and "+33 6 12 34 56 78" are recognised as the same person.
+ */
+async function isPhoneInNotion(notion: NotionSettings, phone: string) {
+  const result = (await notionPost(notion, `databases/${notion.databaseId}/query`, {
+    filter: {property: 'Téléphone', title: {equals: phone}},
+    page_size: 1,
+  })) as {results?: unknown[]};
+  return (result.results?.length ?? 0) > 0;
+}
+
+/** "Date d'inscription" is a created-time column: Notion fills it in itself. */
+async function addPhoneToNotion(
+  notion: NotionSettings,
+  {phone, locale}: {phone: string; locale: string},
+) {
+  await notionPost(notion, 'pages', {
+    parent: {database_id: notion.databaseId},
+    properties: {
+      'Téléphone': {title: [{text: {content: phone}}]},
+      'Code promo': {rich_text: [{text: {content: NEWSLETTER_PROMO_CODE}}]},
+      'Langue': {select: {name: locale}},
+    },
+  });
+}
+
+/** Throws on any failure, including a timeout, so callers can't mistake one for success. */
+async function notionPost(notion: NotionSettings, path: string, body: unknown) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), NOTION_TIMEOUT_MS);
+  try {
+    const res = await fetch(`https://api.notion.com/v1/${path}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${notion.token}`,
+        'Notion-Version': NOTION_VERSION,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      throw new Error(`Notion ${path} → ${res.status} ${await res.text()}`);
+    }
+    return (await res.json()) as unknown;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Forwards a sign-up to the store's native customer form. Shopify redirects
+ * (302) on success; any non-5xx is treated as accepted.
+ */
+async function forwardToShopify({
+  context,
+  tags,
+  field,
+  value,
+}: {
+  context: Route.ActionArgs['context'];
+  tags: string;
+  field: 'phone' | 'email';
+  value: string;
+}) {
+  const body = new URLSearchParams({
+    form_type: 'customer',
+    utf8: '✓',
+    'contact[tags]': tags,
+    [`contact[${field}]`]: value,
+  });
+  try {
+    const res = await fetch(`https://${context.env.PUBLIC_STORE_DOMAIN}/contact`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: body.toString(),
+    });
+    return res.status < 500;
+  } catch (error) {
+    console.error('Newsletter forward failed', error);
+    return false;
   }
 }
 

@@ -736,6 +736,9 @@ html {
 }
 
 .popup__form input {
+  /* 16px, not less: iOS Safari zooms the whole page into any field smaller
+     than that when it gets focus. */
+  font-size: 16px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--color-paper);
@@ -817,6 +820,55 @@ html {
   margin-top: 0.5rem;
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.5);
+}
+
+.popup__code-value {
+  user-select: all;
+  -webkit-user-select: all;
+}
+
+.popup__code-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-top: 1.1rem;
+}
+
+.popup__copy {
+  min-width: 10rem;
+  padding: 0.75rem 1.2rem;
+  border: 1px solid var(--color-paper);
+  border-radius: 2px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 200ms var(--ease-out-soft);
+}
+
+.popup__copy:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.popup__copy:focus-visible,
+.popup__apply:focus-visible {
+  outline: 2px solid var(--color-paper);
+  outline-offset: 3px;
+}
+
+.popup__apply {
+  padding: 0.75rem 0.25rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-paper);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /*
@@ -2410,12 +2462,17 @@ html {
 }
 
 /*
-* Gallery — one image list, two layouts
+* Product gallery (see ProductGallery.tsx) — one horizontal scroll-snap
+* slider at every width, driven by the browser's native scrolling so a swipe
+* never fights the page's vertical scroll.
 *
-* Mobile: a horizontal scroll-snap slider with dots.
-* Desktop: vertical thumbnails beside one large frame; the slides are stacked
-* in that frame and cross-fade. The list is rendered once, so no image is
-* duplicated in the DOM or downloaded twice.
+* With several images the centred one is full size and its neighbours peek in
+* at the edges, scaled down and softened. How far each slide is from the
+* centre arrives as --gallery-progress (0 centred, 1 a slide away), set from
+* the scroll position on every frame — so the growth is continuous and
+* follows the finger, rather than a timed animation that could lag behind it.
+*
+* Desktop adds a thumbnail column on the left; mobile uses dots instead.
 */
 .gallery {
   position: relative;
@@ -2433,8 +2490,11 @@ html {
 }
 
 .gallery__track {
+  position: relative;
   display: flex;
   overflow-x: auto;
+  /* Keeps a sideways swipe at the last image from turning into Safari's
+     back/forward navigation gesture. */
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
@@ -2445,11 +2505,59 @@ html {
   display: none;
 }
 
+.gallery__track:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
 .gallery__slide {
   flex: 0 0 100%;
-  scroll-snap-align: start;
-  aspect-ratio: 4 / 5;
   min-width: 0;
+  aspect-ratio: 4 / 5;
+  scroll-snap-align: center;
+  /* One swipe moves one image, however hard the flick — the natural feel for
+     a product gallery, and it keeps every stop centred. */
+  scroll-snap-stop: always;
+}
+
+.gallery--multiple .gallery__track {
+  cursor: grab;
+}
+
+.gallery--multiple .gallery__track:active {
+  cursor: grabbing;
+}
+
+/* Spacers either side, so the first and last images can reach the centre too.
+   Pseudo-elements rather than padding: a percentage flex-basis resolves
+   against the track's content box, which padding would shrink. */
+.gallery--multiple .gallery__track::before,
+.gallery--multiple .gallery__track::after {
+  content: '';
+  flex: 0 0 8%;
+}
+
+.gallery--multiple .gallery__slide {
+  flex-basis: 84%;
+  /* Before the first scroll measurement lands, neighbours already start at
+     their small size; the inline value set by the component then takes over. */
+  --gallery-progress: 1;
+}
+
+.gallery--multiple .gallery__slide--active {
+  --gallery-progress: 0;
+}
+
+.gallery__slide-inner {
+  width: 100%;
+  height: 100%;
+}
+
+.gallery--multiple .gallery__slide-inner {
+  transform: scale(calc(1 - var(--gallery-progress) * 0.1));
+  opacity: calc(1 - var(--gallery-progress) * 0.4);
+  transform-origin: center;
+  will-change: transform;
 }
 
 /* `contain` keeps every source ratio intact — images are never stretched and
@@ -2460,6 +2568,8 @@ html {
   height: 100%;
   object-fit: contain;
   padding: 2%;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .gallery__dots {
@@ -2477,20 +2587,28 @@ html {
   padding: 0;
   background: var(--color-line);
   cursor: pointer;
-  transition: background 200ms var(--ease-out-soft);
+  transition:
+    background 200ms var(--ease-out-soft),
+    width 260ms var(--ease-out-soft);
 }
 
 .gallery__dot--active {
+  width: 18px;
   background: var(--color-ink);
 }
 
 @media (min-width: 64em) {
-  /* Thumbnail rail on the left, main frame on the right. */
+  /* Thumbnail rail on the left, slider on the right. */
   .gallery {
     display: grid;
     grid-template-columns: 4.5rem minmax(0, 1fr);
     gap: 1rem;
     align-items: start;
+  }
+
+  /* A single image has no thumbnail rail, so it takes the whole width. */
+  .gallery--single {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .gallery__thumbs {
@@ -2529,42 +2647,17 @@ html {
     border-color: var(--color-ink);
   }
 
-  /* All slides share one grid cell, so they stack in the same frame. */
-  .gallery__track {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    overflow: visible;
-    scroll-snap-type: none;
+  .gallery--multiple .gallery__track::before,
+  .gallery--multiple .gallery__track::after {
+    flex-basis: 10%;
   }
 
-  .gallery__slide {
-    grid-column: 1;
-    grid-row: 1;
-    flex: none;
-    opacity: 0;
-    transform: translateX(1.25rem);
-    pointer-events: none;
-    transition:
-      opacity 420ms var(--ease-out-soft),
-      transform 420ms var(--ease-out-soft);
-  }
-
-  .gallery__slide--active {
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
+  .gallery--multiple .gallery__slide {
+    flex-basis: 80%;
   }
 
   .gallery__dots {
     display: none;
-  }
-}
-
-/* Respect reduced-motion: swap instantly instead of gliding. */
-@media (prefers-reduced-motion: reduce) {
-  .gallery__slide {
-    transition: none;
-    transform: none;
   }
 }
 

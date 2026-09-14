@@ -26,6 +26,7 @@ interface PageLayoutProps {
   navCollections: NavCollection[];
   isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
+  promoSignupEnabled?: boolean;
   children?: React.ReactNode;
 }
 
@@ -36,6 +37,7 @@ export function PageLayout({
   navCollections,
   isLoggedIn,
   publicStoreDomain,
+  promoSignupEnabled = false,
 }: PageLayoutProps) {
   // The header is fixed (see .site-header), so it no longer reserves layout
   // space itself — every route needs that space reserved via padding,
@@ -61,7 +63,7 @@ export function PageLayout({
         )}
         <main className={isHome ? undefined : 'main--with-header-space'}>{children}</main>
         <Footer header={header} />
-        <NewsletterPopup />
+        <NewsletterPopup enabled={promoSignupEnabled} />
       </HeaderToneProvider>
     </Aside.Provider>
   );

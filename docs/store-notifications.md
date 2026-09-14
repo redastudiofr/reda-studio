@@ -50,7 +50,7 @@ client, puis le texte de l'avis en entier.
 
 **Numéro collecté** — objet `Nouveau numéro collecté — pop-up`, corps : le
 numéro au format international, la langue du visiteur, le code promo
-distribué (`REDA10`).
+distribué (`REDA15`).
 
 ## Un avis n'est jamais publié automatiquement
 

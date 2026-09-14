@@ -1,5 +1,6 @@
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {Image} from '@shopify/hydrogen';
+import {useHorizontalRail} from '~/lib/useHorizontalRail';
 
 type GalleryImage = {
   id?: string | null;
@@ -10,18 +11,27 @@ type GalleryImage = {
 };
 
 /**
- * Product gallery — a single image list that CSS lays out two ways, so no
- * image is ever duplicated in the DOM or downloaded twice:
+ * Product gallery — one horizontal slider at every width. The image in the
+ * middle is full size; its neighbours peek in at the edges, slightly smaller
+ * and softer, and grow back as they're swiped towards the centre.
  *
- * - desktop (>= 64em): the slides are stacked in one large frame and only the
- *   active one is visible. Picking a thumbnail cross-fades the new image in
- *   with a slight horizontal glide.
- * - mobile / tablet: the same slides become a horizontal scroll-snap slider
- *   driven by touch, with dots that reflect and control the position.
+ * Scrolling is the browser's own: an overflow-x track with scroll-snap. That
+ * is what keeps a swipe fluid and free of conflict with the page's vertical
+ * scroll — the browser itself decides whether a gesture is a horizontal
+ * swipe of the gallery or a vertical scroll of the page, with native momentum
+ * and axis locking, which no JavaScript touch handler reproduces as well.
+ * Mouse drag is layered on top for desktop by useHorizontalRail, which only
+ * ever listens to mouse pointers and so never touches the touch path.
  *
- * Each slide is a fixed-aspect box with `object-fit: contain`: the space is
- * reserved before the image loads (no layout shift) and no source ratio is
- * ever stretched or cropped.
+ * The centre effect is not a timed animation but a function of the scroll
+ * position: each frame, every slide gets --gallery-progress (0 when centred,
+ * 1 a full slide away) and CSS derives its scale and opacity from it. It is
+ * therefore progressive by construction and follows the finger exactly —
+ * mid-swipe, both images sit between the two sizes.
+ *
+ * The image list is rendered once; nothing is duplicated or downloaded twice.
+ * Each slide is a fixed-aspect box with `object-fit: contain`, so the space is
+ * reserved before the image loads and no source ratio is stretched or cropped.
  */
 export function ProductGallery({
   images,
@@ -30,34 +40,85 @@ export function ProductGallery({
   images: GalleryImage[];
   title: string;
 }) {
-  const trackRef = useRef<HTMLDivElement>(null);
+  const {ref: trackRef} = useHorizontalRail<HTMLDivElement>();
   const [active, setActive] = useState(0);
+  const multiple = images.length > 1;
+  // The images array is a new object every time the route's data reloads —
+  // picking a size does that — so effects key off the image ids instead.
+  // Otherwise choosing a size would throw the gallery back to its first image.
+  const imagesKey = images.map((image) => image.id ?? image.url).join('|');
 
-  // Reset when the product changes (this component gets reused across routes).
+  // This component is reused across product routes: a new product starts
+  // back on its first image.
   useEffect(() => {
     setActive(0);
-  }, [images]);
+    const track = trackRef.current;
+    if (track) track.scrollLeft = 0;
+  }, [imagesKey, trackRef]);
 
-  // Keeps the active index in sync while swiping. Only fires on the mobile
-  // slider — on desktop the track isn't horizontally scrollable.
   useEffect(() => {
     const track = trackRef.current;
-    if (!track) return;
-    const onScroll = () => {
-      if (track.clientWidth === 0) return;
-      setActive(Math.round(track.scrollLeft / track.clientWidth));
-    };
-    track.addEventListener('scroll', onScroll, {passive: true});
-    return () => track.removeEventListener('scroll', onScroll);
-  }, []);
+    if (!track || !multiple) return;
 
-  const select = (index: number) => {
-    const clamped = Math.max(0, Math.min(index, images.length - 1));
-    setActive(clamped);
-    // If the track is actually scrollable (mobile), move it too.
-    const track = trackRef.current;
-    if (track && track.clientWidth > 0 && track.scrollWidth > track.clientWidth + 1) {
-      track.scrollTo({left: track.clientWidth * clamped, behavior: 'smooth'});
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const slides = Array.from(track.children) as HTMLElement[];
+      const centre = track.scrollLeft + track.clientWidth / 2;
+
+      // Every read first, then every write: setting a custom property between
+      // two offsetLeft reads would force a fresh layout for each slide.
+      const distances = slides.map((slide) =>
+        Math.abs(slide.offsetLeft + slide.offsetWidth / 2 - centre),
+      );
+      const width = slides[0]?.offsetWidth || 1;
+
+      let nearest = 0;
+      distances.forEach((distance, index) => {
+        slides[index].style.setProperty(
+          '--gallery-progress',
+          Math.min(distance / width, 1).toFixed(3),
+        );
+        if (distance < distances[nearest]) nearest = index;
+      });
+      setActive(nearest);
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    update();
+    track.addEventListener('scroll', schedule, {passive: true});
+    window.addEventListener('resize', schedule);
+    return () => {
+      track.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [imagesKey, multiple, trackRef]);
+
+  const select = useCallback(
+    (index: number) => {
+      const track = trackRef.current;
+      const clamped = Math.max(0, Math.min(index, images.length - 1));
+      const slide = track?.children[clamped] as HTMLElement | undefined;
+      if (!track || !slide) return;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      track.scrollTo({
+        left: slide.offsetLeft - (track.clientWidth - slide.offsetWidth) / 2,
+        behavior: reduceMotion ? 'auto' : 'smooth',
+      });
+    },
+    [images.length, trackRef],
+  );
+
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      select(active + 1);
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      select(active - 1);
     }
   };
 
@@ -65,10 +126,12 @@ export function ProductGallery({
     return <div className="gallery gallery--empty" aria-hidden="true" />;
   }
 
-  const multiple = images.length > 1;
-
   return (
-    <div className="gallery">
+    <div
+      className={`gallery ${multiple ? 'gallery--multiple' : 'gallery--single'}`}
+      aria-roledescription={multiple ? 'carrousel' : undefined}
+      aria-label={multiple ? `Images du produit ${title}` : undefined}
+    >
       {multiple && (
         <div className="gallery__thumbs" role="tablist" aria-label="Images du produit">
           {images.map((image, index) => (
@@ -92,22 +155,32 @@ export function ProductGallery({
         </div>
       )}
 
-      <div className="gallery__track" ref={trackRef}>
+      <div
+        className="gallery__track"
+        ref={trackRef}
+        tabIndex={multiple ? 0 : undefined}
+        onKeyDown={multiple ? onKeyDown : undefined}
+      >
         {images.map((image, index) => (
           <div
             className={`gallery__slide ${index === active ? 'gallery__slide--active' : ''}`}
             key={image.id ?? `${image.url}-${index}`}
-            aria-hidden={index === active ? undefined : true}
+            role={multiple ? 'group' : undefined}
+            aria-roledescription={multiple ? 'image' : undefined}
+            aria-label={multiple ? `${index + 1} sur ${images.length}` : undefined}
           >
-            <Image
-              data={image}
-              alt={
-                image.altText ||
-                (images.length > 1 ? `${title} — image ${index + 1}` : title)
-              }
-              sizes="(min-width: 64em) 48vw, 100vw"
-              loading={index === 0 ? 'eager' : 'lazy'}
-            />
+            <div className="gallery__slide-inner">
+              <Image
+                data={image}
+                alt={
+                  image.altText ||
+                  (multiple ? `${title} — image ${index + 1}` : title)
+                }
+                sizes="(min-width: 64em) 40vw, 84vw"
+                loading={index === 0 ? 'eager' : 'lazy'}
+                draggable={false}
+              />
+            </div>
           </div>
         ))}
       </div>

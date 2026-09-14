@@ -1,122 +1,176 @@
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {useLocation} from 'react-router';
 import {CloseIcon} from '~/components/Icons';
 import {lockScroll, unlockScroll} from '~/lib/scrollLock';
 import {normalizePhone} from '~/lib/phone';
-import {NEWSLETTER_PROMO_CODE} from '~/lib/newsletterPromo';
+import {PROMO_SIGNUP_COOKIE} from '~/lib/newsletterPromo';
 import {useT} from '~/lib/i18n';
 
-const STORAGE_KEY = 'reda-studio-newsletter-seen';
+/** Signed up: never shown again. The server sets the cookie; this is the second copy. */
+const SIGNUP_STORAGE_KEY = 'reda-studio-promo-signup';
+/** Written by the pop-up before -15%, only once someone had actually subscribed. */
+const LEGACY_SIGNUP_STORAGE_KEY = 'reda-studio-newsletter-subscribed';
 
-/**
- * The key used before the pop-up became once-per-visitor. Still honoured on
- * read: someone who had already subscribed back then must not be asked again
- * just because the flag was renamed.
- */
-const LEGACY_STORAGE_KEY = 'reda-studio-newsletter-subscribed';
+/** Closed with the X: left alone for DISMISS_DAYS, then offered again. */
+const DISMISS_COOKIE = 'reda_promo_dismissed';
+const DISMISS_STORAGE_KEY = 'reda-studio-promo-dismissed';
+const DISMISS_DAYS = 7;
 
-/**
- * The same flag, as a cookie.
- *
- * Two records of one fact, on purpose — they are evicted under different
- * rules, and either one is enough to keep the pop-up away. It matters most on
- * Safari, where script-written localStorage is capped at seven days of
- * inactivity: a visitor who dismissed the pop-up and came back a fortnight
- * later would otherwise see it again.
- */
-const COOKIE_NAME = 'reda_newsletter_seen';
-const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
-
+const DAY_SECONDS = 60 * 60 * 24;
+const SIGNUP_MAX_AGE_SECONDS = DAY_SECONDS * 365;
 const OPEN_DELAY_MS = 1200;
 
-/**
- * Welcome pop-up offering -10% in exchange for a phone number.
- *
- * Shown **once per visitor**: the flag is written the moment it opens and
- * again when it closes, so it never comes back — whether the visitor
- * subscribed, dismissed it, or simply ignored it. (It used to reappear at
- * every visit until someone subscribed.) It is recorded twice, in localStorage
- * and in a one-year cookie, because browsers evict the two under different
- * rules; only clearing the browser's site data resets both.
- *
- * Posts through the same real /newsletter endpoint as the footer sign-up
- * (Shopify's own customer form), so every number lands in the store's
- * customer list — and, once configured, also in a Notion database kept just
- * for these — see docs/emails-newsletter.md. The promo code only appears
- * once that submission actually succeeds.
- */
 /*
- * localStorage throws outright when a browser has storage blocked — Safari's
- * private mode being the classic case. An unguarded read here would take the
- * whole page down over a marketing pop-up, so every access fails soft: the
- * visitor simply gets shown the offer.
+ * Every fact is recorded twice, in a cookie and in localStorage, because
+ * browsers evict the two under different rules — Safari caps script-written
+ * storage at seven days of inactivity. Either one is enough.
+ *
+ * Both throw outright when a browser blocks storage (Safari private mode being
+ * the classic case), so every access fails soft: an unguarded read would take
+ * the whole page down over a marketing pop-up.
  */
-function hasCookie(): boolean {
+function hasCookie(name: string): boolean {
   try {
-    return document.cookie
-      .split(';')
-      .some((entry) => entry.trim().startsWith(`${COOKIE_NAME}=`));
+    return document.cookie.split(';').some((entry) => entry.trim().startsWith(`${name}=`));
   } catch {
     return false;
   }
 }
 
-function hasStorageFlag(): boolean {
+function setCookie(name: string, maxAgeSeconds: number) {
   try {
-    return (
-      window.localStorage.getItem(STORAGE_KEY) !== null ||
-      window.localStorage.getItem(LEGACY_STORAGE_KEY) !== null
-    );
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${name}=1; path=/; max-age=${maxAgeSeconds}; SameSite=Lax${secure}`;
   } catch {
-    return false;
+    // Nothing to do — localStorage is the other half.
   }
 }
 
-/** Either record is enough — the pop-up has been shown before. */
-function alreadySeen(): boolean {
-  return hasCookie() || hasStorageFlag();
+function readStorage(key: string): string | null {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorage(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // Nothing to do — the cookie is the other half.
+  }
+}
+
+function hasSignedUp(): boolean {
+  return (
+    hasCookie(PROMO_SIGNUP_COOKIE) ||
+    readStorage(SIGNUP_STORAGE_KEY) !== null ||
+    readStorage(LEGACY_SIGNUP_STORAGE_KEY) !== null
+  );
+}
+
+function recentlyDismissed(): boolean {
+  if (hasCookie(DISMISS_COOKIE)) return true;
+  const dismissedAt = Number(readStorage(DISMISS_STORAGE_KEY));
+  return dismissedAt > 0 && Date.now() - dismissedAt < DISMISS_DAYS * DAY_SECONDS * 1000;
+}
+
+function rememberSignup() {
+  writeStorage(SIGNUP_STORAGE_KEY, String(Date.now()));
+  setCookie(PROMO_SIGNUP_COOKIE, SIGNUP_MAX_AGE_SECONDS);
+}
+
+function rememberDismissal() {
+  writeStorage(DISMISS_STORAGE_KEY, String(Date.now()));
+  setCookie(DISMISS_COOKIE, DISMISS_DAYS * DAY_SECONDS);
 }
 
 /**
- * Writes both records. Called when the pop-up opens and again when it closes:
- * the second write costs nothing and covers the case where the first one was
- * refused — a storage quota, a permission that changed mid-visit.
+ * The async Clipboard API needs a secure context and, on older Safari and
+ * Opera, isn't there at all — hence the execCommand fallback, which works from
+ * a click on every browser this shop sees.
  */
-function markSeen() {
+async function writeToClipboard(text: string): Promise<boolean> {
   try {
-    window.localStorage.setItem(STORAGE_KEY, '1');
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
   } catch {
-    // Nothing to do — the cookie below is the other half of the belt.
+    // Permission refused — try the fallback.
   }
 
   try {
-    document.cookie = `${COOKIE_NAME}=1; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
+    const field = document.createElement('textarea');
+    field.value = text;
+    // readonly keeps the iOS keyboard from opening; off-screen keeps it invisible.
+    field.setAttribute('readonly', '');
+    field.style.position = 'fixed';
+    field.style.top = '0';
+    field.style.opacity = '0';
+    document.body.appendChild(field);
+    field.select();
+    field.setSelectionRange(0, text.length);
+    const copied = document.execCommand('copy');
+    field.remove();
+    return copied;
   } catch {
-    // Nothing to do: without storage the offer can't be remembered.
+    return false;
   }
 }
 
-export function NewsletterPopup() {
+type Status = 'idle' | 'loading' | 'done' | 'error' | 'invalid';
+
+/**
+ * Welcome pop-up: -15% in exchange for a phone number.
+ *
+ * - Shown only to a visitor who hasn't signed up. Once they have, never again.
+ * - Closing it (X, the backdrop, Escape) is remembered for DISMISS_DAYS, so it
+ *   doesn't come back on every page or every visit — only after that pause.
+ * - Hidden entirely while `enabled` is false, i.e. while the server has no
+ *   Notion database to store numbers in: better no offer than a code handed
+ *   out for a sign-up that was never saved.
+ *
+ * The code shown is the one the server returns, and only after it has
+ * confirmed the number is stored — see app/routes/newsletter.tsx.
+ */
+export function NewsletterPopup({enabled}: {enabled: boolean}) {
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<
-    'idle' | 'loading' | 'done' | 'error' | 'invalid'
-  >('idle');
+  const [status, setStatus] = useState<Status>('idle');
+  const [code, setCode] = useState('');
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const statusRef = useRef<Status>('idle');
+  const codeRef = useRef<HTMLParagraphElement>(null);
+  const {pathname} = useLocation();
   const t = useT();
 
+  statusRef.current = status;
+
   useEffect(() => {
-    if (alreadySeen()) return;
-    const timer = setTimeout(() => {
-      // Marked as seen on opening, not on closing: a visitor who navigates
-      // away with it still on screen doesn't get it again either.
-      markSeen();
-      setOpen(true);
-    }, OPEN_DELAY_MS);
+    if (!enabled || hasSignedUp() || recentlyDismissed()) return;
+    const timer = setTimeout(() => setOpen(true), OPEN_DELAY_MS);
     return () => clearTimeout(timer);
+  }, [enabled]);
+
+  const close = useCallback(() => {
+    // Closing after signing up isn't a dismissal — that visitor is already
+    // recorded as signed up and won't see it again anyway.
+    if (statusRef.current !== 'done') rememberDismissal();
+    setOpen(false);
   }, []);
 
   useEffect(() => {
     if (!open) return;
     const controller = new AbortController();
-    document.addEventListener('keydown', (event) => event.key === 'Escape' && close(), {signal: controller.signal});
+    document.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key === 'Escape') close();
+      },
+      {signal: controller.signal},
+    );
 
     // Shared with the cart, search and menu drawers — see app/lib/scrollLock.ts
     // for why locking the page must not be allowed to resize it.
@@ -126,23 +180,21 @@ export function NewsletterPopup() {
       controller.abort();
       unlockScroll();
     };
-  }, [open]);
+  }, [open, close]);
 
-  function close() {
-    // Written again here, not only on opening: closing is the moment the
-    // visitor is most explicit about not wanting it, and a second write covers
-    // a first one that silently failed.
-    markSeen();
-    setOpen(false);
-  }
+  useEffect(() => {
+    if (copyState === 'idle') return;
+    const timer = setTimeout(() => setCopyState('idle'), 2500);
+    return () => clearTimeout(timer);
+  }, [copyState]);
 
   async function submit(form: HTMLFormElement) {
-    const raw = (form.elements.namedItem('phone') as HTMLInputElement)?.value;
+    if (statusRef.current === 'loading') return;
+    const raw = (form.elements.namedItem('phone') as HTMLInputElement | null)?.value;
     if (!raw) return;
 
-    // Checked here, before the request, so a mistyped number never reaches
-    // the network — and again on the server, since a client check alone can
-    // always be bypassed.
+    // Checked before the request so a mistyped number never reaches the
+    // network — and again on the server, since this check can be bypassed.
     const phone = normalizePhone(raw);
     if (!phone) {
       setStatus('invalid');
@@ -151,20 +203,29 @@ export function NewsletterPopup() {
 
     setStatus('loading');
     try {
-      const body = new URLSearchParams({
-        form_type: 'customer',
-        utf8: '✓',
-        'contact[phone]': phone,
-        // Tagged as coming from the pop-up so the two sign-up points can be
-        // told apart in the store's customer list.
-        source: 'popup',
-      });
       const res = await fetch('/newsletter', {
         method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: body.toString(),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json',
+        },
+        body: new URLSearchParams({'contact[phone]': phone, source: 'popup'}).toString(),
       });
-      setStatus(res.ok ? 'done' : 'error');
+      const result = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        code?: string;
+        alreadyRegistered?: boolean;
+        error?: string;
+      } | null;
+
+      if (res.ok && result?.ok && result.code) {
+        rememberSignup();
+        setCode(result.code);
+        setAlreadyRegistered(Boolean(result.alreadyRegistered));
+        setStatus('done');
+      } else {
+        setStatus(result?.error === 'phone' ? 'invalid' : 'error');
+      }
     } catch {
       setStatus('error');
     }
@@ -173,6 +234,23 @@ export function NewsletterPopup() {
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     void submit(event.currentTarget);
+  }
+
+  async function copyCode() {
+    if (await writeToClipboard(code)) {
+      setCopyState('copied');
+      return;
+    }
+    // Last resort: select the code on screen, so a long-press or Ctrl+C copies it.
+    const node = codeRef.current;
+    const selection = window.getSelection();
+    if (node && selection) {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+    setCopyState('failed');
   }
 
   if (!open) return null;
@@ -201,14 +279,31 @@ export function NewsletterPopup() {
 
           {status === 'done' ? (
             <div className="popup__code">
-              <p className="popup__code-label">{t('popup.codeLabel')}</p>
-              <p className="popup__code-value">{NEWSLETTER_PROMO_CODE}</p>
-              <p className="popup__code-hint">{t('popup.codeHint')}</p>
+              <p className="popup__code-label">
+                {alreadyRegistered ? t('popup.alreadyRegistered') : t('popup.codeLabel')}
+              </p>
+              <p className="popup__code-value" ref={codeRef}>
+                {code}
+              </p>
+              <div className="popup__code-actions">
+                <button type="button" className="popup__copy" onClick={() => void copyCode()}>
+                  {copyState === 'copied' ? t('popup.copied') : t('popup.copy')}
+                </button>
+                <a
+                  className="popup__apply"
+                  href={`/discount/${encodeURIComponent(code)}?redirect=${encodeURIComponent(pathname)}`}
+                >
+                  {t('popup.apply')}
+                </a>
+              </div>
+              <p className="popup__code-hint" role="status" aria-live="polite">
+                {copyState === 'failed' ? t('popup.copyFailed') : t('popup.codeHint')}
+              </p>
             </div>
           ) : (
             <>
               <p className="popup__text">{t('popup.text')}</p>
-              <form className="popup__form" onSubmit={onSubmit}>
+              <form className="popup__form" onSubmit={onSubmit} noValidate>
                 <input
                   type="tel"
                   name="phone"
@@ -217,6 +312,7 @@ export function NewsletterPopup() {
                   autoComplete="tel"
                   inputMode="tel"
                   required
+                  onChange={() => status !== 'loading' && status !== 'idle' && setStatus('idle')}
                 />
                 <button type="submit" className="btn btn--full" disabled={status === 'loading'}>
                   {status === 'loading' ? '…' : t('popup.cta')}
@@ -228,7 +324,7 @@ export function NewsletterPopup() {
                 )}
                 {status === 'error' && (
                   <p className="form-error" role="alert">
-                    {t('news.error')}
+                    {t('popup.error')}
                   </p>
                 )}
               </form>
