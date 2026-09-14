@@ -142,6 +142,9 @@ export function NewsletterPopup({enabled}: {enabled: boolean}) {
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [digitCount, setDigitCount] = useState(0);
+  // A short technical reference shown with a failed save (e.g. N404), so a
+  // screenshot is enough to tell what went wrong — see NotionError.
+  const [errorRef, setErrorRef] = useState('');
   const statusRef = useRef<Status>('idle');
   const codeRef = useRef<HTMLParagraphElement>(null);
   const {pathname} = useLocation();
@@ -218,6 +221,7 @@ export function NewsletterPopup({enabled}: {enabled: boolean}) {
         code?: string;
         alreadyRegistered?: boolean;
         error?: string;
+        ref?: string;
       } | null;
 
       if (res.ok && result?.ok && result.code) {
@@ -226,9 +230,11 @@ export function NewsletterPopup({enabled}: {enabled: boolean}) {
         setAlreadyRegistered(Boolean(result.alreadyRegistered));
         setStatus('done');
       } else {
+        setErrorRef(result?.ref ?? `H${res.status}`);
         setStatus(result?.error === 'phone' ? 'invalid' : 'error');
       }
     } catch {
+      setErrorRef('NET');
       setStatus('error');
     }
   }
@@ -330,6 +336,7 @@ export function NewsletterPopup({enabled}: {enabled: boolean}) {
                 {status === 'error' && (
                   <p className="form-error" role="alert">
                     {t('popup.error')}
+                    {errorRef && ` (${errorRef})`}
                   </p>
                 )}
               </form>

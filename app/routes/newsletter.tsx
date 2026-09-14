@@ -92,7 +92,8 @@ async function popupSignup({
     }
   } catch (error) {
     console.error('Promo pop-up: Notion request failed', error);
-    return Response.json({ok: false, error: 'storage'}, {status: 502});
+    const ref = `N${error instanceof NotionError ? error.status : 0}`;
+    return Response.json({ok: false, error: 'storage', ref}, {status: 502});
   }
 
   // Secondary copies, only for a genuinely new number. Awaited so they aren't
@@ -164,12 +165,28 @@ async function addPhoneToNotion(
   });
 }
 
+/**
+ * A failed Notion call. `status` is Notion's HTTP status (0 when the request
+ * never got an answer), and is what the pop-up shows as a short reference —
+ * enough to tell a wrong token (401) from a database not shared with the
+ * integration (404) or a missing capability (403), without exposing anything.
+ */
+class NotionError extends Error {
+  status: number;
+
+  constructor(status: number, detail: string) {
+    super(`Notion → ${status} ${detail}`);
+    this.status = status;
+  }
+}
+
 /** Throws on any failure, including a timeout, so callers can't mistake one for success. */
 async function notionPost(notion: NotionSettings, path: string, body: unknown) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), NOTION_TIMEOUT_MS);
+  let res: Response;
   try {
-    const res = await fetch(`https://api.notion.com/v1/${path}`, {
+    res = await fetch(`https://api.notion.com/v1/${path}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${notion.token}`,
@@ -179,13 +196,15 @@ async function notionPost(notion: NotionSettings, path: string, body: unknown) {
       body: JSON.stringify(body),
       signal: controller.signal,
     });
-    if (!res.ok) {
-      throw new Error(`Notion ${path} → ${res.status} ${await res.text()}`);
-    }
-    return (await res.json()) as unknown;
+  } catch (error) {
+    throw new NotionError(0, controller.signal.aborted ? 'timeout' : String(error));
   } finally {
     clearTimeout(timer);
   }
+  if (!res.ok) {
+    throw new NotionError(res.status, `${path} ${await res.text()}`);
+  }
+  return (await res.json()) as unknown;
 }
 
 /**
