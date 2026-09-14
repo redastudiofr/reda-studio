@@ -2,7 +2,7 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {useLocation} from 'react-router';
 import {CloseIcon} from '~/components/Icons';
 import {lockScroll, unlockScroll} from '~/lib/scrollLock';
-import {normalizePhone} from '~/lib/phone';
+import {countDigits, normalizePhone} from '~/lib/phone';
 import {PROMO_SIGNUP_COOKIE} from '~/lib/newsletterPromo';
 import {useT} from '~/lib/i18n';
 
@@ -141,6 +141,7 @@ export function NewsletterPopup({enabled}: {enabled: boolean}) {
   const [code, setCode] = useState('');
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [digitCount, setDigitCount] = useState(0);
   const statusRef = useRef<Status>('idle');
   const codeRef = useRef<HTMLParagraphElement>(null);
   const {pathname} = useLocation();
@@ -196,6 +197,7 @@ export function NewsletterPopup({enabled}: {enabled: boolean}) {
     // Checked before the request so a mistyped number never reaches the
     // network — and again on the server, since this check can be bypassed.
     const phone = normalizePhone(raw);
+    setDigitCount(countDigits(raw));
     if (!phone) {
       setStatus('invalid');
       return;
@@ -320,6 +322,9 @@ export function NewsletterPopup({enabled}: {enabled: boolean}) {
                 {status === 'invalid' && (
                   <p className="form-error" role="alert">
                     {t('popup.invalidPhone')}
+                    {/* Said back so a slip — two extra digits, a missing one —
+                        is obvious instead of leaving the visitor guessing. */}
+                    {digitCount > 0 && ` (${t('popup.digitsTyped', {count: digitCount})})`}
                   </p>
                 )}
                 {status === 'error' && (
