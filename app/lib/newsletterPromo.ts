@@ -14,3 +14,10 @@ export const NEWSLETTER_PROMO_CODE = 'REDA15';
  * nothing but "1", and the pop-up needs to see it.
  */
 export const PROMO_SIGNUP_COOKIE = 'reda_promo_signup';
+
+/**
+ * Master switch for the pop-up. Off: it is never shown, whatever the Notion
+ * configuration — turned off at the shop's request while the Notion link is
+ * being sorted out. Set back to `true` to bring it back; nothing else changes.
+ */
+export const PROMO_POPUP_ACTIVE = false;

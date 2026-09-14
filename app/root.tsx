@@ -19,6 +19,7 @@ import {PageLayout} from './components/PageLayout';
 import {withoutAutoCollections} from '~/lib/collections';
 import {I18nProvider} from '~/lib/i18n';
 import {DEFAULT_LOCALE, localeFromRequest} from '~/lib/i18n/locale';
+import {PROMO_POPUP_ACTIVE} from '~/lib/newsletterPromo';
 
 export type RootLoader = typeof loader;
 
@@ -87,9 +88,11 @@ export async function loader(args: Route.LoaderArgs) {
     ...deferredData,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
-    // Only a yes/no reaches the browser: whether the -15% pop-up has a Notion
-    // database to store numbers in. The token itself never leaves the server.
-    promoSignupEnabled: Boolean(env.NOTION_API_KEY && env.NOTION_PHONE_DATABASE_ID),
+    // Only a yes/no reaches the browser: whether the -15% pop-up is switched on
+    // and has a Notion database to store numbers in. The token itself never
+    // leaves the server.
+    promoSignupEnabled:
+      PROMO_POPUP_ACTIVE && Boolean(env.NOTION_API_KEY && env.NOTION_PHONE_DATABASE_ID),
     shop: getShopAnalytics({
       storefront,
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
