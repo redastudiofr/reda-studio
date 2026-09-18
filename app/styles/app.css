@@ -3628,7 +3628,10 @@ html {
   gap: 0.6rem;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
+  /* Proximity, not mandatory: the row follows the finger and the mouse
+     freely and settles near a photo, instead of being pulled back onto the
+     nearest one at every step — which is what made it feel stuck. */
+  scroll-snap-type: x proximity;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   padding-inline: 1.25rem;
@@ -4019,36 +4022,6 @@ html {
   min-width: 0;
 }
 
-/*
- * Mobile: the product rail becomes a plain two-column grid of the first
- * eight products.
- *
- * A horizontal rail is right on a desktop, where a row shows five or six
- * pieces at once; on a phone it showed barely two, and everything else
- * needed a sideways swipe most visitors never make. The grid puts eight in
- * front of them straight away, in the same shape as the homepage catalogue
- * below it. Desktop keeps the rail exactly as it was.
- */
-@media (max-width: 47.99em) {
-  .collection-feature__rail {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem 0.5rem;
-    /* The rail mechanics are switched off rather than left dangling: with no
-       overflow there is nothing to scroll, snap or drag. */
-    overflow: visible;
-    scroll-snap-type: none;
-    cursor: default;
-  }
-
-  .collection-feature__item {
-    flex: none;
-  }
-
-  .collection-feature__item:nth-child(n + 9) {
-    display: none;
-  }
-}
 
 @media (min-width: 40em) {
   .collection-feature__item {

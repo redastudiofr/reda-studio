@@ -24,7 +24,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {getProductFaq} from '~/data/faq';
 import {parseRating} from '~/lib/rating';
 import {onlyShowcaseCollections} from '~/lib/collections';
-import {getRatingForSeed, reviewCountForAge, seededInt} from '~/data/reviews';
+import {getRatingForSeed, reviewCountForProduct} from '~/data/reviews';
 import {isPreorderHandle} from '~/lib/preorder';
 import {useT} from '~/lib/i18n';
 
@@ -121,27 +121,19 @@ function loadDeferredData(
      * Ratings for this row — see docs/synthetic-ratings.md for why it shows
      * numbers beyond what Shopify's real review metafields provide here, at
      * the store owner's explicit, informed request. A real metafield rating
-     * always wins and is never touched. Failing that, at least two items in
-     * the row land on a plain 4.0 rather than everything reading the same
-     * score; every other item gets the same age-aware summary the product's
-     * own page uses (fewer illustrative reviews for a recently added
-     * product — see reviewCountForAge), never a uniform dozen regardless of
-     * how long it's actually been on the shelf.
+     * always wins and is never touched. Failing that, each item gets exactly
+     * the summary its own product page shows: the average of a per-product
+     * number of illustrative reviews (reviewCountForProduct), so the scores
+     * spread across the range instead of every card reading the same, and a
+     * product added days ago doesn't claim a dozen reviews already.
      */
-    let fourStarAssigned = 0;
     return merged.map((item) => {
       if (parseRating(item.rating, item.ratingCount)) return item;
 
-      if (fourStarAssigned < 2) {
-        fourStarAssigned++;
-        return {
-          ...item,
-          rating: {value: '4.0'},
-          ratingCount: {value: String(seededInt(item.id, 5, 11))},
-        };
-      }
-
-      const rating = getRatingForSeed(item.id, reviewCountForAge(item.createdAt));
+      const rating = getRatingForSeed(
+        item.id,
+        reviewCountForProduct(item.id, item.createdAt),
+      );
       if (!rating) return item;
       return {
         ...item,
@@ -240,6 +232,10 @@ export default function Product() {
   const t = useT();
   const {title, description, descriptionHtml, vendor} = product;
 
+  // One number for the whole page: the buy box's star rating is the average
+  // of exactly the reviews listed further down, and says so.
+  const reviewCount = reviewCountForProduct(product.id, product.createdAt);
+
   const galleryImages = product.images.nodes.length
     ? product.images.nodes
     : selectedVariant?.image
@@ -282,6 +278,7 @@ export default function Product() {
             sizes={sizes}
             available={available}
             quantityAvailable={selectedVariant?.quantityAvailable ?? null}
+            productId={product.id}
             shortDescription={shortenDescription(description ?? '')}
             variantId={selectedVariant?.id}
             preorder={preorder}
@@ -291,7 +288,7 @@ export default function Product() {
               // from fewer of them for a product that hasn't been live long
               // enough to plausibly have a dozen reviews yet.
               parseRating(product.rating, product.ratingCount) ??
-              getRatingForSeed(product.id, reviewCountForAge(product.createdAt))
+              getRatingForSeed(product.id, reviewCount)
             }
           />
 
@@ -355,7 +352,11 @@ export default function Product() {
       <VisionSection />
 
       <div className="pdp__reviews">
-        <ProductReviews productId={product.id} productTitle={title} />
+        <ProductReviews
+          productId={product.id}
+          productTitle={title}
+          count={reviewCount}
+        />
       </div>
 
       {/* Closing the page: full-bleed collection tiles. */}

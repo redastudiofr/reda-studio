@@ -29,6 +29,18 @@ export function useHorizontalRail<T extends HTMLElement>({
 
     node.scrollLeft = node.scrollWidth / 3;
 
+    /*
+     * Moving the rail by one copy has to move the drag's own reference point
+     * with it. Without this, a mouse drag that crossed a copy boundary was
+     * corrected here and then immediately undone by the next pointermove —
+     * which sets scrollLeft from the position the drag started at — so the
+     * rail sat there refusing to go any further, in both directions.
+     */
+    const shiftBy = (delta: number) => {
+      node.scrollLeft += delta;
+      if (dragState.current.active) dragState.current.startScroll += delta;
+    };
+
     let frame = 0;
     const onScroll = () => {
       if (frame) return;
@@ -36,9 +48,9 @@ export function useHorizontalRail<T extends HTMLElement>({
         frame = 0;
         const oneCopy = node.scrollWidth / 3;
         if (node.scrollLeft < oneCopy * 0.5) {
-          node.scrollLeft += oneCopy;
+          shiftBy(oneCopy);
         } else if (node.scrollLeft > oneCopy * 1.5) {
-          node.scrollLeft -= oneCopy;
+          shiftBy(-oneCopy);
         }
       });
     };

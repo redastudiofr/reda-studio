@@ -12,6 +12,7 @@ import {StarRating} from '~/components/StarRating';
 import {useAside} from '~/components/Aside';
 import type {ProductRating} from '~/lib/rating';
 import {useT} from '~/lib/i18n';
+import {stockState} from '~/lib/stock';
 
 /**
  * The buy box: everything the customer needs to pick a variant and add it to
@@ -31,6 +32,7 @@ export function ProductPurchase({
   sizes,
   available,
   quantityAvailable,
+  productId,
   shortDescription,
   variantId,
   rating,
@@ -43,6 +45,8 @@ export function ProductPurchase({
   sizes: SizeEntry[];
   available: boolean;
   quantityAvailable: number | null;
+  /** Stable seed for the availability line — see app/lib/stock.ts. */
+  productId: string;
   shortDescription: string;
   variantId?: string;
   rating?: ProductRating | null;
@@ -61,14 +65,16 @@ export function ProductPurchase({
       ? Math.round((1 - priceAmount / compareAmount) * 100)
       : 0;
 
-  const stock = !available
-    ? {className: 'buybox__stock--out', label: t('product.soldOut')}
-    : quantityAvailable !== null && quantityAvailable > 0 && quantityAvailable <= 5
-      ? {
-          className: 'buybox__stock--low',
-          label: t('product.lowStock', {count: quantityAvailable}),
-        }
-      : {className: 'buybox__stock--in', label: t('product.inStock')};
+  const state = stockState({available, quantityAvailable, seed: productId});
+  const stock =
+    state.kind === 'out'
+      ? {className: 'buybox__stock--out', label: t('product.soldOut')}
+      : state.kind === 'low'
+        ? {
+            className: 'buybox__stock--low',
+            label: t('product.lowStock', {count: state.count}),
+          }
+        : {className: 'buybox__stock--in', label: t('product.inStock')};
 
   const lines = variantId ? [{merchandiseId: variantId, quantity}] : [];
 

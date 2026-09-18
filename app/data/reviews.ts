@@ -159,6 +159,104 @@ const REVIEW_POOL: Review[] = [
     text: {en: 'excellent quality for the price.', fr: 'excellente qualité pour le prix.'},
     certified: true,
   },
+  // A run of more measured reviews. Reviews are picked as a contiguous
+  // window (see getReviewsForSeed), so keeping these together is what lets a
+  // product land on 4.2 or 4.4 instead of every product averaging 4.7.
+  {
+    id: 'r21',
+    name: 'Nora Benali',
+    rating: 4,
+    text: {
+      en: 'nice piece, the colour is slightly darker than on screen.',
+      fr: 'belle pièce, la couleur est un peu plus foncée qu’à l’écran.',
+    },
+  },
+  {
+    id: 'r22',
+    name: 'Julien Mercier',
+    rating: 4,
+    text: {
+      en: 'good quality, delivery took a little longer than expected.',
+      fr: 'bonne qualité, la livraison a pris un peu plus de temps que prévu.',
+    },
+    certified: true,
+  },
+  {
+    id: 'r23',
+    name: 'Anaïs Perrin',
+    rating: 4,
+    text: {
+      en: 'happy with it overall, i would have liked a slightly thicker fabric.',
+      fr: 'contente dans l’ensemble, j’aurais aimé une matière un peu plus épaisse.',
+    },
+  },
+  {
+    id: 'r24',
+    name: 'Samir Ouali',
+    rating: 4.5,
+    text: {
+      en: 'very good piece, sizing is spot on.',
+      fr: 'très bonne pièce, la taille correspond bien.',
+    },
+    certified: true,
+  },
+  {
+    id: 'r25',
+    name: 'Manon Leclerc',
+    rating: 4,
+    text: {
+      en: 'well made, packaging could be simpler.',
+      fr: 'bien fait, l’emballage pourrait être plus simple.',
+    },
+  },
+  {
+    id: 'r26',
+    name: 'Ilyes Mansouri',
+    rating: 5,
+    text: {
+      en: 'exactly what i was looking for, worn non-stop since.',
+      fr: 'exactement ce que je cherchais, porté sans arrêt depuis.',
+    },
+    certified: true,
+  },
+  {
+    id: 'r27',
+    name: 'Théo Vidal',
+    rating: 4,
+    text: {
+      en: 'solid piece, the fit is a little roomier than i expected.',
+      fr: 'pièce solide, la coupe est un peu plus ample que prévu.',
+    },
+  },
+  {
+    id: 'r28',
+    name: 'Lina Haddad',
+    rating: 4,
+    text: {
+      en: 'good buy, i took a size down in the end.',
+      fr: 'bon achat, j’ai finalement pris une taille en dessous.',
+    },
+    certified: true,
+  },
+  {
+    id: 'r29',
+    name: 'Victor Lambert',
+    rating: 4.5,
+    text: {
+      en: 'really nice finish, arrived well protected.',
+      fr: 'très belles finitions, arrivé bien protégé.',
+    },
+  },
+  {
+    id: 'r30',
+    name: 'Sarah Benkhaled',
+    rating: 4,
+    text: {
+      en: 'faithful to the photos, a touch long on me.',
+      fr: 'fidèle aux photos, un peu long sur moi.',
+    },
+    certified: true,
+  },
 ];
 
 /** Small deterministic hash (djb2) for a stable per-id selection. */
@@ -189,6 +287,29 @@ export function reviewCountForAge(createdAt?: string | null): number {
   if (ageDays < 21) return 3;
   if (ageDays < 45) return 7;
   return 12;
+}
+
+/**
+ * How many reviews one product shows — and therefore what its star rating is
+ * an average of.
+ *
+ * Two products that have been on sale for the same time no longer show the
+ * same dozen reviews and the same score: the count itself varies with the
+ * product id, inside the ceiling its age allows. That is what makes the
+ * ratings land across the range rather than all on the same number, without
+ * anything inventing a score separately from the reviews on display.
+ */
+export function reviewCountForProduct(
+  seed: string,
+  createdAt?: string | null,
+): number {
+  const ceiling = reviewCountForAge(createdAt);
+  if (ceiling === 0) return 0;
+  const max = ceiling >= 12 ? 14 : ceiling;
+  // The salt goes in front of the id, never behind it: this hash is djb2,
+  // whose low bits are dominated by the last characters, so a shared suffix
+  // (":units", ":reviews") made every product draw almost the same number.
+  return seededInt(`reviews:${seed}`, Math.min(5, max), max);
 }
 
 /**
