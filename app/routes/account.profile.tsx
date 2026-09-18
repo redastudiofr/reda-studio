@@ -82,7 +82,6 @@ export async function action({request, context}: Route.ActionArgs) {
 
 export default function AccountProfile() {
   const t = useT();
-  const t = useT();
   const account = useOutletContext<{customer: CustomerFragment}>();
   const {state} = useNavigation();
   const action = useActionData<ActionResponse>();

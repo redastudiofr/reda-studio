@@ -124,7 +124,6 @@ function OrderSearchForm({
   currentFilters: OrderFilterParams;
 }) {
   const t = useT();
-  const t = useT();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigation = useNavigation();
   const isSearching =
