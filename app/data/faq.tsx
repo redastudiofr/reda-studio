@@ -1,4 +1,5 @@
 import type {ReactNode} from 'react';
+import type {Translate} from '~/lib/i18n';
 
 export interface FaqItem {
   question: string;
@@ -6,26 +7,14 @@ export interface FaqItem {
 }
 
 /** General questions — shipping, quality, refunds. */
-export const generalFaq: FaqItem[] = [
-  {
-    question: 'how long does shipping take?',
-    answer:
-      'we ship from our studio in paris and deliver within 48 hours anywhere in france.',
-  },
-  {
-    question: 'where are your pieces made?',
-    answer: 'every piece is manufactured in portugal.',
-  },
-  {
-    question: 'how is quality controlled?',
-    answer:
-      'each piece is checked one by one against our quality and finishing standards before it goes on sale.',
-  },
-  {
-    question: 'can i get a refund?',
-    answer: 'refunds are issued once the returned item reaches us.',
-  },
-];
+export function getGeneralFaq(t: Translate): FaqItem[] {
+  return [
+    {question: t('faqData.shippingQ'), answer: t('faqData.shippingA')},
+    {question: t('faqData.madeQ'), answer: t('faqData.madeA')},
+    {question: t('faqData.qualityQ'), answer: t('faqData.qualityA')},
+    {question: t('faqData.refundQ'), answer: t('faqData.refundA')},
+  ];
+}
 
 /**
  * Pulls the composition out of a product description.
@@ -72,70 +61,32 @@ export function extractComposition(description: string): string | null {
  * Product-page FAQ. `composition` is derived from the product's own
  * description, so each product states its real materials.
  */
-export function getProductFaq(description = ''): FaqItem[] {
+export function getProductFaq(t: Translate, description = ''): FaqItem[] {
   const composition = extractComposition(description);
 
   return [
+    {question: t('faqData.fitQ'), answer: t('faqData.fitA')},
     {
-      question: 'fit & sizing',
+      question: t('faqData.compositionQ'),
+      answer: composition ? `${composition}.` : t('faqData.compositionA'),
+    },
+    {question: t('faqData.manufacturingQ'), answer: t('faqData.manufacturingA')},
+    {
+      question: t('faqData.shipping2Q'),
       answer: (
         <>
-          the cut and size guidance are given in the product description
-          wherever they are available. if you fall between two sizes, reach out
-          to us before ordering and we will advise.
+          {t('faqData.shipping2A')} <a href="/legal/shipping">{t('faqData.shippingLink')}</a>.
         </>
       ),
     },
     {
-      question: 'composition',
-      answer: composition ? (
-        <>{composition}.</>
-      ) : (
-        <>
-          the exact composition of this piece — materials and percentages — is
-          printed on the label sewn inside the garment.
-        </>
-      ),
-    },
-    {
-      question: 'manufacturing',
+      question: t('faqData.returnsQ'),
       answer: (
         <>
-          our pieces are made in portugal, then checked one by one against our
-          quality and finishing standards before going on sale.
+          {t('faqData.returnsA')} <a href="/legal/returns">{t('faqData.returnsLink')}</a>.
         </>
       ),
     },
-    {
-      question: 'shipping',
-      answer: (
-        <>
-          shipped from our studio in paris and delivered within 48 hours
-          anywhere in france, with tracking. full details on our{' '}
-          <a href="/legal/shipping">shipping page</a>.
-        </>
-      ),
-    },
-    {
-      question: 'returns',
-      answer: (
-        <>
-          returns and exchanges accepted within 30 days. full details on our{' '}
-          <a href="/legal/returns">returns page</a>.
-        </>
-      ),
-    },
-    {
-      question: 'care',
-      answer: (
-        <>
-          wash inside out at a low temperature, and follow the specific
-          instructions printed on the garment&rsquo;s label.
-        </>
-      ),
-    },
+    {question: t('faqData.careQ'), answer: t('faqData.careA')},
   ];
 }
-
-/** Generic product questions for the standalone /faq page. */
-export const productFaq: FaqItem[] = getProductFaq();

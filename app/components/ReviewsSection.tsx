@@ -1,7 +1,7 @@
 import {Link} from 'react-router';
 import type {Review} from '~/data/reviews';
 import {StarRating} from '~/components/StarRating';
-import {useT} from '~/lib/i18n';
+import {useI18n, useT} from '~/lib/i18n';
 
 const AVATAR_PALETTE = ['#111111', '#3d3d3a', '#6b6b66', '#8a8a86'];
 
@@ -34,11 +34,12 @@ function avatarColor(id: string): string {
  */
 function ReviewCard({review}: {review: Review}) {
   const t = useT();
+  const {locale} = useI18n();
   return (
     <article className="review-card">
       <StarRating rating={review.rating} className="review-card__stars" />
 
-      <p className="review-card__text">&ldquo;{review.text}&rdquo;</p>
+      <p className="review-card__text">&ldquo;{review.text[locale]}&rdquo;</p>
 
       <footer className="review-card__author">
         <span

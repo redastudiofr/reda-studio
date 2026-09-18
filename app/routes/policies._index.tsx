@@ -1,6 +1,7 @@
 import {useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/policies._index';
 import type {PoliciesQuery, PolicyItemFragment} from 'storefrontapi.generated';
+import {useT} from '~/lib/i18n';
 
 export async function loader({context}: Route.LoaderArgs) {
   const data: PoliciesQuery = await context.storefront.query(POLICIES_QUERY);
@@ -26,7 +27,7 @@ export default function Policies() {
 
   return (
     <div className="page">
-      <h1>informations</h1>
+      <h1>{t('policies.title')}</h1>
       <ul>
         {policies.map((policy) => (
           <li key={policy.id} style={{padding: '0.6rem 0', borderBottom: '1px solid var(--color-line)'}}>

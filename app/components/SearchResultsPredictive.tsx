@@ -7,6 +7,7 @@ import {
   type PredictiveSearchReturn,
 } from '~/lib/search';
 import {useAside} from './Aside';
+import {useT} from '~/lib/i18n';
 
 type PredictiveSearchItems = PredictiveSearchReturn['result']['items'];
 
@@ -85,11 +86,12 @@ function SearchResultsPredictiveArticles({
   articles,
   closeSearch,
 }: PartialPredictiveSearchResult<'articles'>) {
+  const t = useT();
   if (!articles.length) return null;
 
   return (
     <div className="search-group" key="articles">
-      <h5>articles</h5>
+      <h5>{t('search.articles')}</h5>
       <ul>
         {articles.map((article) => {
           const articleUrl = urlWithTrackingParams({
@@ -126,11 +128,12 @@ function SearchResultsPredictiveCollections({
   collections,
   closeSearch,
 }: PartialPredictiveSearchResult<'collections'>) {
+  const t = useT();
   if (!collections.length) return null;
 
   return (
     <div className="search-group" key="collections">
-      <h5>collections</h5>
+      <h5>{t('search.collections')}</h5>
       <ul>
         {collections.map((collection) => {
           const collectionUrl = urlWithTrackingParams({
@@ -167,11 +170,12 @@ function SearchResultsPredictivePages({
   pages,
   closeSearch,
 }: PartialPredictiveSearchResult<'pages'>) {
+  const t = useT();
   if (!pages.length) return null;
 
   return (
     <div className="search-group" key="pages">
-      <h5>pages</h5>
+      <h5>{t('search.pages')}</h5>
       <ul>
         {pages.map((page) => {
           const pageUrl = urlWithTrackingParams({
@@ -200,11 +204,12 @@ function SearchResultsPredictiveProducts({
   products,
   closeSearch,
 }: PartialPredictiveSearchResult<'products'>) {
+  const t = useT();
   if (!products.length) return null;
 
   return (
     <div className="search-group" key="products">
-      <h5>products</h5>
+      <h5>{t('search.products')}</h5>
       <ul>
         {products.map((product) => {
           const productUrl = urlWithTrackingParams({

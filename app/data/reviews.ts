@@ -1,3 +1,5 @@
+import type {Locale} from '~/lib/i18n';
+
 export interface Review {
   /** Stable identifier, used as the React key. */
   id: string;
@@ -5,10 +7,13 @@ export interface Review {
   name: string;
   rating: number;
   /**
-   * The review in full. It is the card's only piece of copy — no headline,
-   * no pull quote — so nothing ever reads as a summary of the review.
+   * The review in full, in both languages. It is the card's only piece of
+   * copy — no headline, no pull quote — so nothing ever reads as a summary of
+   * the review. Written here rather than in the dictionary because a review is
+   * content, not interface: it belongs with the name and the rating it goes
+   * with.
    */
-  text: string;
+  text: Record<Locale, string>;
   /** Drives the "verified review" badge. Only set on part of the pool. */
   certified?: boolean;
 }
@@ -26,132 +31,132 @@ const REVIEW_POOL: Review[] = [
     id: 'r01',
     name: 'Amine Belkacem',
     rating: 5,
-    text: 'perfect, nothing to fault.',
+    text: {en: 'perfect, nothing to fault.', fr: 'parfait, rien à redire.'},
     certified: true,
   },
   {
     id: 'r02',
     name: 'Camille Rousseau',
     rating: 5,
-    text: 'everything was perfect, fast delivery.',
+    text: {en: 'everything was perfect, fast delivery.', fr: 'tout était parfait, livraison rapide.'},
     certified: true,
   },
   {
     id: 'r03',
     name: 'Mehdi Kaddouri',
     rating: 4.5,
-    text: 'very good, exactly like the photos.',
+    text: {en: 'very good, exactly like the photos.', fr: 'très bien, exactement comme sur les photos.'},
   },
   {
     id: 'r04',
     name: 'Sarah Lemoine',
     rating: 5,
-    text: 'flawless, i recommend it.',
+    text: {en: 'flawless, i recommend it.', fr: 'impeccable, je recommande.'},
     certified: true,
   },
   {
     id: 'r05',
     name: 'Clara Fontaine',
     rating: 4,
-    text: 'good piece, arrived quickly.',
+    text: {en: 'good piece, arrived quickly.', fr: 'belle pièce, arrivée rapidement.'},
     certified: true,
   },
   {
     id: 'r06',
     name: 'Lucas Dubois',
     rating: 5,
-    text: 'great quality, fits true to size.',
+    text: {en: 'great quality, fits true to size.', fr: 'super qualité, taille normalement.'},
   },
   {
     id: 'r07',
     name: 'Yanis Rahmani',
     rating: 4.5,
-    text: 'really happy, parcel arrived in 2 days.',
+    text: {en: 'really happy, parcel arrived in 2 days.', fr: 'très content, colis reçu en 2 jours.'},
     certified: true,
   },
   {
     id: 'r08',
     name: 'Nadia Toumi',
     rating: 5,
-    text: 'impeccable, just as expected.',
+    text: {en: 'impeccable, just as expected.', fr: 'impeccable, conforme à mes attentes.'},
   },
   {
     id: 'r09',
     name: 'Chloé Marchand',
     rating: 5,
-    text: 'nothing to complain about, fast shipping.',
+    text: {en: 'nothing to complain about, fast shipping.', fr: 'rien à redire, expédition rapide.'},
   },
   {
     id: 'r10',
     name: 'Céline Vasseur',
     rating: 4,
-    text: 'matches the description, thank you.',
+    text: {en: 'matches the description, thank you.', fr: 'conforme à la description, merci.'},
     certified: true,
   },
   {
     id: 'r11',
     name: 'Adam Khelifi',
     rating: 5,
-    text: 'perfect, my second order.',
+    text: {en: 'perfect, my second order.', fr: 'parfait, ma deuxième commande.'},
     certified: true,
   },
   {
     id: 'r12',
     name: 'Inès Daoudi',
     rating: 4.5,
-    text: 'top quality, lovely fabric.',
+    text: {en: 'top quality, lovely fabric.', fr: 'qualité au top, très belle matière.'},
   },
   {
     id: 'r13',
     name: 'Thomas Berger',
     rating: 5,
-    text: 'very satisfied, shipped fast.',
+    text: {en: 'very satisfied, shipped fast.', fr: 'très satisfait, envoi rapide.'},
     certified: true,
   },
   {
     id: 'r14',
     name: 'Hugo Renaud',
     rating: 4,
-    text: 'good product, nicely packaged.',
+    text: {en: 'good product, nicely packaged.', fr: 'bon produit, bien emballé.'},
     certified: true,
   },
   {
     id: 'r15',
     name: 'Emma Girard',
     rating: 5,
-    text: 'i love it, hangs beautifully.',
+    text: {en: 'i love it, hangs beautifully.', fr: 'j’adore, très beau tombé.'},
   },
   {
     id: 'r16',
     name: 'Karim Saidi',
     rating: 4.5,
-    text: 'order arrived quickly, very good.',
+    text: {en: 'order arrived quickly, very good.', fr: 'commande arrivée vite, très bien.'},
   },
   {
     id: 'r17',
     name: 'Léa Moreau',
     rating: 5,
-    text: 'everything is perfect.',
+    text: {en: 'everything is perfect.', fr: 'tout est parfait.'},
     certified: true,
   },
   {
     id: 'r18',
     name: 'Maxime Petit',
     rating: 5,
-    text: 'first class, i recommend.',
+    text: {en: 'first class, i recommend.', fr: 'au top, je recommande.'},
     certified: true,
   },
   {
     id: 'r19',
     name: 'Sofia Zeroual',
     rating: 4,
-    text: 'happy with it, runs slightly large.',
+    text: {en: 'happy with it, runs slightly large.', fr: 'content, taille légèrement grand.'},
   },
   {
     id: 'r20',
     name: 'Rayan Fournier',
     rating: 4.5,
-    text: 'excellent quality for the price.',
+    text: {en: 'excellent quality for the price.', fr: 'excellente qualité pour le prix.'},
     certified: true,
   },
 ];
