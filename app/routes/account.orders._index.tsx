@@ -23,6 +23,7 @@ import type {
   OrderItemFragment,
 } from 'customer-accountapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {useT} from '~/lib/i18n';
 
 type OrdersLoaderData = {
   customer: CustomerOrdersFragment;
@@ -93,22 +94,23 @@ function OrdersTable({
 }
 
 function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
+  const t = useT();
   return (
     <div>
       {hasFilters ? (
         <>
-          <p>No orders found matching your search.</p>
+          <p>{t('account.noMatch')}</p>
           <br />
           <p>
-            <Link to="/account/orders">Clear filters →</Link>
+            <Link to="/account/orders">{t('account.clearFilters')}</Link>
           </p>
         </>
       ) : (
         <>
-          <p>You haven&apos;t placed any orders yet.</p>
+          <p>{t('account.noOrders')}</p>
           <br />
           <p>
-            <Link to="/collections">Start Shopping →</Link>
+            <Link to="/collections">{t('account.startShopping')}</Link>
           </p>
         </>
       )}
@@ -121,6 +123,8 @@ function OrderSearchForm({
 }: {
   currentFilters: OrderFilterParams;
 }) {
+  const t = useT();
+  const t = useT();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigation = useNavigation();
   const isSearching =
@@ -153,25 +157,25 @@ function OrderSearchForm({
       ref={formRef}
       onSubmit={handleSubmit}
       className="order-search-form"
-      aria-label="Search orders"
+      aria-label={t('account.searchOrders')}
     >
       <fieldset className="order-search-fieldset">
-        <legend className="order-search-legend">Filter Orders</legend>
+        <legend className="order-search-legend">{t('account.filterOrders')}</legend>
 
         <div className="order-search-inputs">
           <input
             type="search"
             name={ORDER_FILTER_FIELDS.NAME}
-            placeholder="Order #"
-            aria-label="Order number"
+            placeholder={t('account.orderNumber')}
+            aria-label={t('account.orderNumber')}
             defaultValue={currentFilters.name || ''}
             className="order-search-input"
           />
           <input
             type="search"
             name={ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER}
-            placeholder="Confirmation #"
-            aria-label="Confirmation number"
+            placeholder={t('account.confirmationNumber')}
+            aria-label={t('account.confirmationNumber')}
             defaultValue={currentFilters.confirmationNumber || ''}
             className="order-search-input"
           />
@@ -179,7 +183,7 @@ function OrderSearchForm({
 
         <div className="order-search-buttons">
           <button type="submit" disabled={isSearching}>
-            {isSearching ? 'Searching' : 'Search'}
+            {isSearching ? t('account.searching') : t('account.search')}
           </button>
           {hasFilters && (
             <button
@@ -190,7 +194,7 @@ function OrderSearchForm({
                 formRef.current?.reset();
               }}
             >
-              Clear
+              {t('account.clear')}
             </button>
           )}
         </div>
@@ -200,6 +204,7 @@ function OrderSearchForm({
 }
 
 function OrderItem({order}: {order: OrderItemFragment}) {
+  const t = useT();
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
   return (
     <>
@@ -209,12 +214,16 @@ function OrderItem({order}: {order: OrderItemFragment}) {
         </Link>
         <p>{new Date(order.processedAt).toDateString()}</p>
         {order.confirmationNumber && (
-          <p>Confirmation: {order.confirmationNumber}</p>
+          <p>
+            {t('account.confirmation')}: {order.confirmationNumber}
+          </p>
         )}
         <p>{order.financialStatus}</p>
         {fulfillmentStatus && <p>{fulfillmentStatus}</p>}
         <Money data={order.totalPrice} />
-        <Link to={`/account/orders/${btoa(order.id)}`}>View Order →</Link>
+        <Link to={`/account/orders/${btoa(order.id)}`}>
+          {t('account.viewOrder')}
+        </Link>
       </fieldset>
       <br />
     </>

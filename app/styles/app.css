@@ -980,6 +980,47 @@ html {
 }
 
 /*
+ * Opening animation — mobile only.
+ *
+ * The page settles in instead of appearing all at once: the header first,
+ * then the content just behind it, while the hero runs its own staggered
+ * entrance (see AnimatedHero). It is CSS on elements that are in the HTML
+ * already, so nothing is delayed waiting for JavaScript and the load itself
+ * is no slower; sections further down keep fading in as they are scrolled
+ * to, exactly as before.
+ *
+ * Deliberately short and shallow — 8px of travel — so it reads as the page
+ * arriving, not as an effect.
+ */
+@keyframes app-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 47.99em) {
+  .site-header {
+    animation: app-enter 420ms 40ms var(--ease-out-soft) both;
+  }
+
+  main {
+    animation: app-enter 520ms var(--ease-out-soft) both;
+  }
+}
+
+@media (max-width: 47.99em) and (prefers-reduced-motion: reduce) {
+  .site-header,
+  main {
+    animation: none;
+  }
+}
+
+/*
 * --------------------------------------------------
 * Hero
 * --------------------------------------------------
@@ -1016,17 +1057,16 @@ html {
   height: 100%;
 }
 
-/* Mobile has its own portrait-framed shot (~9:16), so a centred cover is
-   enough — no top-biased crop, which the shared landscape image used to
-   need to keep the subjects in frame.
+/* The mobile shot is a 3:4 portrait and the hero is taller than that, so
+   `cover` trims the sides rather than the top and bottom. The subject stands
+   just left of centre, hence 45% rather than 50%: it keeps him in frame on
+   the narrowest phones, where the trim is deepest.
 
-   There is exactly one of these in the document. The two mobile shots used
-   to be stacked here and crossfaded on a timer; now the server picks one
-   per page load (app/lib/heroImage.ts) and only that one is rendered, so
-   there's nothing to fade between and no opacity to manage. */
+   There is exactly one of these in the document — the shop asked for this
+   photo only, so there is no second shot to swap in and nothing to fade. */
 .hero__img--mobile {
   object-fit: cover;
-  object-position: 50% 50%;
+  object-position: 45% 50%;
 }
 
 /*
@@ -3977,6 +4017,37 @@ html {
   flex: 0 0 44%;
   scroll-snap-align: start;
   min-width: 0;
+}
+
+/*
+ * Mobile: the product rail becomes a plain two-column grid of the first
+ * eight products.
+ *
+ * A horizontal rail is right on a desktop, where a row shows five or six
+ * pieces at once; on a phone it showed barely two, and everything else
+ * needed a sideways swipe most visitors never make. The grid puts eight in
+ * front of them straight away, in the same shape as the homepage catalogue
+ * below it. Desktop keeps the rail exactly as it was.
+ */
+@media (max-width: 47.99em) {
+  .collection-feature__rail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 0.5rem;
+    /* The rail mechanics are switched off rather than left dangling: with no
+       overflow there is nothing to scroll, snap or drag. */
+    overflow: visible;
+    scroll-snap-type: none;
+    cursor: default;
+  }
+
+  .collection-feature__item {
+    flex: none;
+  }
+
+  .collection-feature__item:nth-child(n + 9) {
+    display: none;
+  }
 }
 
 @media (min-width: 40em) {

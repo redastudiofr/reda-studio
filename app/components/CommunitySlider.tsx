@@ -4,6 +4,7 @@ import {Reveal} from '~/components/Reveal';
 import {COMMUNITY_IMAGES} from '~/lib/communityImages';
 import {INSTAGRAM_URL, TIKTOK_URL} from '~/lib/social';
 import {useHorizontalRail} from '~/lib/useHorizontalRail';
+import {useT} from '~/lib/i18n';
 
 /**
  * "notre communauté" — a single row of customer photos under the products.
@@ -24,6 +25,7 @@ import {useHorizontalRail} from '~/lib/useHorizontalRail';
  * layered on top by useHorizontalRail, and never touch the touch path.
  */
 export function CommunitySlider() {
+  const t = useT();
   // Looping needs enough photos to fill the rail three times over; below
   // that it would just be the same two pictures repeating on screen.
   const loop = COMMUNITY_IMAGES.length >= 3;
@@ -40,7 +42,7 @@ export function CommunitySlider() {
   return (
     <Reveal as="section" className="community" aria-labelledby="community-heading">
       <h2 className="section-title" id="community-heading">
-        notre communauté
+        {t('community.title')}
       </h2>
 
       <div className="rail-wrap">
@@ -52,7 +54,7 @@ export function CommunitySlider() {
               href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Voir la communauté reda studio sur Instagram"
+              aria-label={t('community.instagram')}
             >
               <img
                 src={image.src}
@@ -70,8 +72,8 @@ export function CommunitySlider() {
           onNext={() => scrollByCard(1)}
           disablePrev={atStart}
           disableNext={atEnd}
-          prevLabel="Photo précédente"
-          nextLabel="Photo suivante"
+          prevLabel={t('rail.prevPhoto')}
+          nextLabel={t('rail.nextPhoto')}
         />
       </div>
 
@@ -79,7 +81,7 @@ export function CommunitySlider() {
           things you actually click. A single <a> wrapping both couldn't
           lead to two places, and nesting links isn't valid markup. */}
       <div className="community__socials">
-        <span className="community__socials-label">nos réseaux</span>
+        <span className="community__socials-label">{t('community.socials')}</span>
         <span className="community__socials-links">
           <a
             href={INSTAGRAM_URL}

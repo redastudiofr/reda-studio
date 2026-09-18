@@ -1,4 +1,5 @@
 import {redirect, useLoaderData} from 'react-router';
+import {useT} from '~/lib/i18n';
 import type {Route} from './+types/account.orders.$id';
 import {Money, Image} from '@shopify/hydrogen';
 import type {
@@ -93,10 +94,10 @@ export default function OrderRoute() {
         <table>
           <thead>
             <tr>
-              <th scope="col">Product</th>
-              <th scope="col">Price</th>
-              <th scope="col">Quantity</th>
-              <th scope="col">Total</th>
+              <th scope="col">{t('account.product')}</th>
+              <th scope="col">{t('account.price')}</th>
+              <th scope="col">{t('account.quantity')}</th>
+              <th scope="col">{t('account.total')}</th>
             </tr>
           </thead>
           <tbody>
@@ -110,10 +111,10 @@ export default function OrderRoute() {
               discountPercentage) && (
               <tr>
                 <th scope="row" colSpan={3}>
-                  <p>Discounts</p>
+                  <p>{t('account.discounts')}</p>
                 </th>
                 <th scope="row">
-                  <p>Discounts</p>
+                  <p>{t('account.discounts')}</p>
                 </th>
                 <td>
                   {discountPercentage ? (
@@ -126,10 +127,10 @@ export default function OrderRoute() {
             )}
             <tr>
               <th scope="row" colSpan={3}>
-                <p>Subtotal</p>
+                <p>{t('account.subtotal')}</p>
               </th>
               <th scope="row">
-                <p>Subtotal</p>
+                <p>{t('account.subtotal')}</p>
               </th>
               <td>
                 <Money data={order.subtotal!} />
@@ -137,10 +138,10 @@ export default function OrderRoute() {
             </tr>
             <tr>
               <th scope="row" colSpan={3}>
-                Tax
+                {t('account.tax')}
               </th>
               <th scope="row">
-                <p>Tax</p>
+                <p>{t('account.tax')}</p>
               </th>
               <td>
                 <Money data={order.totalTax!} />
@@ -148,10 +149,10 @@ export default function OrderRoute() {
             </tr>
             <tr>
               <th scope="row" colSpan={3}>
-                Total
+                {t('account.total')}
               </th>
               <th scope="row">
-                <p>Total</p>
+                <p>{t('account.total')}</p>
               </th>
               <td>
                 <Money data={order.totalPrice!} />
@@ -160,7 +161,7 @@ export default function OrderRoute() {
           </tfoot>
         </table>
         <div>
-          <h3>Shipping Address</h3>
+          <h3>{t('account.shippingAddress')}</h3>
           {order?.shippingAddress ? (
             <address>
               <p>{order.shippingAddress.name}</p>
@@ -176,9 +177,9 @@ export default function OrderRoute() {
               )}
             </address>
           ) : (
-            <p>No shipping address defined</p>
+            <p>{t('account.noShippingAddress')}</p>
           )}
-          <h3>Status</h3>
+          <h3>{t('account.status')}</h3>
           <div>
             <p>{fulfillmentStatus}</p>
           </div>
@@ -187,7 +188,7 @@ export default function OrderRoute() {
       <br />
       <p>
         <a target="_blank" href={order.statusPageUrl} rel="noreferrer">
-          View Order Status →
+          {t('account.viewOrderStatus')}
         </a>
       </p>
     </div>

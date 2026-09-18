@@ -30,7 +30,7 @@ export function QuantitySelector({
           className="quantity__btn"
           onClick={() => onChange(Math.max(1, value - 1))}
           disabled={!canDecrease}
-          aria-label="Decrease quantity"
+          aria-label={t('cart.decrease')}
         >
           −
         </button>
@@ -42,7 +42,7 @@ export function QuantitySelector({
           className="quantity__btn"
           onClick={() => onChange(Math.min(ceiling, value + 1))}
           disabled={!canIncrease}
-          aria-label="Increase quantity"
+          aria-label={t('cart.increase')}
         >
           +
         </button>

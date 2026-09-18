@@ -74,7 +74,7 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 
   return (
     <Aside type="cart" heading={t('cart.title')}>
-      <Suspense fallback={<p>loading…</p>}>
+      <Suspense fallback={<p>{t('common.loading')}</p>}>
         <Await resolve={cart}>
           {(resolved) => <CartMain cart={resolved} layout="aside" />}
         </Await>
@@ -97,13 +97,13 @@ function SearchAside() {
                 name="q"
                 onChange={fetchResults}
                 onFocus={fetchResults}
-                placeholder="search for a product"
+                placeholder={t('search.placeholder')}
                 ref={inputRef}
                 type="search"
                 list={queriesDatalistId}
               />
               <button className="link" onClick={goToSearch}>
-                ok
+                {t('search.go')}
               </button>
             </div>
           )}
@@ -114,7 +114,7 @@ function SearchAside() {
             const {articles, collections, pages, products, queries} = items;
 
             if (state === 'loading' && term.current) {
-              return <p className="search-group">searching…</p>;
+              return <p className="search-group">{t('search.searching')}</p>;
             }
 
             if (!total) {

@@ -1,4 +1,5 @@
 import {Link} from 'react-router';
+import {useT} from '~/lib/i18n';
 import type {Route} from './+types/$';
 
 export async function loader({request}: Route.LoaderArgs) {
@@ -12,12 +13,14 @@ export default function CatchAllPage() {
 }
 
 export function ErrorBoundary() {
+  const t = useT();
+
   return (
     <div className="not-found">
       <h1>404</h1>
-      <p>this page doesn&rsquo;t exist.</p>
+      <p>{t('notFound.text')}</p>
       <Link to="/" className="btn--ghost">
-        retour à l&rsquo;accueil
+        {t('notFound.back')}
       </Link>
     </div>
   );

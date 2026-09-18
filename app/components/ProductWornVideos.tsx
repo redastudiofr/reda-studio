@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState, type RefObject} from 'react';
 import {useAmbientVideo} from '~/lib/useAmbientVideo';
 import {useHorizontalRail} from '~/lib/useHorizontalRail';
+import {useT} from '~/lib/i18n';
 import {RailArrows} from '~/components/RailArrows';
 
 /**
@@ -97,6 +98,7 @@ function WornVideoTile({
 }
 
 export function ProductWornVideos() {
+  const t = useT();
   const {ref, scrollByCard} = useHorizontalRail<HTMLDivElement>({loop: true});
 
   if (!VIDEOS.length) return null;
@@ -108,7 +110,7 @@ export function ProductWornVideos() {
   return (
     <section className="pdp__worn" aria-labelledby="worn-heading">
       <h2 className="pdp__section-title" id="worn-heading">
-        Your Product Worn
+        {t('product.worn')}
       </h2>
 
       <div className="rail-wrap">
@@ -125,8 +127,8 @@ export function ProductWornVideos() {
         <RailArrows
           onPrev={() => scrollByCard(-1)}
           onNext={() => scrollByCard(1)}
-          prevLabel="Vidéo précédente"
-          nextLabel="Vidéo suivante"
+          prevLabel={t('rail.prevVideo')}
+          nextLabel={t('rail.nextVideo')}
         />
       </div>
     </section>

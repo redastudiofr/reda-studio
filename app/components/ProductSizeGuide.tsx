@@ -29,7 +29,7 @@ export function ProductSizeGuide({sizes}: {sizes: SizeEntry[]}) {
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
       >
-        guide des tailles
+        {t('product.sizeGuide')}
         <ChevronDownIcon className="size-guide__chevron" />
       </button>
 

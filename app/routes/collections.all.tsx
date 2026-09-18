@@ -3,6 +3,7 @@ import {useLoaderData} from 'react-router';
 import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {ProductItem} from '~/components/ProductItem';
+import {useT} from '~/lib/i18n';
 import type {CollectionItemFragment} from 'storefrontapi.generated';
 
 export const meta: Route.MetaFunction = () => {
@@ -29,12 +30,13 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
 }
 
 export default function Catalog() {
+  const t = useT();
   const {products} = useLoaderData<typeof loader>();
 
   return (
     <div className="collection-page">
       <div className="collection-head">
-        <h1>shop</h1>
+        <h1>{t('shop.title')}</h1>
       </div>
       <PaginatedResourceSection<CollectionItemFragment>
         connection={products}

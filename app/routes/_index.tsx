@@ -1,8 +1,7 @@
-import {Await, useLoaderData, Link, data, type HeadersFunction} from 'react-router';
+import {Await, useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/_index';
 import {Suspense, useState} from 'react';
 import type {AllProductsQuery} from 'storefrontapi.generated';
-import {heroCookie, heroIndexFromRequest} from '~/lib/heroImage';
 import {ProductItem} from '~/components/ProductItem';
 import {CollectionsSlider} from '~/components/CollectionsSlider';
 import {CollectionProductShowcase} from '~/components/CollectionProductShowcase';
@@ -37,14 +36,20 @@ export const meta: Route.MetaFunction = () => {
 /**
  * Preload the hero image (LCP element on the homepage).
  *
- * Desktop only. `links` is static — it can't see which mobile photo this
- * particular request picked (see HERO_IMAGES_MOBILE below), and preloading
- * a fixed one would be wrong half the time, downloading a photo the page
- * never shows. The mobile <img> carries fetchPriority="high" instead, and
- * the preload scanner finds it in the HTML either way.
+ * One entry per breakpoint, each behind the same media query the <picture>
+ * uses, so a phone only ever fetches the mobile photo and a desktop only the
+ * desktop one. The mobile line became possible once that photo stopped
+ * alternating per page load: `links` is static and could not have known
+ * which of two shots the request would render.
  */
 export function links() {
   return [
+    {
+      rel: 'preload',
+      as: 'image',
+      href: '/images/hero3-mobile.webp',
+      media: '(max-width: 47.99em)',
+    },
     {
       rel: 'preload',
       as: 'image',
@@ -55,50 +60,25 @@ export function links() {
 }
 
 /**
- * The mobile hero shows exactly one of these per page load, alternating on
- * every reload — the choice is made server-side from a cookie, see
- * app/lib/heroImage.ts. Add a third entry and the rotation simply runs
- * round three; nothing else needs to change.
+ * The mobile hero. One photo, always the same: the shop asked for the
+ * rooftop shot only, so the two-photo rotation that used to alternate them
+ * per page load (and the cookie behind it) is gone with it.
  */
-const HERO_IMAGES_MOBILE = [
-  {
-    src: '/images/hero3-mobile.webp',
-    alt: 'A man from behind in a reda studio t-shirt and jeans, looking out over a rooftop pool and the city skyline',
-  },
-  {
-    src: '/images/home-hero-mobile-2.jpg',
-    alt: 'A man in a reda studio t-shirt and sweatpants leaning against a black Porsche, a horse behind him',
-  },
-];
+const HERO_IMAGE_MOBILE = {
+  src: '/images/hero3-mobile.webp',
+  alt: 'A man from behind in a reda studio t-shirt and jeans, looking out over a rooftop pool and the city skyline',
+};
 
 const HERO_IMAGE_DESKTOP = {
   src: '/images/home-hero-desktop.jpg',
   alt: 'A man in a reda studio t-shirt and sweatpants leaning against a black Porsche, a horse behind him',
 };
 
-/** Lets the loader's Set-Cookie (the hero alternation) reach the browser. */
-export const headers: HeadersFunction = ({loaderHeaders}) => loaderHeaders;
-
 export async function loader(args: Route.LoaderArgs) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
 
-  // Which mobile hero photo this load gets, and the cookie that hands the
-  // next load the other one. Decided here rather than in the browser so the
-  // HTML already carries the right photo — see app/lib/heroImage.ts.
-  const heroMobileIndex = heroIndexFromRequest(
-    args.request,
-    HERO_IMAGES_MOBILE.length,
-  );
-
-  return data(
-    {...deferredData, ...criticalData, heroMobileIndex},
-    {
-      headers: {
-        'Set-Cookie': heroCookie(heroMobileIndex, HERO_IMAGES_MOBILE.length),
-      },
-    },
-  );
+  return {...deferredData, ...criticalData};
 }
 
 async function loadCriticalData({context}: Route.LoaderArgs) {
@@ -169,7 +149,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <AnimatedHero
-        imageMobile={HERO_IMAGES_MOBILE[data.heroMobileIndex]}
+        imageMobile={HERO_IMAGE_MOBILE}
         imageDesktop={HERO_IMAGE_DESKTOP}
         eyebrow={t('home.eyebrow')}
         title="reda studio"

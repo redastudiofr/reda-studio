@@ -3,6 +3,7 @@ import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
+import {useT} from '~/lib/i18n';
 import {BUNDLE_ADD_ACTION, OFFER_DISCOUNT_CODE} from '~/lib/offers';
 import {PREORDER_BLOCKED_VARIANT_IDS} from '~/lib/preorder';
 
@@ -199,11 +200,12 @@ export async function loader({context}: Route.LoaderArgs) {
 }
 
 export default function Cart() {
+  const t = useT();
   const cart = useLoaderData<typeof loader>();
 
   return (
     <div className="page page--wide">
-      <h1>cart</h1>
+      <h1>{t('cart.title')}</h1>
       <CartMain layout="page" cart={cart} />
     </div>
   );

@@ -36,6 +36,7 @@ function getLineItemChildrenMap(lines: CartLine[]): LineItemChildrenMap {
 }
 
 export function CartMain({layout, cart: originalCart}: CartMainProps) {
+  const t = useT();
   const cart = useOptimisticCart(originalCart);
   const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
   const childrenMap = getLineItemChildrenMap(cart?.lines?.nodes ?? []);
@@ -51,7 +52,7 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
 
   return (
     <>
-      <ul className="cart-lines" aria-label="Cart items">
+      <ul className="cart-lines" aria-label={t('cart.items')}>
         {(cart?.lines?.nodes ?? []).map((line) => {
           if ('parentRelationship' in line && line.parentRelationship?.parent) {
             return null;

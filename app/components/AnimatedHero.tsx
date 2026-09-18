@@ -39,10 +39,8 @@ const glassButtonClassName =
  * framer-motion, without the shadcn/radix Button layer this project doesn't
  * otherwise use.
  *
- * One photo per breakpoint, one at a time. Which mobile photo arrives is
- * decided per page load on the server — see app/lib/heroImage.ts — so the
- * two alternate across reloads without either the markup or this component
- * knowing anything about it.
+ * One photo per breakpoint, one at a time: the caller picks which, and only
+ * the one for the current width is ever downloaded.
  */
 export function AnimatedHero({
   imageMobile,

@@ -12,9 +12,10 @@ import type {
   RegularSearchQuery,
   PredictiveSearchQuery,
 } from 'storefrontapi.generated';
+import {useT} from '~/lib/i18n';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Search`}];
+  return [{title: 'reda studio | search'}];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {
@@ -37,24 +38,25 @@ export async function loader({request, context}: Route.LoaderArgs) {
  * Renders the /search route
  */
 export default function SearchPage() {
+  const t = useT();
   const {type, term, result, error} = useLoaderData<typeof loader>();
   if (type === 'predictive') return null;
 
   return (
     <div className="search">
-      <h1>Search</h1>
+      <h1>{t('search.title')}</h1>
       <SearchForm>
         {({inputRef}) => (
           <>
             <input
               defaultValue={term}
               name="q"
-              placeholder="Search…"
+              placeholder={t('search.placeholder')}
               ref={inputRef}
               type="search"
             />
             &nbsp;
-            <button type="submit">Search</button>
+            <button type="submit">{t('search.submit')}</button>
           </>
         )}
       </SearchForm>

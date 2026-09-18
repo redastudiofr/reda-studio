@@ -2,6 +2,7 @@ import type {RecoProductFragment} from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 import {RailArrows} from '~/components/RailArrows';
 import {useHorizontalRail} from '~/lib/useHorizontalRail';
+import {useT} from '~/lib/i18n';
 
 /**
  * "You may also like" — a real horizontal carousel at every breakpoint
@@ -15,12 +16,13 @@ import {useHorizontalRail} from '~/lib/useHorizontalRail';
  * client-side check.
  */
 export function RelatedProductsRail({items}: {items: RecoProductFragment[]}) {
+  const t = useT();
   const {ref, scrollByCard, atStart, atEnd} = useHorizontalRail<HTMLDivElement>();
 
   return (
     <section className="pdp__related" aria-labelledby="related-heading">
       <h2 className="pdp__section-title" id="related-heading">
-        you may also like
+        {t('product.youMightLike')}
       </h2>
 
       <div className="rail-wrap">
@@ -36,8 +38,8 @@ export function RelatedProductsRail({items}: {items: RecoProductFragment[]}) {
           onNext={() => scrollByCard(1)}
           disablePrev={atStart}
           disableNext={atEnd}
-          prevLabel="Produit précédent"
-          nextLabel="Produit suivant"
+          prevLabel={t('rail.prevProduct')}
+          nextLabel={t('rail.nextProduct')}
         />
       </div>
     </section>

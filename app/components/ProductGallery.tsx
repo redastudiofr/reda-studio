@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {useHorizontalRail} from '~/lib/useHorizontalRail';
+import {useT} from '~/lib/i18n';
 
 type GalleryImage = {
   id?: string | null;
@@ -40,6 +41,7 @@ export function ProductGallery({
   images: GalleryImage[];
   title: string;
 }) {
+  const t = useT();
   const {ref: trackRef} = useHorizontalRail<HTMLDivElement>();
   const [active, setActive] = useState(0);
   const multiple = images.length > 1;
@@ -129,11 +131,11 @@ export function ProductGallery({
   return (
     <div
       className={`gallery ${multiple ? 'gallery--multiple' : 'gallery--single'}`}
-      aria-roledescription={multiple ? 'carrousel' : undefined}
-      aria-label={multiple ? `Images du produit ${title}` : undefined}
+      aria-roledescription={multiple ? t('gallery.carousel') : undefined}
+      aria-label={multiple ? `${t('gallery.label')} — ${title}` : undefined}
     >
       {multiple && (
-        <div className="gallery__thumbs" role="tablist" aria-label="Images du produit">
+        <div className="gallery__thumbs" role="tablist" aria-label={t('gallery.label')}>
           {images.map((image, index) => (
             <button
               type="button"
@@ -142,11 +144,11 @@ export function ProductGallery({
               onClick={() => select(index)}
               role="tab"
               aria-selected={index === active}
-              aria-label={`Voir l'image ${index + 1} sur ${images.length}`}
+              aria-label={t('gallery.view', {index: index + 1, total: images.length})}
             >
               <Image
                 data={image}
-                alt={image.altText || `${title} — miniature ${index + 1}`}
+                alt={image.altText || t('gallery.thumbAlt', {title, index: index + 1})}
                 sizes="80px"
                 loading="lazy"
               />
@@ -166,15 +168,15 @@ export function ProductGallery({
             className={`gallery__slide ${index === active ? 'gallery__slide--active' : ''}`}
             key={image.id ?? `${image.url}-${index}`}
             role={multiple ? 'group' : undefined}
-            aria-roledescription={multiple ? 'image' : undefined}
-            aria-label={multiple ? `${index + 1} sur ${images.length}` : undefined}
+            aria-roledescription={multiple ? t('gallery.image') : undefined}
+            aria-label={multiple ? t('gallery.position', {index: index + 1, total: images.length}) : undefined}
           >
             <div className="gallery__slide-inner">
               <Image
                 data={image}
                 alt={
                   image.altText ||
-                  (multiple ? `${title} — image ${index + 1}` : title)
+                  (multiple ? t('gallery.imageAlt', {title, index: index + 1}) : title)
                 }
                 sizes="(min-width: 64em) 40vw, 84vw"
                 loading={index === 0 ? 'eager' : 'lazy'}
@@ -193,7 +195,7 @@ export function ProductGallery({
               key={image.id ?? `dot-${image.url}-${index}`}
               className={`gallery__dot ${index === active ? 'gallery__dot--active' : ''}`}
               onClick={() => select(index)}
-              aria-label={`Voir l'image ${index + 1} sur ${images.length}`}
+              aria-label={t('gallery.view', {index: index + 1, total: images.length})}
               aria-current={index === active}
             />
           ))}

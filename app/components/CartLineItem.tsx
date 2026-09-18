@@ -108,6 +108,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
 }
 
 function CartLineRemoveButton({lineIds, disabled}: {lineIds: string[]; disabled: boolean}) {
+  const t = useT();
   return (
     <CartForm
       fetcherKey={getUpdateKey(lineIds)}
@@ -116,7 +117,7 @@ function CartLineRemoveButton({lineIds, disabled}: {lineIds: string[]; disabled:
       inputs={{lineIds}}
     >
       <button disabled={disabled} type="submit" className="cart-line__remove">
-        retirer
+        {t('cart.remove')}
       </button>
     </CartForm>
   );

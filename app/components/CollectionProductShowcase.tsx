@@ -111,8 +111,8 @@ export function CollectionProductShowcase({
           onNext={() => scrollByCard(1)}
           disablePrev={atStart}
           disableNext={atEnd}
-          prevLabel="Produit précédent"
-          nextLabel="Produit suivant"
+          prevLabel={t('rail.prevProduct')}
+          nextLabel={t('rail.nextProduct')}
         />
       </div>
     </Reveal>

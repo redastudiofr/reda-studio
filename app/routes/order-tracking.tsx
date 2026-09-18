@@ -2,6 +2,7 @@ import {Form, Link, useActionData, useLoaderData, useNavigation} from 'react-rou
 import type {Route} from './+types/order-tracking';
 import type {TrackedOrderFragment} from 'customer-accountapi.generated';
 import {CUSTOMER_ORDER_TRACKING_QUERY} from '~/graphql/customer-account/CustomerOrderTrackingQuery';
+import {useT} from '~/lib/i18n';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -34,7 +35,11 @@ type TrackingResult = {
 
 type ActionResult =
   | {state: 'found'; tracking: TrackingResult}
-  | {state: 'not-found'; message: string}
+  | {
+      state: 'not-found';
+      messageKey: 'missingFields' | 'notFound' | 'emailMismatch';
+      orderNumber?: string;
+    }
   | {state: 'needs-login'; orderNumber: string; email: string};
 
 export async function loader({context}: Route.LoaderArgs) {
@@ -63,7 +68,7 @@ export async function action({request, context}: Route.ActionArgs) {
   if (!rawNumber || !email) {
     return {
       state: 'not-found',
-      message: 'Please give both your order number and the email you ordered with.',
+      messageKey: 'missingFields',
     } satisfies ActionResult;
   }
 
@@ -92,7 +97,8 @@ export async function action({request, context}: Route.ActionArgs) {
   if (!order) {
     return {
       state: 'not-found',
-      message: `We couldn't find order #${orderNumber} on this account. Check the number, or sign in with the account the order was placed on.`,
+      messageKey: 'notFound',
+      orderNumber,
     } satisfies ActionResult;
   }
 
@@ -102,7 +108,8 @@ export async function action({request, context}: Route.ActionArgs) {
   if (orderEmail && orderEmail !== email) {
     return {
       state: 'not-found',
-      message: `That email doesn't match the one on order #${orderNumber}.`,
+      messageKey: 'emailMismatch',
+      orderNumber,
     } satisfies ActionResult;
   }
 
@@ -175,6 +182,7 @@ function formatDateTime(value: string): string {
 
 export default function OrderTracking() {
   const {loggedIn} = useLoaderData<typeof loader>();
+  const t = useT();
   const result = useActionData<typeof action>() as ActionResult | undefined;
   const navigation = useNavigation();
   const busy = navigation.state === 'submitting';
@@ -182,17 +190,14 @@ export default function OrderTracking() {
   return (
     <div className="tracking">
       <header className="tracking__header">
-        <p className="tracking__eyebrow">support</p>
-        <h1 className="tracking__title">order tracking</h1>
-        <p className="tracking__intro">
-          Your order number is in your confirmation email — it looks like
-          #1024. Enter it with the email you ordered with.
-        </p>
+        <p className="tracking__eyebrow">{t('track.eyebrow')}</p>
+        <h1 className="tracking__title">{t('track.title')}</h1>
+        <p className="tracking__intro">{t('track.intro')}</p>
       </header>
 
       <Form method="post" className="tracking__form">
         <div className="tracking__field">
-          <label htmlFor="orderNumber">order number</label>
+          <label htmlFor="orderNumber">{t('track.orderNumber')}</label>
           <input
             id="orderNumber"
             name="orderNumber"
@@ -208,7 +213,7 @@ export default function OrderTracking() {
         </div>
 
         <div className="tracking__field">
-          <label htmlFor="email">email address</label>
+          <label htmlFor="email">{t('track.email')}</label>
           <input
             id="email"
             name="email"
@@ -220,7 +225,7 @@ export default function OrderTracking() {
         </div>
 
         <button type="submit" className="btn btn--full" disabled={busy}>
-          {busy ? 'looking…' : 'track order'}
+          {busy ? t('track.looking') : t('track.submit')}
         </button>
       </Form>
 
@@ -230,28 +235,29 @@ export default function OrderTracking() {
 
       {result?.state === 'not-found' && (
         <p className="tracking__error" role="alert">
-          {result.message}
+          {result.messageKey === 'missingFields'
+            ? t('track.missingFields')
+            : t(
+                result.messageKey === 'notFound' ? 'track.notFound' : 'track.emailMismatch',
+                {number: result.orderNumber ?? ''},
+              )}
         </p>
       )}
 
       {result?.state === 'found' && <Result tracking={result.tracking} />}
 
       <section className="tracking__help">
-        <h2>can&rsquo;t find your order?</h2>
+        <h2>{t('track.helpTitle')}</h2>
+        <p>{t('track.helpBody1')}</p>
         <p>
-          Tracking becomes available once the parcel leaves us, one to three
-          business days after you order. A freshly created tracking number can
-          also take a few hours to activate with the carrier.
-        </p>
-        <p>
-          Still stuck? Write to us from the <Link to="/contact">contact page</Link>{' '}
-          and we&rsquo;ll look it up ourselves. Full delivery times are in our{' '}
-          <Link to="/legal/shipping">shipping policy</Link>.
+          {t('track.helpBody2')} <Link to="/contact">{t('faq.contactPage')}</Link>{' '}
+          {t('track.helpBody3')}{' '}
+          <Link to="/legal/shipping">{t('faq.shippingPolicy')}</Link>.
         </p>
         {loggedIn && (
           <p>
-            You&rsquo;re signed in — all your orders are in{' '}
-            <Link to="/account/orders">your account</Link>.
+            {t('track.signedIn')}{' '}
+            <Link to="/account/orders">{t('track.yourAccount')}</Link>.
           </p>
         )}
       </section>
@@ -267,6 +273,8 @@ export default function OrderTracking() {
  * number.
  */
 function NeedsLogin({email}: {email: string}) {
+  const t = useT();
+
   /*
    * A plain link, not a form: /account/login is a GET loader that redirects to
    * Shopify. `login_hint` carries the address the visitor just typed so they
@@ -281,37 +289,34 @@ function NeedsLogin({email}: {email: string}) {
 
   return (
     <div className="tracking__gate">
-      <h2>one step first</h2>
-      <p>
-        We only show order details to the person who placed the order. Confirm
-        your email address and we&rsquo;ll bring you straight back here —
-        Shopify sends you a one-time code, there is no password to remember.
-      </p>
+      <h2>{t('track.gateTitle')}</h2>
+      <p>{t('track.gateBody')}</p>
       <a href={loginUrl} className="btn">
-        confirm my email
+        {t('track.gateCta')}
       </a>
     </div>
   );
 }
 
 function Result({tracking}: {tracking: TrackingResult}) {
+  const t = useT();
   const hasShipments = tracking.shipments.length > 0;
 
   return (
     <section className="tracking__result" aria-live="polite">
       <div className="tracking__result-head">
         <div>
-          <p className="tracking__result-label">order</p>
+          <p className="tracking__result-label">{t('track.order')}</p>
           <p className="tracking__result-value">{tracking.orderName}</p>
         </div>
         <div>
-          <p className="tracking__result-label">placed</p>
+          <p className="tracking__result-label">{t('track.placed')}</p>
           <p className="tracking__result-value">
             {formatDate(tracking.placedAt)}
           </p>
         </div>
         <div>
-          <p className="tracking__result-label">status</p>
+          <p className="tracking__result-label">{t('track.status')}</p>
           <p className="tracking__result-value tracking__result-value--status">
             {humanise(tracking.fulfillmentStatus)}
           </p>
@@ -319,10 +324,7 @@ function Result({tracking}: {tracking: TrackingResult}) {
       </div>
 
       {!hasShipments && (
-        <p className="tracking__pending">
-          Your order is confirmed and being prepared. A tracking number appears
-          here as soon as it ships — one to three business days.
-        </p>
+        <p className="tracking__pending">{t('track.pending')}</p>
       )}
 
       {tracking.shipments.map((shipment, index) => (
@@ -341,7 +343,7 @@ function Result({tracking}: {tracking: TrackingResult}) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            open the full order status page →
+            {t('track.statusPage')}
           </a>
         </p>
       )}
@@ -358,25 +360,26 @@ function ShipmentCard({
   index: number;
   total: number;
 }) {
+  const t = useT();
   return (
     <article className="tracking__shipment">
       {total > 1 && (
         <p className="tracking__shipment-index">
-          parcel {index + 1} of {total}
+          {t('track.parcelOf', {index: index + 1, total})}
         </p>
       )}
 
       <dl className="tracking__grid">
         <div>
-          <dt>status</dt>
+          <dt>{t('track.status')}</dt>
           <dd>{humanise(shipment.status)}</dd>
         </div>
         <div>
-          <dt>carrier</dt>
+          <dt>{t('track.carrier')}</dt>
           <dd>{shipment.carrier ?? '—'}</dd>
         </div>
         <div>
-          <dt>tracking number</dt>
+          <dt>{t('track.trackingNumber')}</dt>
           <dd>
             {shipment.trackingNumber ? (
               shipment.trackingUrl ? (
@@ -396,18 +399,18 @@ function ShipmentCard({
           </dd>
         </div>
         <div>
-          <dt>shipped</dt>
+          <dt>{t('track.shipped')}</dt>
           <dd>{formatDate(shipment.shippedAt)}</dd>
         </div>
         <div>
-          <dt>estimated delivery</dt>
+          <dt>{t('track.estimated')}</dt>
           <dd>{formatDate(shipment.estimatedDeliveryAt)}</dd>
         </div>
       </dl>
 
       {shipment.history.length > 0 && (
         <div className="tracking__history">
-          <p className="tracking__history-title">history</p>
+          <p className="tracking__history-title">{t('track.history')}</p>
           <ol>
             {shipment.history.map((event, position) => (
               <li
