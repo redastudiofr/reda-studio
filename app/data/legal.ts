@@ -7,11 +7,12 @@
  * France. The Admin policies still exist and are what Shopify's own checkout
  * links to — keep the two in step (see docs/legal-pages.md).
  *
- * The Legal Notice (`legal-notice`) is written in French rather than English,
- * unlike the other four documents — "mentions légales" is a specific French
- * legal filing, not a genre that translates, and every field it names (SIREN,
- * SIRET, TVA intracommunautaire) is a French concept with no English
- * equivalent to translate it into.
+ * Each document exists in both languages: this file holds the English set,
+ * ./legal.fr.ts the French one, under the same handles. The French version of
+ * the Legal Notice is the one that governs — "mentions légales" is a French
+ * legal filing, and the fields it names (SIREN, SIRET, TVA intracommunautaire)
+ * are French concepts; the English rendering exists so an English-speaking
+ * customer can read the same facts, and says so on the page itself.
  *
  * Every fact it states — the hosting, the payment provider, which cookies are
  * set, what data the site actually collects — was verified against this
@@ -23,6 +24,9 @@
  * one can never be mistaken for real data. See docs/legal-pages.md for the
  * complete list and what replaces each one.
  */
+
+import type {Locale} from '~/lib/i18n';
+import {LEGAL_DOCUMENTS_FR} from './legal.fr';
 
 export type LegalField = {
   label: string;
@@ -60,7 +64,7 @@ export type LegalDocument = {
   sections: LegalSection[];
 };
 
-export const LEGAL_DOCUMENTS: LegalDocument[] = [
+const LEGAL_DOCUMENTS_EN: LegalDocument[] = [
   {
     handle: 'terms',
     title: 'terms & conditions',
@@ -347,29 +351,32 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
 
   {
     handle: 'legal-notice',
-    title: 'mentions légales',
-    navLabel: 'mentions légales',
+    title: 'legal notice',
+    navLabel: 'legal notice',
     intro:
-      "L'éditeur du site, l'hébergement, le paiement, la propriété intellectuelle et les données personnelles.",
+      'Who publishes this site, where it is hosted, how payment works, and what happens to your data.',
     updated: 'August 2026',
     sections: [
       {
-        heading: 'éditeur du site',
-        body: [`Le présent site est édité par :`],
+        heading: 'about this translation',
+        body: [
+          `This page is an English rendering of the French "mentions légales", a filing French law requires of anyone publishing a commercial website. The French version — the one this site shows when it is set to French — is the version that governs; this one is here so an English-speaking customer can read the same facts.`,
+        ],
+      },
+      {
+        heading: 'site publisher',
+        body: [`This site is published by:`],
         fields: [
-          {label: 'Nom / raison sociale', value: 'Reda Studio'},
-          {label: 'Nom commercial', value: 'Reda Studio'},
-          {label: 'Forme juridique', value: 'Micro-entreprise'},
-          {label: 'Siège social', value: '52 Rue Rémy Dumoncel'},
+          {label: 'Company name', value: 'Reda Studio'},
+          {label: 'Trading name', value: 'Reda Studio'},
+          {label: 'Legal form', value: 'Micro-entreprise (French sole trader)'},
+          {label: 'Registered office', value: '52 Rue Rémy Dumoncel'},
           {label: 'SIREN', value: '583 741 926'},
           {label: 'SIRET', value: '583 741 926 00047'},
+          {label: 'Intra-EU VAT number', value: 'FR 74 583741926'},
           {
-            label: 'Numéro de TVA intracommunautaire',
-            value: 'FR 74 583741926',
-          },
-          {
-            label: 'Représentants légaux',
-            value: 'Alex Salvatico et Antoine Dubosque',
+            label: 'Legal representatives',
+            value: 'Alex Salvatico and Antoine Dubosque',
           },
           {
             label: 'Contact',
@@ -377,76 +384,76 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
             href: 'mailto:redastudio.fr@gmail.com',
           },
           {
-            label: 'Téléphone',
+            label: 'Phone',
             value: '06 50 39 83 10',
             href: 'tel:+33650398310',
           },
         ],
       },
       {
-        heading: 'hébergement',
+        heading: 'hosting',
         body: [
-          `Ce site est hébergé sur Shopify Oxygen, l'infrastructure d'hébergement fournie par Shopify International Limited, Victoria Buildings, 1–2 Haddington Road, Dublin 4, D04 XN32, Irlande.`,
-          `La plateforme de commerce en ligne — prise de commande, paiement et gestion des expéditions — est fournie par Shopify Inc. et ses filiales.`,
+          `This site is hosted on Shopify Oxygen, the hosting infrastructure provided by Shopify International Limited, Victoria Buildings, 1–2 Haddington Road, Dublin 4, D04 XN32, Ireland.`,
+          `The commerce platform behind it — orders, payment and shipping management — is provided by Shopify Inc. and its subsidiaries.`,
         ],
       },
       {
-        heading: 'paiement',
+        heading: 'payment',
         body: [
-          `Les paiements effectués sur ce site sont traités de manière sécurisée par Shopify Payments. Reda Studio ne stocke ni ne traite directement les données de carte bancaire : elles sont transmises directement à ce prestataire de paiement.`,
+          `Payments made on this site are processed securely by Shopify Payments. Reda Studio neither stores nor directly handles card details: they go straight to that payment provider.`,
         ],
       },
       {
-        heading: 'propriété intellectuelle',
+        heading: 'intellectual property',
         body: [
-          `L'ensemble des éléments présents sur le site Reda Studio, notamment les textes, photographies, images, logos, graphismes, icônes, éléments visuels, produits et mise en page, est protégé par les dispositions applicables en matière de propriété intellectuelle.`,
-          `Toute reproduction, représentation, modification, adaptation ou exploitation, totale ou partielle, de ces éléments sans autorisation préalable est interdite, sauf dans les cas prévus par la loi.`,
+          `Everything on the Reda Studio site — texts, photographs, images, logos, graphics, icons, visual elements, products and layout — is protected by applicable intellectual property law.`,
+          `Reproducing, representing, modifying, adapting or exploiting any of it, in whole or in part, without prior authorisation is prohibited, except where the law allows.`,
         ],
       },
       {
-        heading: 'données personnelles',
+        heading: 'personal data',
         body: [
-          `Dans le cadre du fonctionnement du site, Reda Studio est amené à collecter et traiter certaines données personnelles, uniquement dans les cas suivants :`,
+          `Running this site means Reda Studio collects and processes some personal data, in these cases only:`,
         ],
         list: [
-          'commandes et livraison — nom, adresse, e-mail et téléphone, transmis à notre transporteur pour l’expédition',
-          'paiement — traité directement par Shopify Payments ; Reda Studio n’accède à aucune donnée bancaire',
-          'service client et avis clients — informations transmises via la page contact ou le formulaire d’avis, pour répondre à une demande ou publier un retour d’expérience',
-          'newsletter et offres — e-mail ou numéro de téléphone laissés volontairement, pour l’envoi d’offres commerciales, uniquement avec le consentement de la personne concernée',
-          'sécurité — données techniques nécessaires au bon fonctionnement du site et à la prévention des abus',
+          'orders and delivery — name, address, email and phone, passed to our carrier for shipping',
+          'payment — handled directly by Shopify Payments; Reda Studio never sees any banking data',
+          'customer service and reviews — what you send through the contact page or the review form, to answer you or publish your feedback',
+          'newsletter and offers — the email address or phone number you chose to leave, to send commercial offers, with your consent only',
+          'security — technical data needed to keep the site working and prevent abuse',
         ],
       },
       {
-        heading: 'données personnelles — vos droits',
+        heading: 'personal data — your rights',
         body: [
-          `Ces données sont conservées le temps nécessaire à ces finalités, dans le respect du Règlement Général sur la Protection des Données (RGPD). Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de vos données, ainsi que du droit de retirer à tout moment votre consentement aux communications marketing.`,
-          `Le détail complet — ce qui est collecté, pourquoi, combien de temps et avec qui c'est partagé — figure dans notre Politique de confidentialité. Pour exercer ces droits, écrivez-nous à redastudio.fr@gmail.com ou depuis la page contact.`,
+          `This data is kept for as long as those purposes require, in line with the General Data Protection Regulation (GDPR). You have the right to access, correct, erase, restrict, object to and port your data, and to withdraw your consent to marketing at any time.`,
+          `The full detail — what is collected, why, for how long and with whom it is shared — is in our Privacy Policy. To exercise these rights, write to redastudio.fr@gmail.com or use the contact page.`,
         ],
       },
       {
         heading: 'cookies',
         body: [
-          `Ce site utilise des cookies strictement nécessaires à son fonctionnement — panier, session de navigation et préférence de langue — qui ne nécessitent pas de consentement.`,
-          `Il utilise également l'outil de mesure d'audience natif fourni par Shopify, pour nos propres statistiques de visites et de commandes. Aucun pixel publicitaire tiers (Meta, TikTok, Google Ads ou équivalent) n'est utilisé à ce jour.`,
-          `Vous pouvez configurer votre navigateur pour refuser les cookies à tout moment ; certaines fonctionnalités, notamment le panier, peuvent alors ne plus fonctionner correctement.`,
+          `This site uses cookies that are strictly necessary for it to work — your cart, your browsing session and your language preference — which require no consent.`,
+          `It also uses Shopify's own built-in analytics for our own visit and order statistics. No third-party advertising pixel (Meta, TikTok, Google Ads or similar) is used to date.`,
+          `You can set your browser to refuse cookies at any time; some features, the cart in particular, may then stop working properly.`,
         ],
       },
       {
-        heading: 'responsabilité',
+        heading: 'liability',
         body: [
-          `Reda Studio s'efforce de maintenir les informations présentes sur ce site aussi exactes et à jour que possible. Ces informations — notamment les produits, les prix et les délais — peuvent néanmoins évoluer sans préavis.`,
-          `Reda Studio ne saurait être tenu responsable des interruptions temporaires du site liées à la maintenance, à des causes techniques ou à des événements indépendants de sa volonté.`,
+          `Reda Studio works to keep the information on this site as accurate and current as possible. That information — products, prices and lead times in particular — may nonetheless change without notice.`,
+          `Reda Studio cannot be held liable for temporary interruptions of the site caused by maintenance, technical issues or events beyond its control.`,
         ],
       },
       {
-        heading: 'médiation et résolution des litiges en ligne',
+        heading: 'mediation and online dispute resolution',
         body: [
-          `Conformément à l'article L.612-1 du Code de la consommation, vous pouvez recourir gratuitement à un médiateur de la consommation en cas de litige. La Commission européenne met également à disposition une plateforme de résolution des litiges en ligne, accessible à l'adresse ec.europa.eu/consumers/odr.`,
+          `Under article L.612-1 of the French Consumer Code, you may refer a dispute to a consumer mediator free of charge. The European Commission also provides an online dispute resolution platform at ec.europa.eu/consumers/odr.`,
         ],
       },
       {
-        heading: 'nous contacter',
-        body: [`Une question sur ces mentions, une commande ou vos données ?`],
+        heading: 'contact us',
+        body: [`A question about this notice, an order or your data?`],
         fields: [
           {
             label: 'Email',
@@ -454,19 +461,31 @@ export const LEGAL_DOCUMENTS: LegalDocument[] = [
             href: 'mailto:redastudio.fr@gmail.com',
           },
           {
-            label: 'Téléphone',
+            label: 'Phone',
             value: '06 50 39 83 10',
             href: 'tel:+33650398310',
           },
-          {label: 'Adresse', value: '52 Rue Rémy Dumoncel'},
+          {label: 'Address', value: '52 Rue Rémy Dumoncel'},
         ],
-        cta: {label: 'écrire depuis la page contact', to: '/contact'},
+        cta: {label: 'write from the contact page', to: '/contact'},
       },
     ],
   },
 ];
 
-/** Lookup by URL handle. */
-export function findLegalDocument(handle?: string): LegalDocument | undefined {
-  return LEGAL_DOCUMENTS.find((document) => document.handle === handle);
+/**
+ * The set shown for each language. Same handles on both sides, so a visitor
+ * switching language stays on the same document.
+ */
+export const LEGAL_DOCUMENTS: Record<Locale, LegalDocument[]> = {
+  en: LEGAL_DOCUMENTS_EN,
+  fr: LEGAL_DOCUMENTS_FR,
+};
+
+/** Lookup by URL handle, in the language being shown. */
+export function findLegalDocument(
+  locale: Locale,
+  handle?: string,
+): LegalDocument | undefined {
+  return LEGAL_DOCUMENTS[locale].find((document) => document.handle === handle);
 }

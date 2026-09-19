@@ -10,6 +10,7 @@ import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu, type NavCollection} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
 import {NewsletterPopup} from '~/components/NewsletterPopup';
+import {LanguagePrompt} from '~/components/LanguagePrompt';
 import {useT} from '~/lib/i18n';
 import {SearchIcon} from '~/components/Icons';
 import {HeaderToneProvider} from '~/lib/header-tone';
@@ -27,6 +28,8 @@ interface PageLayoutProps {
   isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
   promoSignupEnabled?: boolean;
+  /** False only for a visitor who has never answered the language question. */
+  localeChosen?: boolean;
   children?: React.ReactNode;
 }
 
@@ -38,6 +41,7 @@ export function PageLayout({
   isLoggedIn,
   publicStoreDomain,
   promoSignupEnabled = false,
+  localeChosen = true,
 }: PageLayoutProps) {
   // The header is fixed (see .site-header), so it no longer reserves layout
   // space itself — every route needs that space reserved via padding,
@@ -64,6 +68,7 @@ export function PageLayout({
         <main className={isHome ? undefined : 'main--with-header-space'}>{children}</main>
         <Footer header={header} />
         <NewsletterPopup enabled={promoSignupEnabled} />
+        {!localeChosen && <LanguagePrompt />}
       </HeaderToneProvider>
     </Aside.Provider>
   );

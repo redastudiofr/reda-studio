@@ -5,6 +5,8 @@ import {
   findLegalDocument,
   type LegalSection,
 } from '~/data/legal';
+import {useT} from '~/lib/i18n';
+import {localeFromRequest} from '~/lib/i18n/locale';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
@@ -13,8 +15,11 @@ export const meta: Route.MetaFunction = ({data}) => {
   ];
 };
 
-export async function loader({params}: Route.LoaderArgs) {
-  const document = findLegalDocument(params.handle);
+export async function loader({params, request}: Route.LoaderArgs) {
+  // The documents exist in both languages under the same handles, so the page
+  // follows the language the visitor chose — see app/data/legal.fr.ts.
+  const locale = localeFromRequest(request);
+  const document = findLegalDocument(locale, params.handle);
 
   if (!document) {
     throw new Response('Not found', {status: 404});
@@ -24,26 +29,32 @@ export async function loader({params}: Route.LoaderArgs) {
     document,
     // The other documents, for the sidebar — every legal page links to all
     // the others, which is what people actually do on these pages.
-    others: LEGAL_DOCUMENTS.map(({handle, navLabel}) => ({handle, navLabel})),
+    others: LEGAL_DOCUMENTS[locale].map(({handle, navLabel}) => ({
+      handle,
+      navLabel,
+    })),
   };
 }
 
 export default function LegalPage() {
   const {document, others} = useLoaderData<typeof loader>();
+  const t = useT();
 
   return (
     <div className="legal">
       <header className="legal__header">
-        <p className="legal__eyebrow">legal</p>
+        <p className="legal__eyebrow">{t('legal.eyebrow')}</p>
         <h1 className="legal__title">{document.title}</h1>
         <p className="legal__intro">{document.intro}</p>
-        <p className="legal__updated">last updated — {document.updated}</p>
+        <p className="legal__updated">
+          {t('legal.updated')} {document.updated}
+        </p>
       </header>
 
       <div className="legal__layout">
         {/* Sticky on desktop, a plain row of links on mobile. */}
-        <nav className="legal__nav" aria-label="Legal documents">
-          <p className="legal__nav-title">documents</p>
+        <nav className="legal__nav" aria-label={t('legal.documents')}>
+          <p className="legal__nav-title">{t('legal.documents')}</p>
           <ul>
             {others.map((entry) => (
               <li key={entry.handle}>
@@ -67,8 +78,8 @@ export default function LegalPage() {
 
           <footer className="legal__foot">
             <p>
-              A question about any of this? Write to us from the{' '}
-              <Link to="/contact">contact page</Link>.
+              {t('legal.question')}{' '}
+              <Link to="/contact">{t('faq.contactPage')}</Link>.
             </p>
           </footer>
         </article>

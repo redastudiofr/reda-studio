@@ -19,7 +19,7 @@ export const DEFAULT_LOCALE: Locale = 'en';
 export const LOCALE_COOKIE = 'locale';
 
 /** A year: long enough that a returning customer never has to choose twice. */
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 export function isLocale(value: unknown): value is Locale {
   return typeof value === 'string' && (LOCALES as readonly string[]).includes(value);
@@ -41,9 +41,25 @@ export function localeFromRequest(request: Request): Locale {
   return DEFAULT_LOCALE;
 }
 
+/**
+ * Has this visitor already answered the language question?
+ *
+ * The cookie is the record of the choice — English included, which is why
+ * choosing English writes one too. No cookie means the question has never
+ * been put to them, and the prompt is rendered (see LanguagePrompt).
+ */
+export function localeChosen(request: Request): boolean {
+  const header = request.headers.get('Cookie');
+  if (!header) return false;
+
+  return header
+    .split(';')
+    .some((part) => part.trim().startsWith(`${LOCALE_COOKIE}=`));
+}
+
 /** The Set-Cookie value that remembers a choice. */
 export function localeCookie(locale: Locale): string {
-  return `${LOCALE_COOKIE}=${locale}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+  return `${LOCALE_COOKIE}=${locale}; Path=/; Max-Age=${LOCALE_COOKIE_MAX_AGE}; SameSite=Lax`;
 }
 
 /**
