@@ -18,6 +18,7 @@ import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
 import {withoutAutoCollections} from '~/lib/collections';
 import {I18nProvider} from '~/lib/i18n';
+import {consentChosen as hasConsentChoice} from '~/lib/cookieConsent';
 import {
   DEFAULT_LOCALE,
   localeChosen as hasLocaleChoice,
@@ -139,7 +140,13 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
   // Whether the language question has ever been answered — the pop-up is
   // rendered only when it hasn't, so it can't flash for someone who already
   // chose, and can't come back page after page.
-  return {header, navCollections, locale, localeChosen: hasLocaleChoice(request)};
+  return {
+    header,
+    navCollections,
+    locale,
+    localeChosen: hasLocaleChoice(request),
+    consentChosen: hasConsentChoice(request),
+  };
 }
 
 /**

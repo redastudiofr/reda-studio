@@ -192,6 +192,13 @@ export const en = {
   'popup.alreadyRegistered': 'this number is already registered — here is your code',
   'popup.error': 'we couldn’t save your number. please try again in a moment.',
 
+  'cookies.title': 'cookies',
+  'cookies.text':
+    'we use cookies for the cart, your language and our own visit statistics. no advertising trackers.',
+  'cookies.accept': 'accept',
+  'cookies.accepted': 'accepted',
+  'cookies.essential': 'essential only',
+  'cookies.more': 'privacy policy',
   'faqPage.title': 'frequently asked questions',
   'faqPage.intro': 'shipping, returns, care — the answers to the questions we are asked most often about reda studio and our pieces.',
   'faqPage.groupOrders': 'orders & shipping',
@@ -342,6 +349,7 @@ export const en = {
   'search.go': 'ok',
   'search.searching': 'searching…',
   'search.empty': 'no results, try a different search.',
+  'search.viewAllFor': 'see all results for “{term}” →',
   'contact.title': 'contact',
   'contact.intro': 'a question about an order, a piece or a collaboration? write to us.',
   'contact.name': 'name',
@@ -651,6 +659,13 @@ export const fr: Record<TranslationKey, string> = {
   'popup.alreadyRegistered': 'ce numéro est déjà inscrit — voici votre code',
   'popup.error': 'votre numéro n’a pas pu être enregistré. réessayez dans un instant.',
 
+  'cookies.title': 'cookies',
+  'cookies.text':
+    'nous utilisons des cookies pour le panier, votre langue et nos propres statistiques de visite. aucun traceur publicitaire.',
+  'cookies.accept': 'accepter',
+  'cookies.accepted': 'accepté',
+  'cookies.essential': 'essentiels uniquement',
+  'cookies.more': 'politique de confidentialité',
   'faqPage.title': 'questions fréquentes',
   'faqPage.intro': 'livraison, retours, entretien — les réponses aux questions qu’on nous pose le plus souvent sur reda studio et nos pièces.',
   'faqPage.groupOrders': 'commandes et livraison',
@@ -801,6 +816,7 @@ export const fr: Record<TranslationKey, string> = {
   'search.go': 'ok',
   'search.searching': 'recherche…',
   'search.empty': 'aucun résultat, essayez une autre recherche.',
+  'search.viewAllFor': 'voir tous les résultats pour « {term} » →',
   'contact.title': 'contact',
   'contact.intro': 'une question sur une commande, une pièce ou une collaboration ? écrivez-nous.',
   'contact.name': 'nom',

@@ -6083,70 +6083,89 @@ html {
 
 /*
 * --------------------------------------------------
-* Choix de la langue (LanguagePrompt)
+* Arrivée : langue et cookies (LanguagePrompt)
 * --------------------------------------------------
 *
-* Posée une seule fois, sur la première page d'un visiteur. Aucune animation
-* d'apparition, volontairement : une animation figée par le navigateur — un
-* onglet ralenti, une page restaurée — laisserait un panneau invisible
-* par-dessus tout le site, sans moyen de répondre.
+* Une seule interruption, posée une seule fois. Sur téléphone c'est une
+* feuille ancrée en bas, plus discrète qu'un panneau au milieu de l'écran ;
+* sur grand écran, une carte centrée, l'image à gauche.
+*
+* Aucune animation d'apparition, volontairement : une animation figée par le
+* navigateur — onglet ralenti, page restaurée — laisserait un panneau
+* invisible par-dessus tout le site, sans moyen de répondre.
 */
 .lang-prompt {
   position: fixed;
   inset: 0;
-  /* Au-dessus des tiroirs (60) et du pop-up promo. */
+  /* Au-dessus des tiroirs (60). */
   z-index: 70;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  padding: 1.25rem;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.5);
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
 }
 
 .lang-prompt__panel {
-  width: min(26rem, 100%);
-  padding: 2rem 1.5rem;
-  text-align: center;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
   background: var(--color-paper);
   color: var(--color-ink);
-  border: 1px solid var(--color-ink);
-  border-radius: 2px;
   box-shadow: var(--shadow-md);
 }
 
+/* Bandeau photo : le sujet est dans le tiers haut du cadrage, d'où le 32%. */
+.lang-prompt__media {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--color-tile);
+}
+
+.lang-prompt__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 32%;
+}
+
+.lang-prompt__body {
+  padding: 1.5rem 1.25rem 1.75rem;
+  text-align: center;
+}
+
 .lang-prompt__eyebrow {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   text-transform: uppercase;
-  letter-spacing: 0.24em;
-  opacity: 0.55;
+  letter-spacing: 0.26em;
+  opacity: 0.5;
 }
 
 .lang-prompt__title {
-  margin-top: 0.75rem;
-  font-size: 1rem;
+  margin-top: 0.7rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.45;
   text-transform: none;
 }
 
 .lang-prompt__title span {
   display: block;
   font-weight: 400;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .lang-prompt__actions {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  margin-top: 1.5rem;
+  gap: 0.55rem;
+  margin-top: 1.25rem;
 }
 
 .lang-prompt__btn {
-  padding: 0.9rem 1.2rem;
-  font-size: 0.72rem;
+  padding: 0.85rem 1.2rem;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -6174,20 +6193,115 @@ html {
   background: rgba(17, 17, 17, 0.85);
 }
 
-.lang-prompt__btn:focus-visible {
+.lang-prompt__btn:focus-visible,
+.lang-prompt__link:focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 3px;
 }
 
-.lang-prompt__note {
-  margin-top: 1rem;
-  font-size: 0.66rem;
-  line-height: 1.6;
-  opacity: 0.5;
+/* Les cookies : une ligne de texte et deux réponses en petit, sous un filet.
+   Volontairement plus discret que la langue — c'est une question de réglage,
+   pas la raison de la visite. */
+.lang-prompt__cookies {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-line);
 }
 
-/* Les deux réponses côte à côte dès qu'il y a la place. */
-@media (min-width: 30em) {
+.lang-prompt__cookies-text {
+  font-size: 0.68rem;
+  line-height: 1.6;
+  opacity: 0.6;
+}
+
+.lang-prompt__cookies-text a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.lang-prompt__cookies-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 0.7rem;
+}
+
+.lang-prompt__link {
+  padding: 0.25rem 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: none;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+  opacity: 0.65;
+  transition:
+    opacity 200ms var(--ease-out-soft),
+    border-color 200ms var(--ease-out-soft);
+}
+
+.lang-prompt__link:hover,
+.lang-prompt__link[data-chosen='true'] {
+  opacity: 1;
+  border-bottom-color: var(--color-ink);
+}
+
+.lang-prompt__note {
+  margin-top: 1rem;
+  font-size: 0.62rem;
+  line-height: 1.6;
+  opacity: 0.45;
+}
+
+.lang-prompt__note span {
+  display: block;
+}
+
+/* Grand écran : carte centrée, photo à gauche sur toute la hauteur. */
+@media (min-width: 40em) {
+  .lang-prompt {
+    align-items: center;
+    padding: 1.5rem;
+  }
+
+  .lang-prompt__panel {
+    display: grid;
+    grid-template-columns: 38% minmax(0, 1fr);
+    width: min(44rem, 100%);
+    max-height: min(32rem, 90vh);
+    border: 1px solid var(--color-ink);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .lang-prompt__media {
+    aspect-ratio: auto;
+    height: 100%;
+  }
+
+  .lang-prompt__media img {
+    object-position: 50% 45%;
+  }
+
+  .lang-prompt__body {
+    padding: 2.25rem 2rem;
+    text-align: left;
+    align-self: center;
+  }
+
+  .lang-prompt__cookies-actions,
+  .lang-prompt__title,
+  .lang-prompt__note {
+    text-align: left;
+  }
+
+  .lang-prompt__cookies-actions {
+    justify-content: flex-start;
+  }
+
   .lang-prompt__actions {
     flex-direction: row;
   }

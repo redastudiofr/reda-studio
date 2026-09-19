@@ -30,6 +30,8 @@ interface PageLayoutProps {
   promoSignupEnabled?: boolean;
   /** False only for a visitor who has never answered the language question. */
   localeChosen?: boolean;
+  /** False only for a visitor who has never answered the cookie question. */
+  consentChosen?: boolean;
   children?: React.ReactNode;
 }
 
@@ -42,6 +44,7 @@ export function PageLayout({
   publicStoreDomain,
   promoSignupEnabled = false,
   localeChosen = true,
+  consentChosen = true,
 }: PageLayoutProps) {
   // The header is fixed (see .site-header), so it no longer reserves layout
   // space itself — every route needs that space reserved via padding,
@@ -68,7 +71,12 @@ export function PageLayout({
         <main className={isHome ? undefined : 'main--with-header-space'}>{children}</main>
         <Footer header={header} />
         <NewsletterPopup enabled={promoSignupEnabled} />
-        {!localeChosen && <LanguagePrompt />}
+        {(!localeChosen || !consentChosen) && (
+          <LanguagePrompt
+            askLanguage={!localeChosen}
+            askCookies={!consentChosen}
+          />
+        )}
       </HeaderToneProvider>
     </Aside.Provider>
   );
@@ -157,7 +165,7 @@ function SearchAside() {
                     onClick={closeSearch}
                     to={`${SEARCH_ENDPOINT}?q=${term.current}`}
                   >
-                    <p>voir tous les résultats pour « {term.current} » →</p>
+                    <p>{t('search.viewAllFor', {term: term.current})}</p>
                   </Link>
                 ) : null}
               </>
