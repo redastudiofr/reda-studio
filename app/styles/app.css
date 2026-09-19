@@ -966,17 +966,22 @@ html {
 */
 /* Shorter and shallower than it was (650ms / 14px): sections should settle
    into place, not travel. */
+/* Hidden only while JavaScript is actually running: the `js` class is set
+   by an inline script in root.tsx before the page paints. A script that never
+   ran, or hydration that failed, used to leave these sections — whole rows of
+   products among them — invisible for good. */
 .reveal {
-  opacity: 0;
-  transform: translateY(10px);
   transition:
     opacity 480ms var(--ease-out-soft),
     transform 480ms var(--ease-out-soft);
 }
 
-.reveal--visible {
-  opacity: 1;
-  transform: translateY(0);
+/* Written as :not(--visible) rather than as two competing rules: a plain
+   `.js .reveal` would out-specify `.reveal--visible` and keep every section
+   hidden even once it had been revealed. */
+.js .reveal:not(.reveal--visible) {
+  opacity: 0;
+  transform: translateY(10px);
 }
 
 /*
@@ -4146,6 +4151,9 @@ html {
 * desktop reste inchangé.
 */
 @media (max-width: 47.99em) {
+  /* `.js` here only to outweigh `.js .reveal:not(.reveal--visible)`, which
+     would otherwise re-hide this section until it scrolled into view. */
+  .js .vision .reveal,
   .vision .reveal {
     opacity: 1;
     transform: none;

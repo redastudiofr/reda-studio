@@ -22,6 +22,12 @@ export function Reveal({
     const node = ref.current;
     if (!node) return;
 
+    // No observer support: show the content, skip the animation.
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -32,7 +38,20 @@ export function Reveal({
       {threshold: 0.08, rootMargin: '0px 0px -40px 0px'},
     );
     observer.observe(node);
-    return () => observer.disconnect();
+
+    /*
+     * Safety net. An observer that never reports — a background or throttled
+     * tab, a section whose measurements come out wrong, a browser quirk —
+     * used to mean the section simply stayed invisible, forever, refresh
+     * included. After this delay the content is shown whatever happened; a
+     * section already on screen has revealed long before it fires.
+     */
+    const failsafe = setTimeout(() => setVisible(true), 1500);
+
+    return () => {
+      clearTimeout(failsafe);
+      observer.disconnect();
+    };
   }, []);
 
   return (

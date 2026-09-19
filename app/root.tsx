@@ -197,6 +197,20 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <link rel="stylesheet" href={appStyles}></link>
         <Meta />
         <Links />
+        {/*
+          Marks the document as "JavaScript is running" before the page paints.
+          The scroll-reveal animation hides its sections until JavaScript says
+          otherwise (see .reveal in app.css), so without this flag a script
+          that never ran — or hydration that failed — left whole rows of
+          products invisible with no way back. Everything is visible by
+          default now; the animation is the enhancement, not the condition.
+        */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
       </head>
       <body>
         <I18nProvider locale={locale}>{children}</I18nProvider>
