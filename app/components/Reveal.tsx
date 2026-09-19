@@ -17,6 +17,11 @@ export function Reveal({
 } & React.HTMLAttributes<HTMLElement>) {
   const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
+  // Revealed by the safety net rather than by the observer: shown with no
+  // transition at all. A transition can be frozen (a throttled or restored
+  // tab keeps CSS animations at their first frame), and a frozen fade from
+  // opacity 0 is indistinguishable from content that was never there.
+  const [instant, setInstant] = useState(false);
 
   useEffect(() => {
     const node = ref.current;
@@ -24,6 +29,7 @@ export function Reveal({
 
     // No observer support: show the content, skip the animation.
     if (typeof IntersectionObserver === 'undefined') {
+      setInstant(true);
       setVisible(true);
       return;
     }
@@ -46,7 +52,10 @@ export function Reveal({
      * included. After this delay the content is shown whatever happened; a
      * section already on screen has revealed long before it fires.
      */
-    const failsafe = setTimeout(() => setVisible(true), 1500);
+    const failsafe = setTimeout(() => {
+      setInstant(true);
+      setVisible(true);
+    }, 1500);
 
     return () => {
       clearTimeout(failsafe);
@@ -57,7 +66,9 @@ export function Reveal({
   return (
     <Tag
       ref={ref as never}
-      className={`reveal ${visible ? 'reveal--visible' : ''} ${className}`.trim()}
+      className={`reveal ${visible ? 'reveal--visible' : ''} ${
+        instant ? 'reveal--instant' : ''
+      } ${className}`.trim()}
       {...rest}
     >
       {children}

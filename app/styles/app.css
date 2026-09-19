@@ -984,6 +984,14 @@ html {
   transform: translateY(10px);
 }
 
+/* Revealed by Reveal's safety net instead of by the observer: no transition
+   at all. A transition frozen at its first frame (a throttled tab, a page
+   restored from the back/forward cache) holds opacity 0, which looks exactly
+   like missing content — the bug this whole mechanism caused. */
+.reveal--instant {
+  transition: none;
+}
+
 /*
  * Opening animation — mobile only.
  *
@@ -997,13 +1005,21 @@ html {
  * Deliberately short and shallow — 8px of travel — so it reads as the page
  * arriving, not as an effect.
  */
+/*
+ * Movement only, never opacity.
+ *
+ * A CSS animation can be frozen at its first frame — a throttled tab, a page
+ * coming back from the back/forward cache, a browser in battery-saver mode —
+ * and an animation that starts at opacity 0 then leaves the header and the
+ * whole page invisible until something wakes it up. Sliding 8px is safe under
+ * exactly the same conditions: frozen, the content is 8px low and perfectly
+ * readable.
+ */
 @keyframes app-enter {
   from {
-    opacity: 0;
     transform: translateY(8px);
   }
   to {
-    opacity: 1;
     transform: none;
   }
 }
@@ -1203,13 +1219,14 @@ html {
   }
 }
 
+/* Movement only — same reason as @keyframes app-enter: these keyframes carry
+   products, and an animation frozen at its first frame would leave every card
+   revealed by "view more" invisible. */
 @keyframes product-reveal {
   from {
-    opacity: 0;
     transform: translateY(12px);
   }
   to {
-    opacity: 1;
     transform: none;
   }
 }
@@ -3716,13 +3733,13 @@ html {
  * no second observer, and the delay only ever applies to the tiles you can
  * see at that moment, so nothing off screen is animating to itself.
  */
+/* Movement only — see @keyframes app-enter. These are photographs: a frozen
+   fade from opacity 0 would simply look like an empty row. */
 @keyframes community-tile-in {
   from {
-    opacity: 0;
     transform: translateY(14px);
   }
   to {
-    opacity: 1;
     transform: none;
   }
 }
