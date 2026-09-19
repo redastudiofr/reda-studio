@@ -6116,9 +6116,11 @@ html {
   box-shadow: var(--shadow-md);
 }
 
-/* Bandeau photo : le sujet est dans le tiers haut du cadrage, d'où le 32%. */
+/* Bandeau photo, volontairement bas sur téléphone : la feuille doit rester
+   une bande en bas d'écran, pas un panneau plein cadre. Le sujet est dans le
+   tiers haut du cadrage, d'où le 32%. */
 .lang-prompt__media {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 21 / 9;
   overflow: hidden;
   background: var(--color-tile);
 }
@@ -6131,7 +6133,7 @@ html {
 }
 
 .lang-prompt__body {
-  padding: 1.5rem 1.25rem 1.75rem;
+  padding: 1.25rem 1.25rem 1.5rem;
   text-align: center;
 }
 
@@ -6160,7 +6162,7 @@ html {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
-  margin-top: 1.25rem;
+  margin-top: 1rem;
 }
 
 .lang-prompt__btn {
@@ -6203,8 +6205,8 @@ html {
    Volontairement plus discret que la langue — c'est une question de réglage,
    pas la raison de la visite. */
 .lang-prompt__cookies {
-  margin-top: 1.25rem;
-  padding-top: 1rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
   border-top: 1px solid var(--color-line);
 }
 
