@@ -101,43 +101,36 @@ function loadDeferredData({context}: Route.LoaderArgs) {
       return null;
     });
 
-  // The "Automne Drop" showcase — real products from that one Shopify
-  // collection. See app/components/CollectionProductShowcase.tsx for how
-  // this feeds a reusable image + horizontal slider section; to add another
-  // collection later, query it the same way and render another
-  // <CollectionProductShowcase>.
-  const automneDrop = context.storefront
-    .query(COLLECTION_PRODUCTS_QUERY, {
-      variables: {handle: 'automne-drop', first: 20},
-    })
-    .catch((error: Error) => {
-      console.error(error);
-      return null;
-    });
+  /*
+   * One homepage showcase — the collection's photo, its name and a slider of
+   * its real products (see CollectionProductShowcase). Adding another is one
+   * more call here plus one more <CollectionProductShowcase> below.
+   *
+   * A handle that no longer exists in Shopify is logged. That silence is what
+   * made the Best Seller section disappear without a trace when the store
+   * renamed "brest-seller" (a typo) to "best-seller": the query answered
+   * politely with no collection, the section rendered nothing, and nothing
+   * anywhere said why.
+   */
+  const showcase = (handle: string) =>
+    context.storefront
+      .query(COLLECTION_PRODUCTS_QUERY, {variables: {handle, first: 20}})
+      .then((response) => {
+        if (!response?.collection) {
+          console.warn(
+            `Homepage showcase: no collection "${handle}" in Shopify — that section will not render. Check the handle in Shopify Admin → Collections.`,
+          );
+        }
+        return response;
+      })
+      .catch((error: Error) => {
+        console.error(error);
+        return null;
+      });
 
-  // Same treatment for Summer — one more query, one more
-  // <CollectionProductShowcase>, exactly as that component was built for.
-  const summer = context.storefront
-    .query(COLLECTION_PRODUCTS_QUERY, {
-      variables: {handle: 'summer', first: 20},
-    })
-    .catch((error: Error) => {
-      console.error(error);
-      return null;
-    });
-
-  // "brest-seller" is the handle the collection actually has in Shopify: the
-  // title was fixed to "Best seller" but the handle kept the typo, and
-  // renaming a handle changes the collection's public URL. If it is ever
-  // renamed, this string is the one line to change.
-  const bestSeller = context.storefront
-    .query(COLLECTION_PRODUCTS_QUERY, {
-      variables: {handle: 'brest-seller', first: 20},
-    })
-    .catch((error: Error) => {
-      console.error(error);
-      return null;
-    });
+  const automneDrop = showcase('automne-drop');
+  const summer = showcase('summer');
+  const bestSeller = showcase('best-seller');
 
   return {allProducts, automneDrop, summer, bestSeller};
 }
