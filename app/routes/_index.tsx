@@ -268,7 +268,11 @@ function AllProducts({
           {(response) =>
             response ? (
               <>
-                <div className={`product-grid ${expanded ? 'product-grid--expanded' : ''}`}>
+                <div
+                  className={`product-grid product-grid--capped ${
+                    expanded ? 'product-grid--expanded' : ''
+                  }`}
+                >
                   {response.products.nodes.map((product, index) => (
                     <ProductItem
                       key={product.id}

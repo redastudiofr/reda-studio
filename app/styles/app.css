@@ -1177,20 +1177,23 @@ html {
   padding: 0.75rem;
 }
 
-/* Homepage only (see AllProducts in app/routes/_index.tsx): the first eight
-   rows (16 cards, matching the 2-up mobile grid) show up front, the rest
-   wait behind "view more" — mobile only, the desktop grids below are never
-   capped. Keep the 17 here in step with MOBILE_INITIAL_PRODUCT_COUNT in
-   that route; nth-child can't read a custom property, so this is the one
-   number that lives in two files. A card re-entering via
+/* The homepage catalogue only, and only on mobile: the first sixteen cards
+   show up front and the rest wait behind "view more".
+   .product-grid--capped is what limits it to that one grid — the same
+   .product-grid class dresses every collection page, where there is no
+   "view more" button, so an unscoped rule left every product past the
+   sixteenth invisible there with no way to reach it.
+   Keep the 17 in step with MOBILE_INITIAL_PRODUCT_COUNT in
+   app/routes/_index.tsx; nth-child can't read a custom property, so this is
+   the one number that lives in two files. A card re-entering via
    .product-grid--expanded restarts its animation — see @keyframes
    product-reveal. */
 @media (max-width: 47.99em) {
-  .product-grid:not(.product-grid--expanded) > *:nth-child(n + 17) {
+  .product-grid--capped:not(.product-grid--expanded) > *:nth-child(n + 17) {
     display: none;
   }
 
-  .product-grid--expanded > *:nth-child(n + 17) {
+  .product-grid--capped.product-grid--expanded > *:nth-child(n + 17) {
     animation: product-reveal 480ms var(--ease-out-soft) both;
   }
 }
@@ -1207,7 +1210,7 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .product-grid--expanded > *:nth-child(n + 13) {
+  .product-grid--capped.product-grid--expanded > *:nth-child(n + 13) {
     animation: none;
   }
 }
