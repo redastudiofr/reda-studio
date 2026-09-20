@@ -1815,6 +1815,10 @@ html {
   display: flex;
   gap: 0.6rem;
   overflow-x: auto;
+  /* Le doigt ne fait que du gauche-droite ici : pan-x interdit au geste
+     vertical de partir en défilement, donc les cartes ne bougent jamais de
+     haut en bas. Hors de cette bande, la page défile normalement. */
+  touch-action: pan-x;
   /* Le geste s'arrête au bord de la rangée : il ne déclenche pas le retour
      arrière du navigateur et ne fait pas défiler la page. */
   overscroll-behavior-x: contain;
@@ -1838,7 +1842,7 @@ html {
 /* Une carte et demie visible sur téléphone : on voit qu'il y en a d'autres
    à droite sans que la carte devienne minuscule. */
 .review-card {
-  flex: 0 0 74%;
+  flex: 0 0 78%;
   min-width: 0;
   scroll-snap-align: start;
   display: flex;
@@ -1903,6 +1907,66 @@ html {
 .reviews__cta p {
   font-size: 0.85rem;
   color: var(--color-muted);
+}
+
+/*
+* Apparition : les cartes arrivent légèrement floues et se précisent.
+*
+* Le flou est porté par les cartes, pas par la rangée, et la rangée elle-même
+* ne se translate pas : le mouvement resterait sinon perceptible pendant un
+* défilement horizontal. Reveal pose la classe quand la rangée entre à
+* l'écran, et affiche sans transition si son observateur n'a jamais répondu
+* (.reveal--instant) — sans ce filet, un flou figé rendrait des avis
+* illisibles pour de bon.
+*/
+.js .rail-wrap.reveal:not(.reveal--visible) {
+  opacity: 1;
+  transform: none;
+}
+
+.js .rail-wrap.reveal:not(.reveal--visible) .review-card {
+  opacity: 0;
+  filter: blur(10px);
+}
+
+.rail-wrap.reveal .review-card {
+  transition:
+    opacity 520ms var(--ease-out-soft),
+    filter 520ms var(--ease-out-soft);
+}
+
+/* Les premières cartes se précisent l'une après l'autre ; au-delà de la
+   quatrième elles partagent le même retard, personne ne les voit arriver. */
+.rail-wrap.reveal .review-card:nth-child(2) {
+  transition-delay: 70ms;
+}
+
+.rail-wrap.reveal .review-card:nth-child(3) {
+  transition-delay: 140ms;
+}
+
+.rail-wrap.reveal .review-card:nth-child(4) {
+  transition-delay: 210ms;
+}
+
+.rail-wrap.reveal .review-card:nth-child(n + 5) {
+  transition-delay: 260ms;
+}
+
+/* Filet de sécurité de Reveal : affichage immédiat, sans flou ni transition. */
+.rail-wrap.reveal--instant .review-card {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .rail-wrap.reveal:not(.reveal--visible) .review-card {
+    opacity: 1;
+    filter: none;
+  }
+
+  .rail-wrap.reveal .review-card {
+    transition: none;
+  }
 }
 
 @media (min-width: 40em) {

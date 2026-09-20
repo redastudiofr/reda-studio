@@ -2,6 +2,7 @@ import {Link} from 'react-router';
 import type {Review} from '~/data/reviews';
 import {StarRating} from '~/components/StarRating';
 import {RailArrows} from '~/components/RailArrows';
+import {Reveal} from '~/components/Reveal';
 import {useHorizontalRail} from '~/lib/useHorizontalRail';
 import {useI18n, useT} from '~/lib/i18n';
 
@@ -38,9 +39,14 @@ function ReviewCard({review}: {review: Review}) {
  * One row of reviews, scrolled by hand.
  *
  * Same mechanics as every other row on the site (useHorizontalRail): the
- * browser's own overflow scrolling, so a swipe stays native — momentum, axis
- * locking, and no fight with the page scrolling vertically — with mouse drag
- * and arrows layered on top for desktop. Nothing moves on its own.
+ * browser's own overflow scrolling, with mouse drag and arrows layered on top
+ * for desktop. Nothing moves on its own.
+ *
+ * The row is wrapped in Reveal so its cards can arrive out of focus and sharpen
+ * — and, more importantly, so they can never stay that way: Reveal shows its
+ * content with no transition at all when the observer never reports (a
+ * throttled tab, a page restored from the back/forward cache), which is the
+ * only reason a blur effect is safe on text.
  */
 function ReviewRow({reviews}: {reviews: Review[]}) {
   const t = useT();
@@ -49,7 +55,7 @@ function ReviewRow({reviews}: {reviews: Review[]}) {
   if (!reviews.length) return null;
 
   return (
-    <div className="rail-wrap">
+    <Reveal as="div" className="rail-wrap">
       <div className="reviews-row" ref={ref}>
         {reviews.map((review) => (
           <ReviewCard key={review.id} review={review} />
@@ -63,19 +69,20 @@ function ReviewRow({reviews}: {reviews: Review[]}) {
         prevLabel={t('reviews.prev')}
         nextLabel={t('reviews.next')}
       />
-    </div>
+    </Reveal>
   );
 }
 
-const ROW_COUNT = 3;
+const ROW_COUNT = 2;
 
 /**
  * Customer reviews, shared by the homepage and every product page.
  *
- * Three rows, dealt one review at a time so consecutive reviews never land in
- * the same row: each row mixes cities, dates and ratings, and no review
- * appears twice — not across rows, and not within one, whatever the screen
- * width. Rows are scrolled by the visitor, never on a timer.
+ * Two rows, dealt one review at a time so consecutive reviews never land in
+ * the same row: each row mixes cities, dates and ratings, the two come out
+ * the same length give or take one, and no review appears twice — not across
+ * rows, not within one, and not at any screen width, since every size shows
+ * the same cards. Rows are scrolled by the visitor, never on a timer.
  */
 export function ReviewsSection({
   heading,
