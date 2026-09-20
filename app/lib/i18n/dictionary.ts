@@ -115,7 +115,8 @@ export const en = {
   'reviews.subtitle':
     'honest words from the reda studio community, on pieces made to last.',
   'reviews.forProduct': 'reviews for {product}',
-  'reviews.verified': 'verified review',
+  'reviews.prev': 'previous reviews',
+  'reviews.next': 'next reviews',
   'reviews.ctaText': 'seen it, worn it, loved it?',
   'reviews.ctaButton': 'write a review',
 
@@ -581,7 +582,8 @@ export const fr: Record<TranslationKey, string> = {
   'reviews.subtitle':
     'des mots sincères de la communauté reda studio, sur des pièces faites pour durer.',
   'reviews.forProduct': 'avis sur {product}',
-  'reviews.verified': 'avis vérifié',
+  'reviews.prev': 'avis précédents',
+  'reviews.next': 'avis suivants',
   'reviews.ctaText': 'vous l’avez porté ?',
   'reviews.ctaButton': 'laisser un avis',
 

@@ -1,144 +1,81 @@
 import {Link} from 'react-router';
 import type {Review} from '~/data/reviews';
 import {StarRating} from '~/components/StarRating';
+import {RailArrows} from '~/components/RailArrows';
+import {useHorizontalRail} from '~/lib/useHorizontalRail';
 import {useI18n, useT} from '~/lib/i18n';
 
-const AVATAR_PALETTE = ['#111111', '#3d3d3a', '#6b6b66', '#8a8a86'];
-
-/** Initials of the first and last name, for the avatar disc. */
-function initials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-/** Colour derived from the id, stable from one render to the next. */
-function avatarColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
-  }
-  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
-}
-
 /**
- * Review card: rating, the review in full, then the author.
- *
- * One block of copy, printed whole — no headline that would double as a
- * summary, no truncation. The "verified review" badge only shows when the data
- * carries `certified: true`.
+ * One review: the rating, the review in the words it was written in, then who
+ * left it and when. No avatar, no initials disc, no badge — the card carries
+ * what the customer actually said and nothing invented around it.
  */
 function ReviewCard({review}: {review: Review}) {
-  const t = useT();
   const {locale} = useI18n();
+  const [open, close] = locale === 'fr' ? ['« ', ' »'] : ['“', '”'];
+
   return (
     <article className="review-card">
       <StarRating rating={review.rating} className="review-card__stars" />
 
-      <p className="review-card__text">&ldquo;{review.text[locale]}&rdquo;</p>
+      <p className="review-card__text">
+        {open}
+        {review.text}
+        {close}
+      </p>
 
       <footer className="review-card__author">
-        <span
-          className="review-card__avatar"
-          style={{background: avatarColor(review.id)}}
-          aria-hidden="true"
-        >
-          {initials(review.name)}
-        </span>
-        <span className="review-card__identity">
-          <span className="review-card__name">{review.name}</span>
-          {review.certified && (
-            <span className="review-card__certified">
-              <CheckIcon />
-              {t('reviews.verified')}
-            </span>
-          )}
+        <span className="review-card__name">{review.name}</span>
+        <span className="review-card__meta">
+          {review.city}, {review.country} · {review.date}
         </span>
       </footer>
     </article>
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg
-      className="review-card__check"
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      aria-hidden="true"
-    >
-      <circle cx="7" cy="7" r="7" fill="currentColor" />
-      <path
-        d="M3.9 7.2l2.1 2.1 4.1-4.4"
-        fill="none"
-        stroke="#ffffff"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 /**
- * One continuously scrolling row.
+ * One row of reviews, scrolled by hand.
  *
- * The row's reviews are rendered twice, back to back, and the track is
- * translated by exactly -50%. At the end of the cycle the second copy sits
- * precisely where the first began, so the loop restarts with nothing to see —
- * no jump, no visible start or end. Each card still carries a single review;
- * only the track is duplicated, and the duplicate is hidden from screen
- * readers so reviews are never announced twice.
+ * Same mechanics as every other row on the site (useHorizontalRail): the
+ * browser's own overflow scrolling, so a swipe stays native — momentum, axis
+ * locking, and no fight with the page scrolling vertically — with mouse drag
+ * and arrows layered on top for desktop. Nothing moves on its own.
  */
-function ScrollingRow({
-  reviews,
-  direction,
-  duration,
-}: {
-  reviews: Review[];
-  direction: 'left' | 'right';
-  duration: string;
-}) {
+function ReviewRow({reviews}: {reviews: Review[]}) {
+  const t = useT();
+  const {ref, scrollByCard, atStart, atEnd} = useHorizontalRail<HTMLDivElement>();
+
   if (!reviews.length) return null;
 
   return (
-    <div className="reviews-row">
-      <div
-        className={`reviews-row__track reviews-row__track--${direction}`}
-        style={{'--marquee-duration': duration} as React.CSSProperties}
-      >
-        <div className="reviews-row__group">
-          {reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
-          ))}
-        </div>
-        <div className="reviews-row__group" aria-hidden="true">
-          {reviews.map((review) => (
-            <ReviewCard key={`clone-${review.id}`} review={review} />
-          ))}
-        </div>
+    <div className="rail-wrap">
+      <div className="reviews-row" ref={ref}>
+        {reviews.map((review) => (
+          <ReviewCard key={review.id} review={review} />
+        ))}
       </div>
+      <RailArrows
+        onPrev={() => scrollByCard(-1)}
+        onNext={() => scrollByCard(1)}
+        disablePrev={atStart}
+        disableNext={atEnd}
+        prevLabel={t('reviews.prev')}
+        nextLabel={t('reviews.next')}
+      />
     </div>
   );
 }
 
-/** Row settings: right, then left, then right. */
-const ROWS: Array<{direction: 'left' | 'right'; duration: string}> = [
-  {direction: 'right', duration: '58s'},
-  {direction: 'left', duration: '46s'},
-  {direction: 'right', duration: '64s'},
-];
+const ROW_COUNT = 3;
 
 /**
  * Customer reviews, shared by the homepage and every product page.
  *
- * Three rows scrolling continuously in alternating directions. Reviews are
- * dealt across the rows, so no review shows up in more than one of them.
+ * Three rows, dealt one review at a time so consecutive reviews never land in
+ * the same row: each row mixes cities, dates and ratings, and no review
+ * appears twice — not across rows, and not within one, whatever the screen
+ * width. Rows are scrolled by the visitor, never on a timer.
  */
 export function ReviewsSection({
   heading,
@@ -157,8 +94,8 @@ export function ReviewsSection({
   const t = useT();
   if (!reviews.length) return null;
 
-  const rows: Review[][] = [[], [], []];
-  reviews.forEach((review, index) => rows[index % rows.length].push(review));
+  const rows: Review[][] = Array.from({length: ROW_COUNT}, () => []);
+  reviews.forEach((review, index) => rows[index % ROW_COUNT].push(review));
 
   const writeReviewHref = productTitle
     ? `/reviews?product=${encodeURIComponent(productTitle)}`
@@ -172,15 +109,13 @@ export function ReviewsSection({
       </div>
 
       <div className="reviews__rows">
-        {rows.map((row, index) => (
-          <ScrollingRow
-            // eslint-disable-next-line react/no-array-index-key -- fixed-length static array, never reordered
-            key={index}
-            reviews={row}
-            direction={ROWS[index].direction}
-            duration={ROWS[index].duration}
-          />
-        ))}
+        {rows
+          .filter((row) => row.length > 0)
+          .map((row) => (
+            // The first review of a row is a stable identity for it: the rows
+            // are dealt from the same list in the same order every render.
+            <ReviewRow key={row[0].id} reviews={row} />
+          ))}
       </div>
 
       <div className="reviews__cta">
