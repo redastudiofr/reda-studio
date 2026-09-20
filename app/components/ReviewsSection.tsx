@@ -4,12 +4,14 @@ import {StarRating} from '~/components/StarRating';
 import {RailArrows} from '~/components/RailArrows';
 import {Reveal} from '~/components/Reveal';
 import {useHorizontalRail} from '~/lib/useHorizontalRail';
+import {useAutoScroll} from '~/lib/useAutoScroll';
 import {useI18n, useT} from '~/lib/i18n';
 
 /**
- * One review: the rating, the review in the words it was written in, then who
- * left it and when. No avatar, no initials disc, no badge — the card carries
- * what the customer actually said and nothing invented around it.
+ * One review: the stars and the customer's name on the same line, then the
+ * review in the words it was written in, then where and when it was left.
+ * No avatar, no badge — what the customer said, and nothing invented around
+ * it.
  */
 function ReviewCard({review}: {review: Review}) {
   const {locale} = useI18n();
@@ -17,7 +19,10 @@ function ReviewCard({review}: {review: Review}) {
 
   return (
     <article className="review-card">
-      <StarRating rating={review.rating} className="review-card__stars" />
+      <header className="review-card__head">
+        <StarRating rating={review.rating} className="review-card__stars" />
+        <span className="review-card__name">{review.name}</span>
+      </header>
 
       <p className="review-card__text">
         {open}
@@ -25,47 +30,62 @@ function ReviewCard({review}: {review: Review}) {
         {close}
       </p>
 
-      <footer className="review-card__author">
-        <span className="review-card__name">{review.name}</span>
-        <span className="review-card__meta">
-          {review.city}, {review.country} · {review.date}
-        </span>
-      </footer>
+      <p className="review-card__meta">
+        {review.city}, {review.country} · {review.date}
+      </p>
     </article>
   );
 }
 
 /**
- * One row of reviews, scrolled by hand.
+ * One row of reviews: drifting on its own, and scrollable by hand at the same
+ * time.
  *
- * Same mechanics as every other row on the site (useHorizontalRail): the
- * browser's own overflow scrolling, with mouse drag and arrows layered on top
- * for desktop. Nothing moves on its own.
+ * Both are the same mechanism — the row is a plain scroll container, and the
+ * drift only nudges its scroll position (see useAutoScroll). So a finger, a
+ * trackpad or the arrows take over instantly, the drift pauses while they do,
+ * and it resumes from wherever the visitor stopped. `loop` renders the row
+ * three times over so the travel never reaches an end; the two extra copies
+ * are hidden from screen readers, which would otherwise read every review
+ * three times.
  *
- * The row is wrapped in Reveal so its cards can arrive out of focus and sharpen
- * — and, more importantly, so they can never stay that way: Reveal shows its
- * content with no transition at all when the observer never reports (a
- * throttled tab, a page restored from the back/forward cache), which is the
- * only reason a blur effect is safe on text.
+ * Reveal wraps it so the cards can arrive out of focus and sharpen — and so
+ * they can never stay blurred: it shows its content with no transition at all
+ * when the observer never reports.
  */
-function ReviewRow({reviews}: {reviews: Review[]}) {
+function ReviewRow({
+  reviews,
+  direction,
+}: {
+  reviews: Review[];
+  direction: 'left' | 'right';
+}) {
   const t = useT();
-  const {ref, scrollByCard, atStart, atEnd} = useHorizontalRail<HTMLDivElement>();
+  const {ref, scrollByCard} = useHorizontalRail<HTMLDivElement>({loop: true});
+  useAutoScroll(ref, {direction});
 
   if (!reviews.length) return null;
+
+  const copies = [0, 1, 2];
 
   return (
     <Reveal as="div" className="rail-wrap">
       <div className="reviews-row" ref={ref}>
-        {reviews.map((review) => (
-          <ReviewCard key={review.id} review={review} />
-        ))}
+        {copies.map((copy) =>
+          reviews.map((review) => (
+            <div
+              className="reviews-row__item"
+              key={`${copy}-${review.id}`}
+              aria-hidden={copy === 0 ? undefined : true}
+            >
+              <ReviewCard review={review} />
+            </div>
+          )),
+        )}
       </div>
       <RailArrows
         onPrev={() => scrollByCard(-1)}
         onNext={() => scrollByCard(1)}
-        disablePrev={atStart}
-        disableNext={atEnd}
         prevLabel={t('reviews.prev')}
         nextLabel={t('reviews.next')}
       />
@@ -73,16 +93,16 @@ function ReviewRow({reviews}: {reviews: Review[]}) {
   );
 }
 
-const ROW_COUNT = 2;
+/** The first row travels right, the second one left. */
+const ROWS: Array<'left' | 'right'> = ['right', 'left'];
 
 /**
  * Customer reviews, shared by the homepage and every product page.
  *
- * Two rows, dealt one review at a time so consecutive reviews never land in
- * the same row: each row mixes cities, dates and ratings, the two come out
- * the same length give or take one, and no review appears twice — not across
- * rows, not within one, and not at any screen width, since every size shows
- * the same cards. Rows are scrolled by the visitor, never on a timer.
+ * Two rows travelling in opposite directions, dealt one review at a time so
+ * consecutive reviews never land in the same row: each row mixes cities,
+ * dates and ratings, the two come out the same length give or take one, and
+ * the same cards are shown at every screen width.
  */
 export function ReviewsSection({
   heading,
@@ -101,8 +121,8 @@ export function ReviewsSection({
   const t = useT();
   if (!reviews.length) return null;
 
-  const rows: Review[][] = Array.from({length: ROW_COUNT}, () => []);
-  reviews.forEach((review, index) => rows[index % ROW_COUNT].push(review));
+  const rows: Review[][] = Array.from({length: ROWS.length}, () => []);
+  reviews.forEach((review, index) => rows[index % ROWS.length].push(review));
 
   const writeReviewHref = productTitle
     ? `/reviews?product=${encodeURIComponent(productTitle)}`
@@ -116,13 +136,13 @@ export function ReviewsSection({
       </div>
 
       <div className="reviews__rows">
-        {rows
-          .filter((row) => row.length > 0)
-          .map((row) => (
+        {rows.map((row, index) =>
+          row.length ? (
             // The first review of a row is a stable identity for it: the rows
             // are dealt from the same list in the same order every render.
-            <ReviewRow key={row[0].id} reviews={row} />
-          ))}
+            <ReviewRow key={row[0].id} reviews={row} direction={ROWS[index]} />
+          ) : null,
+        )}
       </div>
 
       <div className="reviews__cta">

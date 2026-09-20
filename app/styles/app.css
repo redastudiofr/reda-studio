@@ -1822,7 +1822,9 @@ html {
   /* Le geste s'arrête au bord de la rangée : il ne déclenche pas le retour
      arrière du navigateur et ne fait pas défiler la page. */
   overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
+  /* Aucune aimantation : la rangée avance en continu, un point d'ancrage la
+     rappellerait en arrière à chaque pas. */
+  scroll-snap-type: none;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   /* Marge intérieure plutôt que débord négatif : la rangée ne peut pas
@@ -1839,12 +1841,17 @@ html {
   display: none;
 }
 
-/* Une carte et demie visible sur téléphone : on voit qu'il y en a d'autres
-   à droite sans que la carte devienne minuscule. */
-.review-card {
+/* Le conteneur porte la largeur, la carte le remplit : la boucle rend trois
+   copies de la rangée, et seules les copies changent, pas la carte. */
+.reviews-row__item {
   flex: 0 0 78%;
   min-width: 0;
-  scroll-snap-align: start;
+  display: flex;
+}
+
+.review-card {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -1852,6 +1859,14 @@ html {
   background: var(--color-paper);
   border: 1px solid var(--color-line);
   border-radius: 4px;
+}
+
+/* Les étoiles et le nom sur la même ligne, en tête de carte. */
+.review-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .review-card__stars {
@@ -1863,21 +1878,18 @@ html {
   line-height: 1.6;
 }
 
-.review-card__author {
-  margin-top: auto;
-  padding-top: 0.35rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
 .review-card__name {
   font-size: 0.74rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .review-card__meta {
+  margin-top: auto;
+  padding-top: 0.35rem;
   font-size: 0.66rem;
   color: var(--color-muted);
 }
@@ -1929,6 +1941,9 @@ html {
   filter: blur(10px);
 }
 
+/* Sur téléphone comme sur grand écran : le flou n'est pas conditionné à la
+   taille d'écran, seulement au réglage « moins d'animations ». */
+
 .rail-wrap.reveal .review-card {
   transition:
     opacity 520ms var(--ease-out-soft),
@@ -1937,19 +1952,19 @@ html {
 
 /* Les premières cartes se précisent l'une après l'autre ; au-delà de la
    quatrième elles partagent le même retard, personne ne les voit arriver. */
-.rail-wrap.reveal .review-card:nth-child(2) {
+.rail-wrap.reveal .reviews-row__item:nth-child(2) .review-card {
   transition-delay: 70ms;
 }
 
-.rail-wrap.reveal .review-card:nth-child(3) {
+.rail-wrap.reveal .reviews-row__item:nth-child(3) .review-card {
   transition-delay: 140ms;
 }
 
-.rail-wrap.reveal .review-card:nth-child(4) {
+.rail-wrap.reveal .reviews-row__item:nth-child(4) .review-card {
   transition-delay: 210ms;
 }
 
-.rail-wrap.reveal .review-card:nth-child(n + 5) {
+.rail-wrap.reveal .reviews-row__item:nth-child(n + 5) .review-card {
   transition-delay: 260ms;
 }
 
@@ -1970,7 +1985,7 @@ html {
 }
 
 @media (min-width: 40em) {
-  .review-card {
+  .reviews-row__item {
     flex-basis: 40%;
   }
 }
@@ -1990,8 +2005,11 @@ html {
     padding-inline: 1.5rem;
   }
 
-  .review-card {
+  .reviews-row__item {
     flex-basis: 25%;
+  }
+
+  .review-card {
     padding: 1.25rem 1.35rem;
   }
 
