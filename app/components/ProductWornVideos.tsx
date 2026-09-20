@@ -2,6 +2,7 @@ import {useEffect, useRef, useState, type RefObject} from 'react';
 import {useAmbientVideo} from '~/lib/useAmbientVideo';
 import {useHorizontalRail} from '~/lib/useHorizontalRail';
 import {useT} from '~/lib/i18n';
+import {useInAppBrowser} from '~/lib/inAppBrowser';
 import {RailArrows} from '~/components/RailArrows';
 
 /**
@@ -87,6 +88,12 @@ function WornVideoTile({
         muted
         loop
         playsInline
+        // The legacy spellings of playsinline, for the embedded browsers that
+        // still read those and not the standard one.
+        // eslint-disable-next-line react/no-unknown-property
+        webkit-playsinline="true"
+        // eslint-disable-next-line react/no-unknown-property
+        x5-playsinline="true"
         preload="none"
         draggable={false}
         // Decorative background footage: there is no reason for the browser
@@ -99,9 +106,17 @@ function WornVideoTile({
 
 export function ProductWornVideos() {
   const t = useT();
+  const inApp = useInAppBrowser();
   const {ref, scrollByCard} = useHorizontalRail<HTMLDivElement>({loop: true});
 
-  if (!VIDEOS.length) return null;
+  /*
+   * Nothing at all inside TikTok's or Instagram's browser. These clips are
+   * the ones that kept being thrown full screen over the shop there: they are
+   * decoration, and decoration that hijacks the screen is worse than no
+   * decoration. Every other browser still gets the row — see
+   * app/lib/inAppBrowser.ts.
+   */
+  if (inApp || !VIDEOS.length) return null;
 
   // Three copies back to back so the rail can be scrolled infinitely in
   // either direction — see useHorizontalRail's loop mode.

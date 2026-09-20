@@ -15,6 +15,7 @@ import {getProductVideo} from '~/lib/media';
 import {parseRating} from '~/lib/rating';
 import {StarRating} from '~/components/StarRating';
 import {useT} from '~/lib/i18n';
+import {useInAppBrowser} from '~/lib/inAppBrowser';
 
 type GridProduct =
   | CollectionItemFragment
@@ -31,6 +32,9 @@ export function ProductItem({
   loading?: 'eager' | 'lazy';
 }) {
   const t = useT();
+  // Inside TikTok's or Instagram's browser a card never swaps to video: that
+  // is where those clips were being thrown full screen. The photograph stays.
+  const inApp = useInAppBrowser();
   const variantUrl = useVariantUrl(product.handle);
   const {ref, near} = useNearViewport<HTMLDivElement>();
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -42,7 +46,7 @@ export function ProductItem({
 
   const images = 'images' in product ? product.images?.nodes ?? [] : [];
   const altImage = images.find((img) => img.id !== image?.id);
-  const video = 'media' in product ? getProductVideo(product) : null;
+  const video = !inApp && 'media' in product ? getProductVideo(product) : null;
   const price = product.priceRange.minVariantPrice;
   const compareAt =
     'compareAtPriceRange' in product
@@ -80,6 +84,11 @@ export function ProductItem({
             muted
             loop
             playsInline
+            // Legacy spellings, for embedded browsers that read those only.
+            // eslint-disable-next-line react/no-unknown-property
+            webkit-playsinline="true"
+            // eslint-disable-next-line react/no-unknown-property
+            x5-playsinline="true"
             preload="metadata"
             poster={video.previewImage?.url ?? image?.url}
             disablePictureInPicture

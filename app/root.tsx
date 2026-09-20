@@ -19,6 +19,7 @@ import {PageLayout} from './components/PageLayout';
 import {withoutAutoCollections} from '~/lib/collections';
 import {I18nProvider} from '~/lib/i18n';
 import {consentChosen as hasConsentChoice} from '~/lib/cookieConsent';
+import {isInAppBrowser} from '~/lib/inAppBrowser';
 import {
   DEFAULT_LOCALE,
   localeChosen as hasLocaleChoice,
@@ -146,6 +147,9 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
     locale,
     localeChosen: hasLocaleChoice(request),
     consentChosen: hasConsentChoice(request),
+    // TikTok's and Instagram's own browsers throw inline video full screen on
+    // their own; the site plays none there — see app/lib/inAppBrowser.ts.
+    inAppBrowser: isInAppBrowser(request.headers.get('user-agent')),
   };
 }
 

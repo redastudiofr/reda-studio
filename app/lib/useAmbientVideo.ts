@@ -47,9 +47,40 @@ export function useAmbientVideo(videoRef: RefObject<HTMLVideoElement | null>) {
     observer.observe(video);
     document.addEventListener('visibilitychange', sync);
 
+    /*
+     * A decorative clip has no business taking over the screen. Some browsers
+     * — chiefly the ones embedded in mobile apps — hand a playing video to the
+     * system player anyway, which is how a muted background loop ended up full
+     * screen over the shop. Whenever that happens, leave immediately.
+     *
+     * Belt and braces: the site already refuses to render video at all in the
+     * in-app browsers known for it (see app/lib/inAppBrowser.ts). This catches
+     * whatever else tries.
+     */
+    const escapeFullscreen = () => {
+      const player = video as HTMLVideoElement & {
+        webkitExitFullscreen?: () => void;
+        webkitDisplayingFullscreen?: boolean;
+      };
+      try {
+        if (document.fullscreenElement === video) void document.exitFullscreen();
+        if (player.webkitDisplayingFullscreen) player.webkitExitFullscreen?.();
+      } catch {
+        // Nothing to do: a browser that refuses to leave full screen is not
+        // something the page can force.
+      }
+    };
+
+    video.addEventListener('webkitbeginfullscreen', escapeFullscreen);
+    video.addEventListener('fullscreenchange', escapeFullscreen);
+    video.addEventListener('webkitfullscreenchange', escapeFullscreen);
+
     return () => {
       observer.disconnect();
       document.removeEventListener('visibilitychange', sync);
+      video.removeEventListener('webkitbeginfullscreen', escapeFullscreen);
+      video.removeEventListener('fullscreenchange', escapeFullscreen);
+      video.removeEventListener('webkitfullscreenchange', escapeFullscreen);
     };
   }, [videoRef]);
 }
