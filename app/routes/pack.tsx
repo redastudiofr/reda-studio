@@ -8,8 +8,9 @@ import {useAside} from '~/components/Aside';
 import {
   PACK_ADDS_FREE_LINE,
   PACK_COLLECTION_HANDLE,
+  PACK_DISCOUNT_CODE,
   PACK_FALLBACK_LIST,
-  PACK_FREE_SLOT,
+  PACK_FREE_HANDLE,
   PACK_SLOTS,
   slotForProduct,
   type PackSlot,
@@ -184,7 +185,21 @@ export async function loader({context}: Route.LoaderArgs) {
     );
   }
 
-  return {slots};
+  // The piece that is given. Looked up by handle rather than picked from a
+  // slot: the discount is written for one product, and showing any other one
+  // as free would be a promise Shopify will not keep.
+  const free =
+    pieces.find((piece) => piece.handle === PACK_FREE_HANDLE) ??
+    fallback.find((piece) => piece.handle === PACK_FREE_HANDLE) ??
+    null;
+
+  if (!free) {
+    console.warn(
+      `Pack page: the offered tee ("${PACK_FREE_HANDLE}") was not found — check PACK_FREE_HANDLE in app/lib/packOffer.ts.`,
+    );
+  }
+
+  return {slots, free};
 }
 
 /** The size on a variant, from the size option when there is one. */
@@ -203,7 +218,7 @@ function firstAvailable(piece: PackPiece): PackVariant | undefined {
 }
 
 export default function PackPage() {
-  const {slots} = useLoaderData<typeof loader>();
+  const {slots, free} = useLoaderData<typeof loader>();
   const {locale} = useI18n();
   const {open: openAside} = useAside();
   const t = useT();
@@ -226,6 +241,13 @@ export default function PackPage() {
       }),
     ),
   );
+
+  // The offered tee has a size of its own: it is a piece the customer will
+  // wear, not a line item that happens to cost nothing.
+  const [freeSize, setFreeSize] = useState(() =>
+    free ? (firstAvailable(free)?.id ?? '') : '',
+  );
+  const freeVariant = free?.variants.nodes.find((node) => node.id === freeSize);
 
   const selection = PACK_SLOTS.map((slot) => {
     const pieces = slots[slot] ?? [];
@@ -254,13 +276,10 @@ export default function PackPage() {
     .map(({variant}) => ({merchandiseId: variant!.id, quantity: 1}));
 
   /*
-   * The free tee, for a rule that expects it to be in the basket already —
-   * see PACK_ADDS_FREE_LINE. It goes in as a second unit of the tee the
-   * customer picked, at its normal price; Shopify is what takes it off.
+   * The offered tee goes into the basket with the others, at its normal
+   * price: the code is what brings it to zero, and a code cannot discount a
+   * line that is not there. See PACK_ADDS_FREE_LINE.
    */
-  const freeVariant = selection.find(
-    ({slot}) => slot === PACK_FREE_SLOT,
-  )?.variant;
   const lines =
     PACK_ADDS_FREE_LINE && freeVariant
       ? [...chosenLines, {merchandiseId: freeVariant.id, quantity: 1}]
@@ -376,16 +395,63 @@ export default function PackPage() {
               </div>
             </li>
           ))}
-        </ul>
+          {free && (
+            <li className="pack__piece pack__piece--free" key="free">
+              <span className="pack__shot">
+                {free.featuredImage && (
+                  <Image
+                    data={free.featuredImage}
+                    alt={free.featuredImage.altText || free.title}
+                    sizes="(min-width: 48em) 22vw, 88vw"
+                    loading="lazy"
+                  />
+                )}
+                {/* Écrit sur la photo : c'est là qu'on regarde, et c'est la
+                    seule chose à comprendre de cette pièce. */}
+                <span className="pack__free-tag">{t('pack.freeTag')}</span>
+              </span>
 
-        <p className="pack__equals">{t('pack.equals')}</p>
+              <span className="pack__slot">{t('pack.freeSlot')}</span>
+              <p className="pack__free-name">{free.title}</p>
+
+              <div className="pack__piece-foot">
+                <p className="pack__piece-price pack__piece-price--free">
+                  {t('pack.freeTag')}
+                </p>
+
+                <label className="pack__size">
+                  <span className="pack__size-label">{t('pack.size')}</span>
+                  <select
+                    value={freeSize}
+                    onChange={(event) => setFreeSize(event.target.value)}
+                  >
+                    {free.variants.nodes.map((node) => (
+                      <option
+                        key={node.id}
+                        value={node.id}
+                        disabled={!node.availableForSale}
+                      >
+                        {sizeLabel(node)}
+                        {node.availableForSale
+                          ? ''
+                          : ` — ${t('product.soldOut')}`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </li>
+          )}
+        </ul>
 
         <div className="pack__totals">
           <div className="pack__totals-row pack__totals-row--strong">
             <span>{t('pack.total')}</span>
             <span>{money(total)}</span>
           </div>
-          <p className="pack__free-note">{t('pack.freeNote')}</p>
+          <p className="pack__free-note">
+            {t('pack.freeNote', {code: PACK_DISCOUNT_CODE})}
+          </p>
         </div>
 
         <AddToCartButton

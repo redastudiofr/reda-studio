@@ -6467,11 +6467,38 @@ html {
 }
 
 .pack__shot {
+  position: relative;
   display: block;
   aspect-ratio: 4 / 5;
   overflow: hidden;
   border-radius: 4px;
   background: var(--color-tile);
+}
+
+/* « offert », écrit sur la photo de la pièce offerte. Sur l'image parce que
+   c'est là qu'on regarde, et en noir et blanc comme le reste : une pastille
+   de couleur serait la seule du site. */
+.pack__free-tag {
+  position: absolute;
+  bottom: 0.6rem;
+  left: 0.6rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+  background: var(--color-ink);
+  border-radius: 2px;
+}
+
+.pack__free-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.pack__piece-price--free {
+  text-transform: lowercase;
 }
 
 .pack__shot img {
@@ -6499,12 +6526,9 @@ html {
   gap: 0.5rem;
 }
 
-/* Le résultat de l'équation. */
-.pack__equals {
-  margin-top: 0.25rem;
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-align: center;
+/* La pièce offerte ferme l'équation : « = » et non « + ». */
+.pack__piece + .pack__piece--free::before {
+  content: '=';
 }
 
 .pack__size-label {
@@ -6665,17 +6689,19 @@ html {
   color: var(--color-muted);
 }
 
-/* Les trois pièces côte à côte : le « + » quitte le haut de la carte pour la
-   gouttière, à hauteur des photos. */
-@media (min-width: 48em) {
+/* Les quatre pièces sur une ligne — trois, plus celle qui est offerte : les
+   signes quittent le haut des cartes pour les gouttières, à hauteur des
+   photos. En dessous de cette largeur elles restent empilées : quatre
+   colonnes sur une tablette ne montreraient plus les vêtements. */
+@media (min-width: 64em) {
   .pack__pieces {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 2.5rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2rem;
   }
 
   .pack__piece + .pack__piece::before {
     top: 30%;
-    left: -1.25rem;
+    left: -1rem;
     transform: translate(-50%, -50%);
   }
 }

@@ -1,102 +1,109 @@
-# Pack essentiel — three pieces, a fourth tee free
+# Pack essentiel — three pieces, the Business After Hour tee free
 
 The customer picks a pair of jeans, a longsleeve and a tee, each in their
-size, and Shopify gives a fourth tee.
+size. A fourth piece — the **Tshirt Business After Hour — White** — goes into
+the basket with them and the code **REDA1120** takes it off.
 
-**The storefront never decides what anyone pays.** The reduction is a native
-Shopify "Buy X get Y" discount configured in the admin. This repository only
-chooses the pieces, says what the offer is and puts the lines in the basket.
-Nothing here computes a price, and nothing here shows a struck-through one:
-there is no "before" price to strike, because no piece is being discounted —
-one is given.
+**The storefront never decides what anyone pays.** The reduction is a Shopify
+discount; this repository chooses the pieces, says what the offer is, puts the
+lines in the basket and attaches the code. Nothing here computes a price, and
+nothing shows a struck-through one: no piece is being discounted, one is
+given.
 
-## The pieces, and why the list matters
+## The four pieces
 
-The page can only promise a free tee for the products the **discount rule**
-accepts. If the two lists ever differ, a customer is shown the offer, adds
-three pieces and is charged full price at checkout, silently.
+`app/lib/packOffer.ts` is the single place the storefront's side is written.
 
-`app/lib/packOffer.ts` is the single place the storefront's side is written,
-and it reads two sources in order:
+The three **chosen** pieces come from two sources, in order:
 
 1. **The `pack-essentiel` collection in Shopify Admin**, if it exists and
-   holds at least three products. Point the Buy X get Y rule at that same
-   collection and the two can never drift — adding a product to the
-   collection adds it to the page, with no deploy.
-2. **Otherwise the explicit handles** in `PACK_FALLBACK_HANDLES`, which have
-   to be kept in step with the rule by hand.
+   holds at least three products. Point the discount at that same collection
+   and the two can never drift — adding a product to the collection adds it to
+   the page, with no deploy.
+2. **Otherwise the explicit handles** in `PACK_FALLBACK_HANDLES`, kept in step
+   with the discount by hand. This is what is in use today.
 
-Today there is no such collection, so the fallback is in use. **Creating it
-is the recommended setup.**
+The **given** piece is not a slot but a named product:
 
-Two things are filtered out of whatever the source returns: anything with no
-variant in stock (a piece nobody can add is not a choice) and the pre-ordered
-piece, which the cart action refuses outright (see `app/lib/preorder.ts`).
+```ts
+export const PACK_FREE_HANDLE = 'tshirt-business-after-hour-white';
+export const PACK_DISCOUNT_CODE = 'REDA1120';
+```
 
-Each product is filed under jeans / longsleeve / tee by what it is — its
-type, title and handle — so a product added to the collection lands in the
-right slot on its own. Anything matching none of the three is left out rather
-than filed under a guess.
+If that handle ever stops matching the product the discount is written for,
+the customer is charged for it — the page would still show it as free.
+
+Two things are filtered out of whatever the sources return: anything with no
+variant in stock, and the pre-ordered piece, whose lines the cart refuses
+outright (`app/lib/preorder.ts`).
+
+Each product is filed under jeans / longsleeve / tee by what it is — type,
+title, handle — so a product added to the collection lands in the right slot
+on its own. Anything matching none of the three is left out rather than filed
+under a guess.
 
 ### The product-page line
 
-`PackNote` (the line under the price, "fait partie du pack essentiel — 1
-tshirt offert") checks `PACK_FALLBACK_HANDLES` and nothing else: the browser
-has no idea what a Shopify collection contains. **If you switch to the
-collection, keep the handles here equal to it**, or that line will appear on
-the wrong products.
+`PackNote` (the line under the price) checks `PACK_FALLBACK_HANDLES` and
+nothing else: the browser has no idea what a Shopify collection contains. **If
+you switch to the collection, keep these handles equal to it**, or that line
+appears on the wrong products.
 
-## ⚠️ Does the free tee have to be in the basket?
+## Why the free tee is added to the basket
 
-Shopify's "Buy X get Y" **discounts a line; it does not create one**. It only
-takes money off a Y that is already in the cart.
+A discount takes money off a line that exists — **it does not create one**. So
+the button adds four lines, not three: the three chosen pieces and the offered
+tee, each at its normal price, and REDA1120 brings the tee to zero.
 
-So the right setting depends on how the rule was written:
+That is also why the page shows it as the fourth piece, with `offert` written
+on the photo, rather than as a promise about checkout: what the customer sees
+in the basket is exactly what the page showed them.
 
-| The rule | `PACK_ADDS_FREE_LINE` |
-| --- | --- |
-| Buy 3 pieces, get a **fourth** tee free | `true` |
-| One of the three chosen pieces is itself the free one | `false` (current) |
+`PACK_ADDS_FREE_LINE = false` turns that fourth line off — only correct if the
+discount is ever rewritten so that one of the three chosen pieces is itself
+the free one.
 
-With the flag on, the button adds a second unit of the tee the customer
-picked, at its normal price, and the discount takes it off.
+## The code
 
-This is a flag rather than a guess because getting it wrong is silent: the
-basket simply charges full price and nobody finds out until a customer
-complains. **Check it against the rule in Shopify Admin → Discounts before
-announcing the offer.**
+`REDA1120` is attached to the cart by `app/routes/cart.tsx` after every
+change, through `OFFER_DISCOUNT_CODE` in `app/lib/offers.ts`, which now reads
+`PACK_DISCOUNT_CODE`. The customer never types it; it stays visible on the
+basket so they can check it.
+
+**One code is attached, not two.** It replaced `REDA1130`, the old
+second-piece code. Running both would mean two reductions on the same basket,
+stacking or fighting depending on how each is set to combine in Shopify.
+
+Check in Shopify Admin → Discounts that REDA1120 exists, is spelled exactly
+this way, and that its conditions match what the page promises: three pieces
+from the pack plus the Business After Hour tee, the tee at 100% off.
 
 ## Where the offer shows
 
 | Where | What | Component |
 | --- | --- | --- |
-| `/pack` | the three selectors, the free tee, one button | `app/routes/pack.tsx` |
+| `/pack` | tee + jeans + longsleeve = the offered tee, each with its size | `app/routes/pack.tsx` |
 | Homepage | a paragraph between two hairlines, after the catalogue | `PackTeaser` |
-| Product page of an eligible piece | one line under the price | `PackNote` |
+| Product page of a pack piece | the offer box, in place of the "take two" one | `PackBundle` |
+| Product page, under the price | one line | `PackNote` |
 | Footer | "pack essentiel" under informations | `Footer` |
 
-No banner, no countdown, no badge. The offer is stated once per page in the
-site's own voice, because a reduction announced loudly is what a shop does
-when the reduction is the only thing worth saying about the clothes.
+Products outside the pack keep the "take two" box (`BundleOffer`) exactly as
+before.
+
+No banner, no countdown, no badge beyond the word `offert` on the photo of the
+piece that is actually offered.
 
 ## Turning it off
 
-`PACK_ENABLED = false` in `app/lib/packOffer.ts` takes every mention off the
-storefront at once — teaser, product lines and all — without touching
-anything in Shopify. The page itself stays reachable; delete the route to
-remove it.
+`PACK_ENABLED = false` takes every mention off the storefront at once —
+teaser, product lines and all — without touching anything in Shopify. The page
+itself stays reachable; delete the route to remove it.
 
-## Other discounts running at the same time
+## The other offer still running
 
-Three separate things can take money off this storefront today, and they are
-configured in three different places:
-
-- this pack's Buy X get Y rule;
-- the tiered "2nd −20%, 3rd −30%" offer (`app/lib/tierDiscount.ts`, see
-  `docs/tier-discount.md`);
-- the old `REDA1130` code, still attached to every cart by
-  `app/routes/cart.tsx`.
-
-They stack or fight depending on how each is set to combine in Shopify. Decide
-which ones should coexist before pushing the pack — see the warning at the end
-of `docs/tier-discount.md`.
+The tiered "2nd −20%, 3rd −30%" wording (`app/lib/tierDiscount.ts`, see
+`docs/tier-discount.md`) is still displayed under every price, and whatever
+applies it in Shopify still applies it. Decide whether it should coexist with
+the pack before announcing either: two reductions on one basket combine only
+if Shopify is told they may.

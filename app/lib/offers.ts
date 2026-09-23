@@ -1,4 +1,5 @@
 import {SECOND_ITEM_PERCENT} from './tierDiscount';
+import {PACK_DISCOUNT_CODE} from './packOffer';
 
 /**
  * Second-piece offer — 30% off the second item in the basket.
@@ -27,19 +28,18 @@ export const SECOND_ITEM_DISCOUNT_PERCENT = SECOND_ITEM_PERCENT;
 export const OFFER_ENABLED = true;
 
 /**
- * The offer's discount **code**, exactly as spelled in Shopify — uppercase, no
- * spaces. It has to match the Shopify discount character for character, or the
- * storefront applies a code Shopify does not know.
+ * The code the cart carries, attached by app/routes/cart.tsx after every
+ * change.
  *
- * The customer never has to type it: app/routes/cart.tsx attaches it to the
- * cart after every change. It is shown so they can recognise and check it.
+ * It is the pack's code — REDA1120, the one that makes the offered tee free
+ * — and it is written in app/lib/packOffer.ts. One code is attached to the
+ * cart, not two: running a second one alongside it would mean two reductions
+ * for the same basket, stacking or fighting depending on how each is set to
+ * combine in Shopify.
  *
- * Emptying this switches the storefront to expecting a Shopify *automatic*
- * discount instead, and it stops applying anything itself. Never run a code
- * and an automatic discount for the same offer at once, or the reductions
- * stack.
+ * Emptying it stops the storefront applying anything at all.
  */
-export const OFFER_DISCOUNT_CODE: string = 'REDA1130';
+export const OFFER_DISCOUNT_CODE: string = PACK_DISCOUNT_CODE;
 
 /**
  * Custom cart action: adds the pair's two lines in one request.

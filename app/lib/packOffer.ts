@@ -49,6 +49,27 @@ export const PACK_SLOTS: PackSlot[] = ['tshirt', 'jean', 'longsleeve'];
 export const PACK_FREE_SLOT: PackSlot = 'tshirt';
 
 /**
+ * The piece that is given — a named product, not "a tee".
+ *
+ * It is shown as the fourth piece of the pack, marked as free, and added to
+ * the basket with the other three: a discount code takes money off a line
+ * that exists, it does not create one. If this handle ever stops matching the
+ * product the discount is written for, the customer is charged for it.
+ */
+export const PACK_FREE_HANDLE = 'tshirt-business-after-hour-white';
+
+/**
+ * The code that makes that tee free, exactly as spelled in Shopify — no
+ * spaces, uppercase.
+ *
+ * The customer never types it: app/routes/cart.tsx attaches it to the cart
+ * after every change. It is shown so they can recognise it on the basket and
+ * check it themselves.
+ */
+export const PACK_DISCOUNT_CODE = 'REDA1120';
+
+
+/**
  * Fallback selection, used while `pack-essentiel` does not exist in Shopify.
  *
  * Every one of these is a real handle, in stock at the time of writing, and
@@ -77,23 +98,18 @@ export const PACK_FALLBACK_LIST: string[] = PACK_SLOTS.flatMap((slot) =>
 );
 
 /**
- * Whether the fourth line — the free tee — is added to the basket alongside
- * the three chosen pieces.
+ * Whether the free tee is added to the basket alongside the three chosen
+ * pieces.
  *
- * Shopify's "Buy X get Y" only takes anything off a Y that is **in the
- * basket**: it discounts a line, it does not create one. So which setting is
- * right depends on how the rule was written:
+ * On, because a discount takes money off a line that exists — it does not
+ * create one. The tee has to be in the basket for REDA1120 to bring it to
+ * zero, which is also why the page shows it as the fourth piece rather than
+ * as a promise about checkout.
  *
- *  - Rule "buy 3, get 1 tee free", where the free tee is a fourth item: this
- *    has to be `true`, or the discount has nothing to land on.
- *  - Rule where one of the three chosen pieces is itself the Y: leave it
- *    `false`.
- *
- * It is a single flag rather than a guess because getting it wrong is silent
- * — the basket simply charges full price, and nobody finds out until a
- * customer complains.
+ * Off only if the discount is ever rewritten so that one of the three chosen
+ * pieces is itself the free one.
  */
-export const PACK_ADDS_FREE_LINE = false;
+export const PACK_ADDS_FREE_LINE = true;
 
 /**
  * Which slot a product belongs to, read from what it is rather than from a

@@ -81,7 +81,14 @@ the page shows what it found rather than pretending a two-piece pack is a pack.
 The page is linked from the footer only. Nothing else points to it, and without
 that link it would exist and be unreachable.
 
-## ⚠️ The old second-piece code, REDA1130
+## The code the cart carries
+
+> **Settled.** `OFFER_DISCOUNT_CODE` is now `REDA1120`, the pack code — see
+> `docs/pack-essentiel.md`. The section below described `REDA1130`, which the
+> storefront no longer applies; deactivate it in Shopify Admin if it is still
+> enabled there.
+
+### For the record: the old second-piece code, REDA1130
 
 `app/lib/offers.ts` still holds `OFFER_DISCOUNT_CODE = 'REDA1130'`, and
 `app/routes/cart.tsx` attaches it to the cart after every change. That code is

@@ -205,10 +205,15 @@ export const en = {
     'Pick a pair of jeans, a longsleeve and a tee, each in your size. Three pieces that go together, and a fourth on us.',
   'pack.imageAlt':
     'A reda studio outfit worn outside: white top and washed jeans',
-  'pack.free': '+ 1 tee free',
-  'pack.equals': '= 1 tee free',
+  'pack.free': '+ the Business After Hour tee, free',
+  'pack.freeTag': 'free',
+  'pack.freeSlot': 'the tee we add',
+  'pack.bundleTitle': 'the essential pack',
+  'pack.bundleText':
+    'Jeans, a longsleeve and a tee, each in the size you choose — and the Business After Hour tee comes free with them.',
+  'pack.bundleCta': 'build the pack',
   'pack.freeNote':
-    'The tee is given by the shop’s own discount, applied by Shopify at checkout.',
+    'The fourth tee goes into the basket with the rest and the code {code} takes it off — attached to your basket for you, and visible on it.',
   'pack.piecesTitle': 'choose your three pieces',
   'pack.slot.jean': 'the jeans',
   'pack.slot.longsleeve': 'the longsleeve',
@@ -704,10 +709,15 @@ export const fr: Record<TranslationKey, string> = {
     'Choisissez un jean, un longsleeve et un tshirt, chacun dans votre taille. Trois pièces qui vont ensemble, et une quatrième offerte.',
   'pack.imageAlt':
     'Une tenue reda studio portée en extérieur : haut blanc et jean délavé',
-  'pack.free': '+ 1 tshirt offert',
-  'pack.equals': '= 1 tshirt offert',
+  'pack.free': '+ le tshirt Business After Hour, offert',
+  'pack.freeTag': 'offert',
+  'pack.freeSlot': 'le tshirt offert',
+  'pack.bundleTitle': 'le pack essentiel',
+  'pack.bundleText':
+    'Un jean, un longsleeve et un tshirt, chacun dans la taille de votre choix — et le tshirt Business After Hour est offert avec.',
+  'pack.bundleCta': 'composer le pack',
   'pack.freeNote':
-    'Le tshirt est offert par la remise de la boutique, appliquée par Shopify au paiement.',
+    'Le quatrième tshirt entre au panier avec les autres et le code {code} le déduit — ajouté à votre panier pour vous, et visible dessus.',
   'pack.piecesTitle': 'choisissez vos trois pièces',
   'pack.slot.jean': 'le jean',
   'pack.slot.longsleeve': 'le longsleeve',
