@@ -3,31 +3,31 @@ import {Link, useLoaderData} from 'react-router';
 import {Image, Money} from '@shopify/hydrogen';
 import type {Route} from './+types/pack';
 import {AddToCartButton} from '~/components/AddToCartButton';
-import {useAside} from '~/components/Aside';
 import {Reveal} from '~/components/Reveal';
-import {TierNote} from '~/components/TierNote';
-import {tierTotal} from '~/lib/tierDiscount';
+import {useAside} from '~/components/Aside';
+import {
+  PACK_ADDS_FREE_LINE,
+  PACK_COLLECTION_HANDLE,
+  PACK_FALLBACK_LIST,
+  PACK_FREE_SLOT,
+  PACK_SLOTS,
+  slotForProduct,
+  type PackSlot,
+} from '~/lib/packOffer';
+import {isPreorderHandle} from '~/lib/preorder';
+import type {TranslationKey} from '~/lib/i18n';
 import {useI18n, useT} from '~/lib/i18n';
 
 /**
- * The signature pack: three best-sellers presented together, added to the
- * basket in one go, each in the size the customer picks.
+ * The essential pack: choose a pair of jeans, a longsleeve and a tee, each in
+ * your size, and Shopify adds a fourth tee for nothing.
  *
- * It creates no product and invents no price. The three pieces are the real
- * Shopify products below, at their real prices; the pack price is what the
- * storefront-wide volume offer (see ~/lib/tierDiscount) makes of those three,
- * and the basket is what actually applies it. Change a piece by changing a
- * handle here — nothing else knows which products these are.
- *
- * The t-shirts are the one piece here that the best-seller collection does not
- * carry. The composition asked for — jeans, longsleeve, tee — wins over where
- * each piece is filed: a "pack" whose third piece is a shirt is not the pack.
+ * This page creates no product, invents no price and calculates no reduction.
+ * It shows real products at their real prices, puts the chosen lines in the
+ * basket, and leaves the free tee to the "Buy X get Y" rule in Shopify Admin
+ * — the only thing that can actually take money off. What the pack contains
+ * is decided in ~/lib/packOffer.ts.
  */
-const PACK_HANDLES = {
-  jean: 'kaizen-jeans-raw-denim-blue',
-  longsleeve: 'reda-longsleeve-black',
-  third: 'tshirt-business-after-hour-white',
-} as const;
 
 /** The pack's lifestyle shot. Replace with a photo of the three pieces worn together. */
 const PACK_IMAGE = {
@@ -48,6 +48,7 @@ type PackPiece = {
   id: string;
   title: string;
   handle: string;
+  productType?: string | null;
   featuredImage: {
     id?: string | null;
     url: string;
@@ -60,207 +61,29 @@ type PackPiece = {
 
 export const meta: Route.MetaFunction = () => {
   return [
-    {title: 'reda studio | pack signature'},
+    {title: 'reda studio | pack essentiel'},
     {
       name: 'description',
       content:
-        'Three reda studio pieces together: jeans, longsleeve and tee, in the sizes you choose.',
+        'Jeans, longsleeve and tee in the sizes you choose — with a fourth tee on us.',
     },
   ];
 };
 
-export async function loader({context}: Route.LoaderArgs) {
-  /*
-   * Typed here rather than from storefrontapi.generated: those types are
-   * produced by codegen at build time, and a query that has never been
-   * generated yet would leave this file referring to a type that does not
-   * exist.
-   */
-  const data = (await context.storefront.query(PACK_QUERY, {
-    variables: {
-      jean: PACK_HANDLES.jean,
-      longsleeve: PACK_HANDLES.longsleeve,
-      third: PACK_HANDLES.third,
-    },
-  })) as {
-    jean: PackPiece | null;
-    longsleeve: PackPiece | null;
-    third: PackPiece | null;
-  };
+/** Guards the handles interpolated into the query below. */
+const HANDLE = /^[a-z0-9-]+$/;
 
-  const pieces = [data?.jean, data?.longsleeve, data?.third].filter(
-    (piece): piece is PackPiece => Boolean(piece),
-  );
-
-  if (pieces.length < 3) {
-    // One of the handles no longer matches a product in Shopify. Saying so
-    // here beats a page that quietly shows a two-piece "pack".
-    console.warn(
-      `Pack page: only ${pieces.length} of 3 products found — check PACK_HANDLES against Shopify Admin → Products.`,
-    );
-  }
-
-  return {pieces};
-}
-
-/** The size on a variant, from the size option when there is one. */
-function sizeLabel(variant: PackVariant): string {
-  const option = variant.selectedOptions.find(({name}) =>
-    /taille|size|pointure/i.test(name),
-  );
-  return option?.value ?? variant.title;
-}
-
-function firstAvailable(piece: PackPiece): PackVariant | undefined {
-  return (
-    piece.variants.nodes.find((variant) => variant.availableForSale) ??
-    piece.variants.nodes[0]
-  );
-}
-
-export default function PackPage() {
-  const {pieces} = useLoaderData<typeof loader>();
-  const {locale} = useI18n();
-  const {open: openAside} = useAside();
-  const t = useT();
-
-  // One chosen variant per piece, starting on the first in stock — the same
-  // thing a product page does when it opens.
-  const [chosen, setChosen] = useState<Record<string, string>>(() =>
-    Object.fromEntries(
-      pieces.map((piece) => [piece.id, firstAvailable(piece)?.id ?? '']),
-    ),
-  );
-
-  if (!pieces.length) return null;
-
-  const selection = pieces.map((piece) => ({
-    piece,
-    variant: piece.variants.nodes.find((node) => node.id === chosen[piece.id]),
-  }));
-
-  const complete = selection.every(({variant}) => variant?.availableForSale);
-  const currency = selection[0]?.variant?.price.currencyCode ?? 'EUR';
-  const {full, total, saving} = tierTotal(
-    selection.map(({variant}) => Number(variant?.price.amount ?? 0)),
-  );
-
-  const money = (amount: number) =>
-    new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
-      style: 'currency',
-      currency,
-    }).format(amount);
-
-  const lines = selection
-    .filter(({variant}) => variant)
-    .map(({variant}) => ({merchandiseId: variant!.id, quantity: 1}));
-
-  return (
-    <div className="pack">
-      <Reveal as="section" className="pack__hero">
-        <img
-          className="pack__hero-image"
-          src={PACK_IMAGE.src}
-          alt={t('pack.imageAlt')}
-          width={PACK_IMAGE.width}
-          height={PACK_IMAGE.height}
-          loading="eager"
-          decoding="async"
-        />
-        <div className="pack__hero-text">
-          <p className="pack__eyebrow">{t('pack.eyebrow')}</p>
-          <h1 className="pack__title">{t('pack.title')}</h1>
-          <p className="pack__intro">{t('pack.intro')}</p>
-          <TierNote className="tier-note--pack" />
-        </div>
-      </Reveal>
-
-      <Reveal as="section" className="pack__picker">
-        <h2 className="pack__section-title">{t('pack.piecesTitle')}</h2>
-
-        <ul className="pack__pieces">
-          {selection.map(({piece, variant}) => (
-            <li className="pack__piece" key={piece.id}>
-              <Link to={`/products/${piece.handle}`} className="pack__thumb">
-                {piece.featuredImage && (
-                  <Image
-                    data={piece.featuredImage}
-                    alt={piece.featuredImage.altText || piece.title}
-                    sizes="96px"
-                    loading="lazy"
-                  />
-                )}
-              </Link>
-
-              <div className="pack__piece-body">
-                <Link to={`/products/${piece.handle}`} className="pack__piece-name">
-                  {piece.title}
-                </Link>
-                <p className="pack__piece-price">
-                  {variant ? <Money data={variant.price} /> : null}
-                </p>
-              </div>
-
-              <label className="pack__size">
-                <span className="pack__size-label">{t('pack.size')}</span>
-                <select
-                  value={chosen[piece.id] ?? ''}
-                  onChange={(event) =>
-                    setChosen((current) => ({
-                      ...current,
-                      [piece.id]: event.target.value,
-                    }))
-                  }
-                >
-                  {piece.variants.nodes.map((node) => (
-                    <option
-                      key={node.id}
-                      value={node.id}
-                      disabled={!node.availableForSale}
-                    >
-                      {sizeLabel(node)}
-                      {node.availableForSale ? '' : ` — ${t('product.soldOut')}`}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </li>
-          ))}
-        </ul>
-
-        <div className="pack__totals">
-          <div className="pack__totals-row">
-            <span>{t('pack.separately')}</span>
-            <s>{money(full)}</s>
-          </div>
-          <div className="pack__totals-row pack__totals-row--strong">
-            <span>{t('pack.packPrice')}</span>
-            <span>{money(total)}</span>
-          </div>
-          {saving > 0 && (
-            <p className="pack__saving">{t('pack.saving', {amount: money(saving)})}</p>
-          )}
-        </div>
-
-        <AddToCartButton
-          lines={lines}
-          disabled={!complete}
-          onClick={() => openAside('cart')}
-        >
-          {complete ? t('pack.add') : t('pack.unavailable')}
-        </AddToCartButton>
-
-        <p className="pack__note">{t('pack.note')}</p>
-      </Reveal>
-    </div>
-  );
-}
-
+/*
+ * Written out here rather than generated by codegen: the product aliases come
+ * from the fallback list, so the query follows the configuration instead of
+ * repeating it.
+ */
 const PACK_QUERY = `#graphql
   fragment PackPiece on Product {
     id
     title
     handle
+    productType
     featuredImage {
       id
       url
@@ -285,20 +108,282 @@ const PACK_QUERY = `#graphql
     }
   }
   query PackProducts(
-    $jean: String!
-    $longsleeve: String!
-    $third: String!
+    $collection: String!
     $country: CountryCode
     $language: LanguageCode
   ) @inContext(country: $country, language: $language) {
-    jean: product(handle: $jean) {
-      ...PackPiece
+    collection(handle: $collection) {
+      products(first: 50) {
+        nodes {
+          ...PackPiece
+        }
+      }
     }
-    longsleeve: product(handle: $longsleeve) {
-      ...PackPiece
-    }
-    third: product(handle: $third) {
-      ...PackPiece
-    }
+    ${PACK_FALLBACK_LIST.filter((handle) => HANDLE.test(handle))
+      .map(
+        (handle, index) => `f${index}: product(handle: "${handle}") {...PackPiece}`,
+      )
+      .join('\n    ')}
   }
-` as const;
+`;
+
+export async function loader({context}: Route.LoaderArgs) {
+  const data = (await context.storefront.query(PACK_QUERY, {
+    variables: {collection: PACK_COLLECTION_HANDLE},
+  })) as Record<string, unknown> & {
+    collection?: {products: {nodes: PackPiece[]}} | null;
+  };
+
+  const fromCollection = data?.collection?.products?.nodes ?? [];
+
+  const fallback = PACK_FALLBACK_LIST.map(
+    (_, index) => data?.[`f${index}`] as PackPiece | null,
+  ).filter((piece): piece is PackPiece => Boolean(piece));
+
+  /*
+   * The collection wins as soon as it holds enough to build a pack. Below
+   * that it is treated as absent: a half-filled collection would quietly drop
+   * a whole slot from the page.
+   */
+  const usingCollection = fromCollection.length >= PACK_SLOTS.length;
+  const pieces = usingCollection ? fromCollection : fallback;
+
+  if (!usingCollection && fromCollection.length) {
+    console.warn(
+      `Pack page: the "${PACK_COLLECTION_HANDLE}" collection holds only ${fromCollection.length} product(s) — falling back to the handles in app/lib/packOffer.ts.`,
+    );
+  }
+
+  // Filed by what each product is, with anything unbuyable left out: a piece
+  // nobody can add is not a choice, and the pre-ordered one is refused by the
+  // cart itself.
+  const slots = Object.fromEntries(
+    PACK_SLOTS.map((slot) => [slot, [] as PackPiece[]]),
+  ) as Record<PackSlot, PackPiece[]>;
+
+  for (const piece of pieces) {
+    if (isPreorderHandle(piece.handle)) continue;
+    if (!piece.variants.nodes.some((variant) => variant.availableForSale)) {
+      continue;
+    }
+
+    const slot = slotForProduct(piece);
+    if (slot) slots[slot].push(piece);
+  }
+
+  const missing = PACK_SLOTS.filter((slot) => !slots[slot].length);
+  if (missing.length) {
+    console.warn(
+      `Pack page: nothing available for ${missing.join(', ')} — check app/lib/packOffer.ts against Shopify Admin.`,
+    );
+  }
+
+  return {slots};
+}
+
+/** The size on a variant, from the size option when there is one. */
+function sizeLabel(variant: PackVariant): string {
+  const option = variant.selectedOptions.find(({name}) =>
+    /taille|size|pointure/i.test(name),
+  );
+  return option?.value ?? variant.title;
+}
+
+function firstAvailable(piece: PackPiece): PackVariant | undefined {
+  return (
+    piece.variants.nodes.find((variant) => variant.availableForSale) ??
+    piece.variants.nodes[0]
+  );
+}
+
+export default function PackPage() {
+  const {slots} = useLoaderData<typeof loader>();
+  const {locale} = useI18n();
+  const {open: openAside} = useAside();
+  const t = useT();
+
+  // One product and one size per slot, starting on the first piece in stock —
+  // the same thing a product page does when it opens.
+  const [choice, setChoice] = useState<
+    Record<string, {product: string; variant: string}>
+  >(() =>
+    Object.fromEntries(
+      PACK_SLOTS.map((slot) => {
+        const piece = slots[slot]?.[0];
+        return [
+          slot,
+          {
+            product: piece?.id ?? '',
+            variant: piece ? (firstAvailable(piece)?.id ?? '') : '',
+          },
+        ];
+      }),
+    ),
+  );
+
+  const selection = PACK_SLOTS.map((slot) => {
+    const pieces = slots[slot] ?? [];
+    const piece = pieces.find((node) => node.id === choice[slot]?.product);
+    const variant = piece?.variants.nodes.find(
+      (node) => node.id === choice[slot]?.variant,
+    );
+    return {slot, pieces, piece, variant};
+  });
+
+  const complete = selection.every(({variant}) => variant?.availableForSale);
+  const currency = selection[0]?.variant?.price.currencyCode ?? 'EUR';
+  const total = selection.reduce(
+    (sum, {variant}) => sum + Number(variant?.price.amount ?? 0),
+    0,
+  );
+
+  const money = (amount: number) =>
+    new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', {
+      style: 'currency',
+      currency,
+    }).format(amount);
+
+  const chosenLines = selection
+    .filter(({variant}) => variant)
+    .map(({variant}) => ({merchandiseId: variant!.id, quantity: 1}));
+
+  /*
+   * The free tee, for a rule that expects it to be in the basket already —
+   * see PACK_ADDS_FREE_LINE. It goes in as a second unit of the tee the
+   * customer picked, at its normal price; Shopify is what takes it off.
+   */
+  const freeVariant = selection.find(
+    ({slot}) => slot === PACK_FREE_SLOT,
+  )?.variant;
+  const lines =
+    PACK_ADDS_FREE_LINE && freeVariant
+      ? [...chosenLines, {merchandiseId: freeVariant.id, quantity: 1}]
+      : chosenLines;
+
+  return (
+    <div className="pack">
+      <Reveal as="section" className="pack__hero">
+        <img
+          className="pack__hero-image"
+          src={PACK_IMAGE.src}
+          alt={t('pack.imageAlt')}
+          width={PACK_IMAGE.width}
+          height={PACK_IMAGE.height}
+          loading="eager"
+          decoding="async"
+        />
+        <div className="pack__hero-text">
+          <p className="pack__eyebrow">{t('pack.eyebrow')}</p>
+          <h1 className="pack__title">{t('pack.title')}</h1>
+          <p className="pack__intro">{t('pack.intro')}</p>
+          {/* Dit en une ligne, sans faux prix barré ni pastille : la remise
+              est réelle et c'est Shopify qui l'applique — l'annoncer plus
+              fort ne la rendrait pas plus vraie. */}
+          <p className="pack__free">{t('pack.free')}</p>
+        </div>
+      </Reveal>
+
+      <Reveal as="section" className="pack__picker">
+        <h2 className="pack__section-title">{t('pack.piecesTitle')}</h2>
+
+        <ul className="pack__pieces">
+          {selection.map(({slot, pieces, piece, variant}) => (
+            <li className="pack__piece" key={slot}>
+              {piece?.featuredImage ? (
+                <Link to={`/products/${piece.handle}`} className="pack__thumb">
+                  <Image
+                    data={piece.featuredImage}
+                    alt={piece.featuredImage.altText || piece.title}
+                    sizes="96px"
+                    loading="lazy"
+                  />
+                </Link>
+              ) : (
+                <span className="pack__thumb" />
+              )}
+
+              <div className="pack__piece-body">
+                <span className="pack__slot">
+                  {t(`pack.slot.${slot}` as TranslationKey)}
+                </span>
+                <select
+                  className="pack__select"
+                  aria-label={t(`pack.slot.${slot}` as TranslationKey)}
+                  value={choice[slot]?.product ?? ''}
+                  onChange={(event) => {
+                    const next = pieces.find(
+                      (node) => node.id === event.target.value,
+                    );
+                    setChoice((current) => ({
+                      ...current,
+                      [slot]: {
+                        product: event.target.value,
+                        // A size only means something on the piece it belongs
+                        // to: changing the piece starts its sizes over.
+                        variant: next ? (firstAvailable(next)?.id ?? '') : '',
+                      },
+                    }));
+                  }}
+                >
+                  {pieces.map((node) => (
+                    <option key={node.id} value={node.id}>
+                      {node.title}
+                    </option>
+                  ))}
+                </select>
+                <p className="pack__piece-price">
+                  {variant ? <Money data={variant.price} /> : null}
+                </p>
+              </div>
+
+              <label className="pack__size">
+                <span className="pack__size-label">{t('pack.size')}</span>
+                <select
+                  value={choice[slot]?.variant ?? ''}
+                  onChange={(event) =>
+                    setChoice((current) => ({
+                      ...current,
+                      [slot]: {
+                        product: current[slot]?.product ?? '',
+                        variant: event.target.value,
+                      },
+                    }))
+                  }
+                >
+                  {(piece?.variants.nodes ?? []).map((node) => (
+                    <option
+                      key={node.id}
+                      value={node.id}
+                      disabled={!node.availableForSale}
+                    >
+                      {sizeLabel(node)}
+                      {node.availableForSale ? '' : ` — ${t('product.soldOut')}`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </li>
+          ))}
+        </ul>
+
+        <div className="pack__totals">
+          <div className="pack__totals-row pack__totals-row--strong">
+            <span>{t('pack.total')}</span>
+            <span>{money(total)}</span>
+          </div>
+          <p className="pack__free-note">{t('pack.freeNote')}</p>
+        </div>
+
+        <AddToCartButton
+          lines={lines}
+          disabled={!complete}
+          onClick={() => openAside('cart')}
+        >
+          {complete ? t('pack.add') : t('pack.unavailable')}
+        </AddToCartButton>
+
+        <p className="pack__note">{t('pack.note')}</p>
+      </Reveal>
+    </div>
+  );
+}

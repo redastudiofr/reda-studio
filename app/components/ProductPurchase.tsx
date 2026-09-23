@@ -14,6 +14,7 @@ import type {ProductRating} from '~/lib/rating';
 import {useT} from '~/lib/i18n';
 import {stockState} from '~/lib/stock';
 import {TierNote} from '~/components/TierNote';
+import {PackNote} from '~/components/PackNote';
 
 /**
  * The buy box: everything the customer needs to pick a variant and add it to
@@ -34,6 +35,7 @@ export function ProductPurchase({
   available,
   quantityAvailable,
   productId,
+  handle,
   shortDescription,
   variantId,
   rating,
@@ -48,6 +50,8 @@ export function ProductPurchase({
   quantityAvailable: number | null;
   /** Stable seed for the availability line — see app/lib/stock.ts. */
   productId: string;
+  /** Used to tell whether this piece belongs to the pack — see PackNote. */
+  handle: string;
   shortDescription: string;
   variantId?: string;
   rating?: ProductRating | null;
@@ -104,6 +108,9 @@ export function ProductPurchase({
 
       {/* L'offre par paliers, dite une fois sous le prix — voir TierNote. */}
       <TierNote />
+
+      {/* Et, pour les pièces du pack, une ligne de plus — voir PackNote. */}
+      <PackNote handle={handle} />
 
       <p className="buybox__tax">
         {t('product.taxIncluded')}{' '}

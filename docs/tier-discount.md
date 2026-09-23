@@ -48,6 +48,10 @@ stops saying anything was saved, on its own.
 
 ## The pack page (`/pack`)
 
+> **Outdated since the essential pack.** `/pack` now presents the Buy X get Y
+> offer — three pieces chosen by the customer and a fourth tee given — and no
+> longer prices a pack from the tier rule. See `docs/pack-essentiel.md`.
+
 Three real products presented together and added in one click, each in the size
 the customer picks. It creates no product and invents no price: the prices are
 the products' own, and the "pack price" is what the volume offer makes of those

@@ -6518,10 +6518,119 @@ html {
   color: var(--color-ink);
 }
 
-.pack__saving {
-  font-size: 0.75rem;
+/* Le créneau que la pièce occupe dans le pack — « le jean », « le tshirt » —
+   au-dessus du nom du produit choisi. */
+.pack__slot {
+  display: block;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
   color: var(--color-muted);
 }
+
+.pack__select {
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.45rem 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+}
+
+/* La pièce offerte : une ligne de texte. Pas de prix barré — il n'y a pas de
+   prix à barrer, la remise est appliquée par Shopify au paiement — et pas de
+   pastille criarde, qui serait la seule du site. */
+.pack__free {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.pack__free-note {
+  font-size: 0.7rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+/*
+* --------------------------------------------------
+* Le pack ailleurs sur le site
+* --------------------------------------------------
+*/
+
+/* Sous le prix d'une pièce du pack, sur sa fiche produit. */
+.pack-note {
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.pack-note a {
+  color: var(--color-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pack-note a:hover {
+  color: var(--color-ink);
+}
+
+/* Sur la page d'accueil : un paragraphe entre deux filets, pas une bannière. */
+.pack-teaser {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  max-width: 44rem;
+  margin: 3rem auto;
+  padding: 2.25rem 1.25rem;
+  text-align: center;
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.pack-teaser__eyebrow {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--color-muted);
+}
+
+.pack-teaser__title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+}
+
+.pack-teaser__text {
+  max-width: 34rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+.pack-teaser__link {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (min-width: 48em) {
+  .pack-teaser {
+    margin: 4rem auto;
+    padding: 2.75rem 1.5rem;
+  }
+
+  .pack-teaser__title {
+    font-size: 1.6rem;
+  }
+}
+
 
 .pack__note {
   font-size: 0.7rem;

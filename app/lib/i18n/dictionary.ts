@@ -200,20 +200,29 @@ export const en = {
   'cart.tierNext': 'add one piece: the next one is −{percent}%',
   'cart.tierMax': '−{percent}% from the third piece onwards',
   'pack.eyebrow': 'the pack',
-  'pack.title': 'signature pack',
+  'pack.title': 'essential pack',
   'pack.intro':
-    'Three pieces that work together, each in the size you choose — jeans, longsleeve and tee.',
+    'Pick a pair of jeans, a longsleeve and a tee, each in your size. Three pieces that go together, and a fourth on us.',
   'pack.imageAlt':
     'A reda studio outfit worn outside: white top and washed jeans',
-  'pack.piecesTitle': 'the three pieces',
+  'pack.free': '+ 1 tee free',
+  'pack.freeNote':
+    'The tee is given by the shop’s own discount, applied by Shopify at checkout.',
+  'pack.piecesTitle': 'choose your three pieces',
+  'pack.slot.jean': 'the jeans',
+  'pack.slot.longsleeve': 'the longsleeve',
+  'pack.slot.tshirt': 'the tee',
   'pack.size': 'size',
-  'pack.separately': 'bought separately',
-  'pack.packPrice': 'pack price',
-  'pack.saving': 'you save {amount}',
+  'pack.total': 'the three pieces',
   'pack.add': 'add the pack to the cart',
   'pack.unavailable': 'one of the pieces is sold out',
   'pack.note':
-    'Each piece is added at its own price; the volume offer applies the reduction in the basket, as it does for any three pieces.',
+    'Each piece goes into the basket at its own price — nothing here changes what you pay, the discount does that at checkout.',
+  'pack.badge': 'part of the essential pack — 1 tee free',
+  'pack.teaserTitle': 'three pieces, a fourth on us',
+  'pack.teaserText':
+    'Jeans, longsleeve and tee in the sizes you choose, and a tee given with them.',
+  'pack.teaserLink': 'discover the pack',
   'cookies.title': 'cookies',
   'cookies.text':
     'we use cookies for the cart, your language and our own visit statistics. no advertising trackers.',
@@ -689,20 +698,29 @@ export const fr: Record<TranslationKey, string> = {
   'cart.tierNext': 'ajoutez un article : le suivant est à −{percent} %',
   'cart.tierMax': '−{percent} % dès le 3e article',
   'pack.eyebrow': 'le pack',
-  'pack.title': 'pack signature',
+  'pack.title': 'pack essentiel',
   'pack.intro':
-    'Trois pièces qui vont ensemble, chacune dans la taille de votre choix — jean, longsleeve et t-shirt.',
+    'Choisissez un jean, un longsleeve et un tshirt, chacun dans votre taille. Trois pièces qui vont ensemble, et une quatrième offerte.',
   'pack.imageAlt':
     'Une tenue reda studio portée en extérieur : haut blanc et jean délavé',
-  'pack.piecesTitle': 'les trois pièces',
+  'pack.free': '+ 1 tshirt offert',
+  'pack.freeNote':
+    'Le tshirt est offert par la remise de la boutique, appliquée par Shopify au paiement.',
+  'pack.piecesTitle': 'choisissez vos trois pièces',
+  'pack.slot.jean': 'le jean',
+  'pack.slot.longsleeve': 'le longsleeve',
+  'pack.slot.tshirt': 'le tshirt',
   'pack.size': 'taille',
-  'pack.separately': 'achetées séparément',
-  'pack.packPrice': 'prix du pack',
-  'pack.saving': 'vous économisez {amount}',
+  'pack.total': 'les trois pièces',
   'pack.add': 'ajouter le pack au panier',
   'pack.unavailable': 'une des pièces est épuisée',
   'pack.note':
-    'Chaque pièce est ajoutée à son prix ; l’offre par paliers applique la remise dans le panier, comme pour trois pièces quelconques.',
+    'Chaque pièce entre au panier à son prix — rien ici ne change ce que vous payez, c’est la remise qui s’en charge au paiement.',
+  'pack.badge': 'fait partie du pack essentiel — 1 tshirt offert',
+  'pack.teaserTitle': 'trois pièces, une quatrième offerte',
+  'pack.teaserText':
+    'Jean, longsleeve et tshirt dans les tailles de votre choix, et un tshirt offert avec.',
+  'pack.teaserLink': 'découvrir le pack',
   'cookies.title': 'cookies',
   'cookies.text':
     'nous utilisons des cookies pour le panier, votre langue et nos propres statistiques de visite. aucun traceur publicitaire.',

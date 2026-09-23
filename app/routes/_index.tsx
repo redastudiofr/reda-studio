@@ -6,6 +6,7 @@ import {ProductItem} from '~/components/ProductItem';
 import {CollectionsSlider} from '~/components/CollectionsSlider';
 import {CollectionProductShowcase} from '~/components/CollectionProductShowcase';
 import {CommunitySlider} from '~/components/CommunitySlider';
+import {PackTeaser} from '~/components/PackTeaser';
 import {AnimatedHero} from '~/components/AnimatedHero';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
@@ -157,6 +158,10 @@ export default function Homepage() {
       <CollectionsSlider collections={data.collections} />
 
       <AllProducts products={data.allProducts} />
+
+      {/* Après le catalogue, pas avant : on propose un ensemble à quelqu'un
+          qui a déjà vu les pièces. */}
+      <PackTeaser />
 
       <CommunitySlider />
 

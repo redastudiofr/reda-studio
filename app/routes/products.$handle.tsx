@@ -279,6 +279,7 @@ export default function Product() {
             available={available}
             quantityAvailable={selectedVariant?.quantityAvailable ?? null}
             productId={product.id}
+            handle={product.handle}
             shortDescription={shortenDescription(description ?? '')}
             variantId={selectedVariant?.id}
             preorder={preorder}
