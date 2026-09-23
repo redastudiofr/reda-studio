@@ -5,6 +5,7 @@ import {RailArrows} from '~/components/RailArrows';
 import {Reveal} from '~/components/Reveal';
 import {useHorizontalRail} from '~/lib/useHorizontalRail';
 import {useAutoScroll} from '~/lib/useAutoScroll';
+import {useCenterFocus} from '~/lib/useCenterFocus';
 import {useI18n, useT} from '~/lib/i18n';
 
 /**
@@ -49,9 +50,11 @@ function ReviewCard({review}: {review: Review}) {
  * are hidden from screen readers, which would otherwise read every review
  * three times.
  *
- * Reveal wraps it so the cards can arrive out of focus and sharpen — and so
- * they can never stay blurred: it shows its content with no transition at all
- * when the observer never reports.
+ * Two things blur the cards, and they are not the same thing. Reveal blurs
+ * the row on arrival and clears it — and can never leave it blurred, since it
+ * shows its content with no transition at all when its observer never
+ * reports. useCenterFocus then keeps whatever is passing the middle sharp and
+ * lets the rest soften, for as long as the row travels.
  */
 function ReviewRow({
   reviews,
@@ -63,6 +66,7 @@ function ReviewRow({
   const t = useT();
   const {ref, scrollByCard} = useHorizontalRail<HTMLDivElement>({loop: true});
   useAutoScroll(ref, {direction});
+  useCenterFocus(ref);
 
   if (!reviews.length) return null;
 
@@ -93,16 +97,21 @@ function ReviewRow({
   );
 }
 
-/** The first row travels right, the second one left. */
-const ROWS: Array<'left' | 'right'> = ['right', 'left'];
+/**
+ * One row, travelling right.
+ *
+ * It was two, in opposite directions. One row shows fewer reviews at a time
+ * and reads as a single thing going somewhere, rather than as a wall of text
+ * sliding both ways at once — and it leaves the cards the room to be bigger.
+ */
+const ROW_DIRECTION = 'right' as const;
 
 /**
  * Customer reviews, shared by the homepage and every product page.
  *
- * Two rows travelling in opposite directions, dealt one review at a time so
- * consecutive reviews never land in the same row: each row mixes cities,
- * dates and ratings, the two come out the same length give or take one, and
- * the same cards are shown at every screen width.
+ * One row, holding every review in the order they were left, travelling on
+ * its own and scrollable by hand. The same cards are shown at every screen
+ * width; only how many fit changes.
  */
 export function ReviewsSection({
   heading,
@@ -121,9 +130,6 @@ export function ReviewsSection({
   const t = useT();
   if (!reviews.length) return null;
 
-  const rows: Review[][] = Array.from({length: ROWS.length}, () => []);
-  reviews.forEach((review, index) => rows[index % ROWS.length].push(review));
-
   const writeReviewHref = productTitle
     ? `/reviews?product=${encodeURIComponent(productTitle)}`
     : '/reviews';
@@ -136,13 +142,7 @@ export function ReviewsSection({
       </div>
 
       <div className="reviews__rows">
-        {rows.map((row, index) =>
-          row.length ? (
-            // The first review of a row is a stable identity for it: the rows
-            // are dealt from the same list in the same order every render.
-            <ReviewRow key={row[0].id} reviews={row} direction={ROWS[index]} />
-          ) : null,
-        )}
+        <ReviewRow reviews={reviews} direction={ROW_DIRECTION} />
       </div>
 
       <div className="reviews__cta">
