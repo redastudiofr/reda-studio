@@ -97,9 +97,15 @@ export function useCenterFocus<T extends HTMLElement>(
       if (!frame) frame = requestAnimationFrame(paint);
     };
 
+    /*
+     * Repaints straight away rather than waiting for a frame. A resize is
+     * rare, and until the repaint every card carries a blur computed for the
+     * old layout — a wait that lasts as long as frames are throttled, which
+     * is precisely what happens to a tab that was resized in the background.
+     */
     const remeasure = () => {
       measure();
-      schedule();
+      paint();
     };
 
     measure();
