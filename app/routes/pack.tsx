@@ -3,6 +3,7 @@ import {Link, useLoaderData} from 'react-router';
 import {Image, Money} from '@shopify/hydrogen';
 import type {Route} from './+types/pack';
 import {AddToCartButton} from '~/components/AddToCartButton';
+import {useAside} from '~/components/Aside';
 import {Reveal} from '~/components/Reveal';
 import {TierNote} from '~/components/TierNote';
 import {tierTotal} from '~/lib/tierDiscount';
@@ -119,6 +120,7 @@ function firstAvailable(piece: PackPiece): PackVariant | undefined {
 export default function PackPage() {
   const {pieces} = useLoaderData<typeof loader>();
   const {locale} = useI18n();
+  const {open: openAside} = useAside();
   const t = useT();
 
   // One chosen variant per piece, starting on the first in stock — the same
@@ -239,7 +241,11 @@ export default function PackPage() {
           )}
         </div>
 
-        <AddToCartButton lines={lines} disabled={!complete}>
+        <AddToCartButton
+          lines={lines}
+          disabled={!complete}
+          onClick={() => openAside('cart')}
+        >
           {complete ? t('pack.add') : t('pack.unavailable')}
         </AddToCartButton>
 
