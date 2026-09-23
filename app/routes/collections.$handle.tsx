@@ -4,6 +4,7 @@ import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {ProductItem} from '~/components/ProductItem';
+import {TierNote} from '~/components/TierNote';
 import type {ProductItemFragment} from 'storefrontapi.generated';
 
 export const meta: Route.MetaFunction = ({data}) => {
@@ -49,6 +50,10 @@ export default function Collection() {
       <div className="collection-head">
         <h1>{collection.title}</h1>
         {collection.description ? <p>{collection.description}</p> : null}
+        {/* Une seule fois en tête de liste plutôt que sous chacune des douze
+            vignettes : la même phrase répétée douze fois cesse d'être
+            discrète. */}
+        <TierNote className="tier-note--collection" />
       </div>
       <PaginatedResourceSection<ProductItemFragment>
         connection={collection.products}

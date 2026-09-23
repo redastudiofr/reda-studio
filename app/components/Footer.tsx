@@ -12,6 +12,9 @@ interface FooterProps {
 }
 
 const INFO_LINKS: Array<{key: TranslationKey; to: string}> = [
+  // The pack page has no collection behind it, so nothing links to it on its
+  // own; without this it would exist and be unreachable.
+  {key: 'pack.title', to: '/pack'},
   {key: 'nav.track', to: '/order-tracking'},
   {key: 'footer.faq', to: '/faq'},
   {key: 'home.ourStory', to: '/about'},

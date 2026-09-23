@@ -3,6 +3,7 @@ import {useLoaderData} from 'react-router';
 import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {ProductItem} from '~/components/ProductItem';
+import {TierNote} from '~/components/TierNote';
 import {useT} from '~/lib/i18n';
 import type {CollectionItemFragment} from 'storefrontapi.generated';
 
@@ -37,6 +38,7 @@ export default function Catalog() {
     <div className="collection-page">
       <div className="collection-head">
         <h1>{t('shop.title')}</h1>
+        <TierNote className="tier-note--collection" />
       </div>
       <PaginatedResourceSection<CollectionItemFragment>
         connection={products}

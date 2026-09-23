@@ -193,6 +193,27 @@ export const en = {
   'popup.alreadyRegistered': 'this number is already registered — here is your code',
   'popup.error': 'we couldn’t save your number. please try again in a moment.',
 
+  // — volume offer (see app/lib/tierDiscount.ts) and the signature pack —
+  'tier.second': 'second piece −{percent}%',
+  'tier.third': 'third piece −{percent}%',
+  'cart.tierSaved': 'you save {amount} on this basket',
+  'cart.tierNext': 'add one piece: the next one is −{percent}%',
+  'cart.tierMax': '−{percent}% from the third piece onwards',
+  'pack.eyebrow': 'the pack',
+  'pack.title': 'signature pack',
+  'pack.intro':
+    'Three pieces that work together, each in the size you choose — jeans, longsleeve and shirt.',
+  'pack.imageAlt':
+    'A reda studio outfit worn outside: white top and washed jeans',
+  'pack.piecesTitle': 'the three pieces',
+  'pack.size': 'size',
+  'pack.separately': 'bought separately',
+  'pack.packPrice': 'pack price',
+  'pack.saving': 'you save {amount}',
+  'pack.add': 'add the pack to the cart',
+  'pack.unavailable': 'one of the pieces is sold out',
+  'pack.note':
+    'Each piece is added at its own price; the volume offer applies the reduction in the basket, as it does for any three pieces.',
   'cookies.title': 'cookies',
   'cookies.text':
     'we use cookies for the cart, your language and our own visit statistics. no advertising trackers.',
@@ -661,6 +682,27 @@ export const fr: Record<TranslationKey, string> = {
   'popup.alreadyRegistered': 'ce numéro est déjà inscrit — voici votre code',
   'popup.error': 'votre numéro n’a pas pu être enregistré. réessayez dans un instant.',
 
+  // — offre par paliers (voir app/lib/tierDiscount.ts) et pack signature —
+  'tier.second': '2e article −{percent} %',
+  'tier.third': '3e article −{percent} %',
+  'cart.tierSaved': 'vous économisez {amount} sur ce panier',
+  'cart.tierNext': 'ajoutez un article : le suivant est à −{percent} %',
+  'cart.tierMax': '−{percent} % dès le 3e article',
+  'pack.eyebrow': 'le pack',
+  'pack.title': 'pack signature',
+  'pack.intro':
+    'Trois pièces qui vont ensemble, chacune dans la taille de votre choix — jean, longsleeve et chemise.',
+  'pack.imageAlt':
+    'Une tenue reda studio portée en extérieur : haut blanc et jean délavé',
+  'pack.piecesTitle': 'les trois pièces',
+  'pack.size': 'taille',
+  'pack.separately': 'achetées séparément',
+  'pack.packPrice': 'prix du pack',
+  'pack.saving': 'vous économisez {amount}',
+  'pack.add': 'ajouter le pack au panier',
+  'pack.unavailable': 'une des pièces est épuisée',
+  'pack.note':
+    'Chaque pièce est ajoutée à son prix ; l’offre par paliers applique la remise dans le panier, comme pour trois pièces quelconques.',
   'cookies.title': 'cookies',
   'cookies.text':
     'nous utilisons des cookies pour le panier, votre langue et nos propres statistiques de visite. aucun traceur publicitaire.',

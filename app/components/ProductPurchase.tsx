@@ -13,6 +13,7 @@ import {useAside} from '~/components/Aside';
 import type {ProductRating} from '~/lib/rating';
 import {useT} from '~/lib/i18n';
 import {stockState} from '~/lib/stock';
+import {TierNote} from '~/components/TierNote';
 
 /**
  * The buy box: everything the customer needs to pick a variant and add it to
@@ -100,6 +101,9 @@ export function ProductPurchase({
         <ProductPrice price={price} compareAtPrice={compareAtPrice} />
         {discountPct > 0 && <span className="buybox__discount">−{discountPct}%</span>}
       </div>
+
+      {/* L'offre par paliers, dite une fois sous le prix — voir TierNote. */}
+      <TierNote />
 
       <p className="buybox__tax">
         {t('product.taxIncluded')}{' '}

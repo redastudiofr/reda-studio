@@ -3,10 +3,11 @@ import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useRef} from 'react';
 import {
-  OFFER_DISCOUNT_CODE,
-  OFFER_ENABLED,
-  SECOND_ITEM_DISCOUNT_PERCENT,
-} from '~/lib/offers';
+  nextTier,
+  THIRD_ITEM_PERCENT,
+  TIER_ENABLED,
+  TIER_PERCENTS,
+} from '~/lib/tierDiscount';
 import {ShinyLink} from '~/components/ShinyButton';
 import {useI18n, useT} from '~/lib/i18n';
 
@@ -62,12 +63,13 @@ export function CartSummary({cart}: CartSummaryProps) {
 }
 
 /**
- * States the second-piece offer in the cart.
+ * States the volume offer in the cart: what it has already taken off, and
+ * what one more piece would add.
  *
  * There is no code to look for: Shopify reports what it actually took off as a
  * discount allocation on the line it applies to. Summing those allocations is
  * therefore a statement about the real total rather than an estimate — which
- * is why this is allowed to say "applied" at all. With nothing allocated it
+ * is why this is allowed to say "saved" at all. With nothing allocated it
  * stays an invitation, and never claims a reduction the customer has not got.
  */
 function OfferNote({
@@ -78,7 +80,7 @@ function OfferNote({
   currency: string;
 }) {
   const {t, locale} = useI18n();
-  if (!OFFER_ENABLED) return null;
+  if (!TIER_ENABLED) return null;
 
   const discounted = (lines ?? []).reduce(
     (total, line) =>
@@ -90,32 +92,30 @@ function OfferNote({
     0,
   );
 
-  if (discounted > 0) {
-    return (
-      <p className="cap-offer cap-offer--active">
-        {t('cart.offerApplied', {
-          amount: formatMoney(discounted, currency, locale),
-        })}
-      </p>
-    );
-  }
-
   const items = (lines ?? []).reduce(
     (total, line) => total + (line.quantity ?? 0),
     0,
   );
-
-  const key = items >= 2
-    ? (OFFER_DISCOUNT_CODE ? 'cart.offerActiveCode' : 'cart.offerActiveAuto')
-    : (OFFER_DISCOUNT_CODE ? 'cart.offerInviteCode' : 'cart.offerInviteAuto');
+  const next = nextTier(items);
 
   return (
-    <p className="cap-offer">
-      {t(key, {
-        percent: SECOND_ITEM_DISCOUNT_PERCENT,
-        code: OFFER_DISCOUNT_CODE,
-      })}
-    </p>
+    <>
+      {discounted > 0 && (
+        <p className="cap-offer cap-offer--active">
+          {t('cart.tierSaved', {
+            amount: formatMoney(discounted, currency, locale),
+          })}
+        </p>
+      )}
+
+      {next ? (
+        <p className="cap-offer">{t('cart.tierNext', {percent: next.percent})}</p>
+      ) : items >= TIER_PERCENTS.length && discounted === 0 ? (
+        <p className="cap-offer">
+          {t('cart.tierMax', {percent: THIRD_ITEM_PERCENT})}
+        </p>
+      ) : null}
+    </>
   );
 }
 
