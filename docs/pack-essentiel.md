@@ -2,7 +2,7 @@
 
 The customer picks a pair of jeans, a longsleeve and a tee, each in their
 size. A fourth piece — the **Tshirt Business After Hour — White** — goes into
-the basket with them and the code **REDA1120** takes it off.
+the basket with them and the code **FREEBSN** takes it off.
 
 **The storefront never decides what anyone pays.** The reduction is a Shopify
 discount; this repository chooses the pieces, says what the offer is, puts the
@@ -27,7 +27,7 @@ The **given** piece is not a slot but a named product:
 
 ```ts
 export const PACK_FREE_HANDLE = 'tshirt-business-after-hour-white';
-export const PACK_DISCOUNT_CODE = 'REDA1120';
+export const PACK_DISCOUNT_CODE = 'FREEBSN';
 ```
 
 If that handle ever stops matching the product the discount is written for,
@@ -53,7 +53,7 @@ appears on the wrong products.
 
 A discount takes money off a line that exists — **it does not create one**. So
 the button adds four lines, not three: the three chosen pieces and the offered
-tee, each at its normal price, and REDA1120 brings the tee to zero.
+tee, each at its normal price, and FREEBSN brings the tee to zero.
 
 That is also why the page shows it as the fourth piece, with `offert` written
 on the photo, rather than as a promise about checkout: what the customer sees
@@ -63,20 +63,27 @@ in the basket is exactly what the page showed them.
 discount is ever rewritten so that one of the three chosen pieces is itself
 the free one.
 
-## The code
+## Two codes, two offers, one basket
 
-`REDA1120` is attached to the cart by `app/routes/cart.tsx` after every
-change, through `OFFER_DISCOUNT_CODE` in `app/lib/offers.ts`, which now reads
-`PACK_DISCOUNT_CODE`. The customer never types it; it stays visible on the
-basket so they can check it.
+The shop runs two coded offers, and they must never be confused:
 
-**One code is attached, not two.** It replaced `REDA1130`, the old
-second-piece code. Running both would mean two reductions on the same basket,
-stacking or fighting depending on how each is set to combine in Shopify.
+| Offer | Code | Where |
+| --- | --- | --- |
+| The pack — three pieces, the tee free | `FREEBSN` | `PACK_DISCOUNT_CODE`, app/lib/packOffer.ts |
+| The product page's "take two" box | `REDA1120` | `OFFER_DISCOUNT_CODE`, app/lib/offers.ts |
 
-Check in Shopify Admin → Discounts that REDA1120 exists, is spelled exactly
+The pack has its own cart action, `PACK_ADD_ACTION`: it adds the four lines
+**and** attaches `FREEBSN` in the same request, replacing the other offer's
+code if the basket carried it. Every other line change attaches `REDA1120`,
+but only to a basket that carries no offer code yet — so a pack keeps its own.
+
+A basket therefore never holds both. Whether two of the shop's codes would
+stack, fight or silently cancel each other depends on how each is set to
+combine in Shopify, and the storefront does not put the question.
+
+Check in Shopify Admin → Discounts that `FREEBSN` exists, is spelled exactly
 this way, and that its conditions match what the page promises: three pieces
-from the pack plus the Business After Hour tee, the tee at 100% off.
+from the pack plus the Business After Hour tee, that tee at 100% off.
 
 ## Where the offer shows
 

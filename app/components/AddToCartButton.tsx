@@ -1,6 +1,7 @@
 import {type FetcherWithComponents} from 'react-router';
 import {CartForm, type OptimisticCartLineInput} from '@shopify/hydrogen';
 import {BUNDLE_ADD_ACTION} from '~/lib/offers';
+import {PACK_ADD_ACTION} from '~/lib/packOffer';
 import {ShinyButton} from '~/components/ShinyButton';
 import {useT} from '~/lib/i18n';
 
@@ -12,6 +13,7 @@ export function AddToCartButton({
   onClick,
   className = 'btn btn--full',
   bundle = false,
+  pack = false,
   shiny = true,
 }: {
   analytics?: unknown;
@@ -26,6 +28,12 @@ export function AddToCartButton({
    */
   bundle?: boolean;
   /**
+   * Same idea for the pack, which has a different code — see
+   * ~/lib/packOffer.ts. The two are separate offers and must not borrow each
+   * other's code.
+   */
+  pack?: boolean;
+  /**
    * The sweeping highlight. On the page's main call to action it earns its
    * keep; on a row of small size chips it would mean a dozen animation loops
    * running for as long as the drawer is open, for an effect nobody would see
@@ -34,7 +42,11 @@ export function AddToCartButton({
   shiny?: boolean;
 }) {
   const t = useT();
-  const action = bundle ? BUNDLE_ADD_ACTION : CartForm.ACTIONS.LinesAdd;
+  const action = pack
+    ? PACK_ADD_ACTION
+    : bundle
+      ? BUNDLE_ADD_ACTION
+      : CartForm.ACTIONS.LinesAdd;
   const Button = shiny ? ShinyButton : 'button';
 
   return (

@@ -62,11 +62,23 @@ export const PACK_FREE_HANDLE = 'tshirt-business-after-hour-white';
  * The code that makes that tee free, exactly as spelled in Shopify — no
  * spaces, uppercase.
  *
- * The customer never types it: app/routes/cart.tsx attaches it to the cart
- * after every change. It is shown so they can recognise it on the basket and
- * check it themselves.
+ * It is the pack's code and nothing else's: the product page's "take two" box
+ * runs on its own code (`OFFER_DISCOUNT_CODE` in ./offers.ts), and the two
+ * must never be confused. The customer never types this one — the cart action
+ * attaches it when the pack is added — but it stays visible on the basket so
+ * they can check it.
  */
-export const PACK_DISCOUNT_CODE = 'REDA1120';
+export const PACK_DISCOUNT_CODE = 'FREEBSN';
+
+/**
+ * Custom cart action: adds the pack's lines and attaches the pack's code in
+ * the same request.
+ *
+ * The pack needs its own action precisely because it has its own code. Adding
+ * the four lines through the ordinary add would attach the *other* offer's
+ * code instead, and the tee would be charged for.
+ */
+export const PACK_ADD_ACTION = 'CustomPackAdd' as const;
 
 
 /**

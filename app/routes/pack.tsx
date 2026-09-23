@@ -454,7 +454,10 @@ export default function PackPage() {
           </p>
         </div>
 
+        {/* `pack` : la page passe par l'action panier du pack, qui attache le
+            code du pack et pas celui du duo. */}
         <AddToCartButton
+          pack
           lines={lines}
           disabled={!complete}
           onClick={() => openAside('cart')}

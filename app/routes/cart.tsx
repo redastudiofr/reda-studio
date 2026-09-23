@@ -5,6 +5,7 @@ import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
 import {useT} from '~/lib/i18n';
 import {BUNDLE_ADD_ACTION, OFFER_DISCOUNT_CODE} from '~/lib/offers';
+import {PACK_ADD_ACTION, PACK_DISCOUNT_CODE} from '~/lib/packOffer';
 import {PREORDER_BLOCKED_VARIANT_IDS} from '~/lib/preorder';
 
 export const meta: Route.MetaFunction = () => {
@@ -26,22 +27,41 @@ export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
  * Never throws. Whatever happens to the discount, the line mutation that
  * preceded it stands — that is the sale.
  */
+/** The shop's own offer codes — one per offer, and never two on one basket. */
+const OFFER_CODES = [OFFER_DISCOUNT_CODE, PACK_DISCOUNT_CODE].filter(Boolean);
+
 async function withOfferDiscount(
   cart: Route.ActionArgs['context']['cart'],
   result: CartQueryDataReturn,
+  code: string = OFFER_DISCOUNT_CODE,
+  {replaceOffers = false}: {replaceOffers?: boolean} = {},
 ): Promise<CartQueryDataReturn> {
-  if (!OFFER_DISCOUNT_CODE || !result?.cart) return result;
+  if (!code || !result?.cart) return result;
 
   try {
     const codes = (result.cart.discountCodes ?? []).map(
       (discount) => discount.code,
     );
-    if (codes.includes(OFFER_DISCOUNT_CODE)) return result;
+    if (codes.includes(code)) return result;
 
-    const discounted = await cart.updateDiscountCodes([
-      ...codes,
-      OFFER_DISCOUNT_CODE,
-    ]);
+    /*
+     * One offer code at a time. Whether two of the shop's codes stack, fight
+     * or silently cancel each other depends on how each is set to combine in
+     * Shopify — so the storefront never puts the question: a basket that
+     * already carries an offer keeps the one it has, and only the pack, which
+     * was just promised something specific, takes the place.
+     */
+    const carriesAnOffer = codes.some((existing) =>
+      OFFER_CODES.includes(existing),
+    );
+    if (carriesAnOffer && !replaceOffers) return result;
+
+    // Codes the customer typed themselves are kept either way.
+    const kept = replaceOffers
+      ? codes.filter((existing) => !OFFER_CODES.includes(existing))
+      : codes;
+
+    const discounted = await cart.updateDiscountCodes([...kept, code]);
     return discounted?.cart ? discounted : result;
   } catch (error) {
     console.error('Offer discount could not be applied', error);
@@ -110,6 +130,24 @@ export async function action({request, context}: Route.ActionArgs) {
       const rejected = rejectPreorderLines(bundleLines);
       if (rejected) return rejected;
       result = await withOfferDiscount(cart, await cart.addLines(bundleLines));
+      break;
+    }
+    /*
+     * Pack add: the three chosen pieces plus the offered tee, and the pack's
+     * own code — the one that brings that tee to zero. It replaces any other
+     * offer code on the basket, because it is the offer the customer was just
+     * shown.
+     */
+    case PACK_ADD_ACTION: {
+      const packLines = inputs.lines as Parameters<typeof cart.addLines>[0];
+      const rejected = rejectPreorderLines(packLines);
+      if (rejected) return rejected;
+      result = await withOfferDiscount(
+        cart,
+        await cart.addLines(packLines),
+        PACK_DISCOUNT_CODE,
+        {replaceOffers: true},
+      );
       break;
     }
     case CartForm.ACTIONS.LinesUpdate:

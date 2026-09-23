@@ -83,7 +83,8 @@ that link it would exist and be unreachable.
 
 ## The code the cart carries
 
-> **Settled.** `OFFER_DISCOUNT_CODE` is now `REDA1120`, the pack code — see
+> **Settled.** `OFFER_DISCOUNT_CODE` is now `REDA1120` — the product page's
+> "take two" offer. The pack runs on a separate code, `FREEBSN`; see
 > `docs/pack-essentiel.md`. The section below described `REDA1130`, which the
 > storefront no longer applies; deactivate it in Shopify Admin if it is still
 > enabled there.
