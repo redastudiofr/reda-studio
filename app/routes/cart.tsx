@@ -18,71 +18,33 @@ export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
 const OFFER_CODES = [OFFER_DISCOUNT_CODE, PACK_DISCOUNT_CODE].filter(Boolean);
 
 /**
- * Attaches an offer's discount code to the cart after something is added.
+ * Runs a change to the cart and settles which offer code it comes out with.
  *
- * The customer never has to type a code: adding through the pack attaches the
- * pack's, adding anything else attaches the other offer's. A basket carries
- * one of them at a time, never both — see the comment inside.
+ * One rule, for every kind of change: **a basket keeps the offer it is
+ * already under.** Only an add can put it under one, only the pack can take
+ * the place of another, and nothing else ever swaps one code for the other.
  *
- * Never throws. Whatever happens to the discount, the line mutation that
+ * That rule exists because of a way this went wrong. Shopify removes a code
+ * from the cart the moment the basket stops satisfying it, and never puts it
+ * back when the basket satisfies it again. So any change — adding a piece,
+ * emptying one, a quantity — could leave the pack's code off the basket; the
+ * storefront then saw a basket with no offer, attached the *other* offer's
+ * code, and the tee the customer had been promised free was quietly billed at
+ * 80% of its price. Reading the codes only after the change is what made that
+ * invisible: it looks exactly like a basket that never had one.
+ *
+ * So the codes are read before as well, and anything the basket was carrying
+ * is put back. Nothing here decides whether the basket *deserves* the
+ * reduction — that is Shopify's to judge, and it marks a code inapplicable
+ * when it isn't. Codes the customer typed themselves are never touched.
+ *
+ * Never throws. Whatever happens to the discount, the line change that
  * preceded it stands: that is the sale.
  */
-async function withOfferDiscount(
-  cart: Route.ActionArgs['context']['cart'],
-  result: CartQueryDataReturn,
-  code: string = OFFER_DISCOUNT_CODE,
-  {replaceOffers = false}: {replaceOffers?: boolean} = {},
-): Promise<CartQueryDataReturn> {
-  if (!code || !result?.cart) return result;
-
-  try {
-    const codes = (result.cart.discountCodes ?? []).map(
-      (discount) => discount.code,
-    );
-    if (codes.includes(code)) return result;
-
-    /*
-     * One offer code at a time. Whether two of the shop's codes stack, fight
-     * or silently cancel each other depends on how each is set to combine in
-     * Shopify — so the storefront never puts the question: a basket that
-     * already carries an offer keeps the one it has, and only the pack, which
-     * was just promised something specific, takes the place.
-     */
-    const carriesAnOffer = codes.some((existing) =>
-      OFFER_CODES.includes(existing),
-    );
-    if (carriesAnOffer && !replaceOffers) return result;
-
-    // Codes the customer typed themselves are kept either way.
-    const kept = replaceOffers
-      ? codes.filter((existing) => !OFFER_CODES.includes(existing))
-      : codes;
-
-    const discounted = await cart.updateDiscountCodes([...kept, code]);
-    return discounted?.cart ? discounted : result;
-  } catch (error) {
-    console.error('Offer discount could not be applied', error);
-    return result;
-  }
-}
-
-/**
- * Runs a change to existing lines, and gives the basket back the offer code it
- * was carrying if the change knocked it off.
- *
- * Shopify drops a code from the cart the moment the basket stops satisfying
- * it, and it does not put it back when the basket satisfies it again. So
- * emptying a pack piece and adding it back used to cost the customer the free
- * tee for good — worse, the next change attached the *other* offer's code, and
- * the tee they had been promised free was quietly billed at 80%.
- *
- * Nothing here judges whether the basket qualifies; that is Shopify's to
- * decide, and it will mark the code inapplicable if it does not. This only
- * refuses to let an edit change which offer the basket is under.
- */
-async function keepingOfferCode(
+async function withOfferCode(
   cart: Route.ActionArgs['context']['cart'],
   mutate: () => Promise<CartQueryDataReturn>,
+  {attach = '', replace = false}: {attach?: string; replace?: boolean} = {},
 ): Promise<CartQueryDataReturn> {
   let carried: string[] = [];
 
@@ -96,19 +58,36 @@ async function keepingOfferCode(
   }
 
   const result = await mutate();
-  if (!carried.length || !result?.cart) return result;
+  if (!result?.cart) return result;
 
   try {
     const now = (result.cart.discountCodes ?? []).map(
       (discount) => discount.code,
     );
-    const lost = carried.filter((code) => !now.includes(code));
-    if (!lost.length) return result;
 
-    const restored = await cart.updateDiscountCodes([...now, ...lost]);
-    return restored?.cart ? restored : result;
+    // Which offer the basket should end up under.
+    const offer =
+      replace && attach
+        ? [attach]
+        : carried.length
+          ? carried
+          : attach
+            ? [attach]
+            : [];
+
+    const typedByTheCustomer = now.filter(
+      (code) => !OFFER_CODES.includes(code),
+    );
+    const wanted = [...typedByTheCustomer, ...offer];
+
+    const unchanged =
+      wanted.length === now.length && wanted.every((code) => now.includes(code));
+    if (unchanged) return result;
+
+    const updated = await cart.updateDiscountCodes(wanted);
+    return updated?.cart ? updated : result;
   } catch (error) {
-    console.error('Offer code could not be kept on the cart', error);
+    console.error('Offer code could not be settled on the cart', error);
     return result;
   }
 }
@@ -157,12 +136,14 @@ export async function action({request, context}: Route.ActionArgs) {
     case CartForm.ACTIONS.LinesAdd: {
       const rejected = rejectPreorderLines(inputs.lines);
       if (rejected) return rejected;
-      result = await withOfferDiscount(cart, await cart.addLines(inputs.lines));
+      result = await withOfferCode(cart, () => cart.addLines(inputs.lines), {
+        attach: OFFER_DISCOUNT_CODE,
+      });
       break;
     }
     /*
      * Pair add: both lines in one request. The offer's code is attached
-     * afterwards by `withOfferDiscount`, like every other line mutation.
+     * afterwards by `withOfferCode`, like every other line change.
      *
      * The case stays registered even when the offer is off, so a browser
      * holding a cached page from when it was on still adds to cart instead of
@@ -173,7 +154,9 @@ export async function action({request, context}: Route.ActionArgs) {
       const bundleLines = inputs.lines as Parameters<typeof cart.addLines>[0];
       const rejected = rejectPreorderLines(bundleLines);
       if (rejected) return rejected;
-      result = await withOfferDiscount(cart, await cart.addLines(bundleLines));
+      result = await withOfferCode(cart, () => cart.addLines(bundleLines), {
+        attach: OFFER_DISCOUNT_CODE,
+      });
       break;
     }
     /*
@@ -186,12 +169,10 @@ export async function action({request, context}: Route.ActionArgs) {
       const packLines = inputs.lines as Parameters<typeof cart.addLines>[0];
       const rejected = rejectPreorderLines(packLines);
       if (rejected) return rejected;
-      result = await withOfferDiscount(
-        cart,
-        await cart.addLines(packLines),
-        PACK_DISCOUNT_CODE,
-        {replaceOffers: true},
-      );
+      result = await withOfferCode(cart, () => cart.addLines(packLines), {
+        attach: PACK_DISCOUNT_CODE,
+        replace: true,
+      });
       break;
     }
     /*
@@ -200,12 +181,10 @@ export async function action({request, context}: Route.ActionArgs) {
      * swap a pack for the other offer behind the customer's back.
      */
     case CartForm.ACTIONS.LinesUpdate:
-      result = await keepingOfferCode(cart, () => cart.updateLines(inputs.lines));
+      result = await withOfferCode(cart, () => cart.updateLines(inputs.lines));
       break;
     case CartForm.ACTIONS.LinesRemove:
-      result = await keepingOfferCode(cart, () =>
-        cart.removeLines(inputs.lineIds),
-      );
+      result = await withOfferCode(cart, () => cart.removeLines(inputs.lineIds));
       break;
     case CartForm.ACTIONS.DiscountCodesUpdate: {
       const formDiscountCode = inputs.discountCode;
