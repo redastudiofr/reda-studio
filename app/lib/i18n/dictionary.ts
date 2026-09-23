@@ -74,7 +74,7 @@ export const en = {
   'product.perk.payment': 'secure payment',
 
   // — offer —
-  'offer.heading': 'limited offer',
+  'offer.heading': 'the offer',
   'offer.ribbon': '−{percent}% on your second piece',
   'offer.takeTwo': 'take two',
   'offer.sub': 'add a second piece — any piece — and {percent}% comes off it',
@@ -561,7 +561,7 @@ export const fr: Record<TranslationKey, string> = {
   'product.perk.payment': 'paiement sécurisé',
 
   // — offre —
-  'offer.heading': 'offre limitée',
+  'offer.heading': 'l’offre',
   'offer.ribbon': '−{percent} % sur votre deuxième pièce',
   'offer.takeTwo': 'prenez-en deux',
   'offer.sub':
