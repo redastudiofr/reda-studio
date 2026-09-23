@@ -14,22 +14,19 @@ export const meta: Route.MetaFunction = () => {
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
 
-/**
- * Attaches the offer's discount code to the cart after any change to its
- * lines.
- *
- * **Normally does nothing.** The offer runs on a Shopify *automatic* discount:
- * Shopify evaluates the basket itself and puts the reduction in the totals,
- * with no code involved and nothing for the storefront to apply. This only
- * comes alive if `OFFER_DISCOUNT_CODE` is filled in — the escape hatch
- * described in app/lib/offers.ts.
- *
- * Never throws. Whatever happens to the discount, the line mutation that
- * preceded it stands — that is the sale.
- */
 /** The shop's own offer codes — one per offer, and never two on one basket. */
 const OFFER_CODES = [OFFER_DISCOUNT_CODE, PACK_DISCOUNT_CODE].filter(Boolean);
 
+/**
+ * Attaches an offer's discount code to the cart after something is added.
+ *
+ * The customer never has to type a code: adding through the pack attaches the
+ * pack's, adding anything else attaches the other offer's. A basket carries
+ * one of them at a time, never both — see the comment inside.
+ *
+ * Never throws. Whatever happens to the discount, the line mutation that
+ * preceded it stands: that is the sale.
+ */
 async function withOfferDiscount(
   cart: Route.ActionArgs['context']['cart'],
   result: CartQueryDataReturn,
@@ -65,6 +62,53 @@ async function withOfferDiscount(
     return discounted?.cart ? discounted : result;
   } catch (error) {
     console.error('Offer discount could not be applied', error);
+    return result;
+  }
+}
+
+/**
+ * Runs a change to existing lines, and gives the basket back the offer code it
+ * was carrying if the change knocked it off.
+ *
+ * Shopify drops a code from the cart the moment the basket stops satisfying
+ * it, and it does not put it back when the basket satisfies it again. So
+ * emptying a pack piece and adding it back used to cost the customer the free
+ * tee for good — worse, the next change attached the *other* offer's code, and
+ * the tee they had been promised free was quietly billed at 80%.
+ *
+ * Nothing here judges whether the basket qualifies; that is Shopify's to
+ * decide, and it will mark the code inapplicable if it does not. This only
+ * refuses to let an edit change which offer the basket is under.
+ */
+async function keepingOfferCode(
+  cart: Route.ActionArgs['context']['cart'],
+  mutate: () => Promise<CartQueryDataReturn>,
+): Promise<CartQueryDataReturn> {
+  let carried: string[] = [];
+
+  try {
+    const before = await cart.get();
+    carried = (before?.discountCodes ?? [])
+      .map((discount) => discount.code)
+      .filter((code) => OFFER_CODES.includes(code));
+  } catch (error) {
+    console.error('Cart could not be read before the change', error);
+  }
+
+  const result = await mutate();
+  if (!carried.length || !result?.cart) return result;
+
+  try {
+    const now = (result.cart.discountCodes ?? []).map(
+      (discount) => discount.code,
+    );
+    const lost = carried.filter((code) => !now.includes(code));
+    if (!lost.length) return result;
+
+    const restored = await cart.updateDiscountCodes([...now, ...lost]);
+    return restored?.cart ? restored : result;
+  } catch (error) {
+    console.error('Offer code could not be kept on the cart', error);
     return result;
   }
 }
@@ -150,11 +194,18 @@ export async function action({request, context}: Route.ActionArgs) {
       );
       break;
     }
+    /*
+     * Changing or removing a line never changes which offer the basket is
+     * under: it keeps the code it had. Attaching one here is what used to
+     * swap a pack for the other offer behind the customer's back.
+     */
     case CartForm.ACTIONS.LinesUpdate:
-      result = await withOfferDiscount(cart, await cart.updateLines(inputs.lines));
+      result = await keepingOfferCode(cart, () => cart.updateLines(inputs.lines));
       break;
     case CartForm.ACTIONS.LinesRemove:
-      result = await withOfferDiscount(cart, await cart.removeLines(inputs.lineIds));
+      result = await keepingOfferCode(cart, () =>
+        cart.removeLines(inputs.lineIds),
+      );
       break;
     case CartForm.ACTIONS.DiscountCodesUpdate: {
       const formDiscountCode = inputs.discountCode;
