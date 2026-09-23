@@ -6629,6 +6629,32 @@ html {
   color: var(--color-ink);
 }
 
+/* Les trois pièces du jour, en petit, au-dessus du texte. */
+.pack-teaser__pieces {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.pack-teaser__piece {
+  width: 5.5rem;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--color-tile);
+}
+
+.pack-teaser__piece a,
+.pack-teaser__piece img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* Sur la page d'accueil : un paragraphe entre deux filets, pas une bannière. */
 .pack-teaser {
   display: flex;
@@ -6679,6 +6705,10 @@ html {
 
   .pack-teaser__title {
     font-size: 1.6rem;
+  }
+
+  .pack-teaser__piece {
+    width: 7rem;
   }
 }
 

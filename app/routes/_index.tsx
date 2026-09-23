@@ -86,10 +86,18 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
   const [{collections}] = await Promise.all([
     context.storefront.query(HOME_COLLECTIONS_QUERY),
   ]);
+  /*
+   * The day, used to draw the three pieces shown in the pack block. Drawn on
+   * the server and handed to the browser rather than drawn in the component:
+   * a `Math.random()` there would pick different pieces on the server and on
+   * hydration, and React would find a page that does not match the one it was
+   * sent. A new draw each day is random enough for a shop window.
+   */
+  const packDraw = new Date().toISOString().slice(0, 10);
   // « summer drop » et « all in drop » restent visibles dans le header, sur
   // /collections et dans la vitrine des pages produit, mais pas sur l'accueil.
   const visible = withoutHomeHiddenCollections(collections.nodes);
-  return {collections: visible};
+  return {collections: visible, packDraw};
 }
 
 function loadDeferredData({context}: Route.LoaderArgs) {
@@ -161,7 +169,7 @@ export default function Homepage() {
 
       {/* Après le catalogue, pas avant : on propose un ensemble à quelqu'un
           qui a déjà vu les pièces. */}
-      <PackTeaser />
+      <PackTeaser products={data.allProducts} draw={data.packDraw} />
 
       <CommunitySlider />
 

@@ -225,9 +225,9 @@ export const en = {
   'pack.note':
     'Each piece goes into the basket at its own price — nothing here changes what you pay, the discount does that at checkout.',
   'pack.badge': 'part of the essential pack — 1 tee free',
-  'pack.teaserTitle': 'three pieces, a fourth on us',
+  'pack.teaserTitle': 'any three pieces',
   'pack.teaserText':
-    'Jeans, longsleeve and tee in the sizes you choose, and a tee given with them.',
+    'Build the pack from whatever you like — the Business After Hour tee comes free with it.',
   'pack.teaserLink': 'discover the pack',
   'cookies.title': 'cookies',
   'cookies.text':
@@ -729,9 +729,9 @@ export const fr: Record<TranslationKey, string> = {
   'pack.note':
     'Chaque pièce entre au panier à son prix — rien ici ne change ce que vous payez, c’est la remise qui s’en charge au paiement.',
   'pack.badge': 'fait partie du pack essentiel — 1 tshirt offert',
-  'pack.teaserTitle': 'trois pièces, une quatrième offerte',
+  'pack.teaserTitle': 'trois pièces au choix',
   'pack.teaserText':
-    'Jean, longsleeve et tshirt dans les tailles de votre choix, et un tshirt offert avec.',
+    'Composez le pack avec les pièces que vous voulez — le tshirt Business After Hour est offert avec.',
   'pack.teaserLink': 'découvrir le pack',
   'cookies.title': 'cookies',
   'cookies.text':
