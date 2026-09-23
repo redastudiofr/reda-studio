@@ -1850,16 +1850,26 @@ html {
 }
 
 /*
-* Net au centre, un peu flou sur les côtés.
+* Net au centre, estompé sur les côtés.
 *
-* La valeur est écrite image par image par useCenterFocus, et l'attribut
-* n'existe que sur les cartes qui doivent être floues : une carte nette ne
-* porte aucun filtre, donc aucun calque, donc rien à peindre de plus. Pas de
-* transition ici — la valeur change déjà en continu, une transition ne ferait
-* que la faire trainer derrière le mouvement.
+* `--soft` va de 0 à 1 et vient de useCenterFocus, image par image : 0 pour
+* l'avis le plus au centre — toujours, quelle que soit la position de la
+* rangée — et d'autant plus près de 1 que la carte est loin derrière lui.
+*
+* Le flou reste faible et l'opacité ne descend qu'à 0,8 : les avis voisins
+* doivent rester reconnaissables comme des avis, avec leurs étoiles et un nom
+* lisibles du coin de l'œil. Les effacer ferait croire que la rangée s'arrête
+* là.
+*
+* L'attribut n'existe que sur les cartes estompées : la carte centrale ne
+* porte aucun filtre du tout, donc aucun calque, donc un texte rendu
+* exactement comme le reste de la page. Pas de transition non plus — la valeur
+* change déjà en continu, une transition ne ferait que la faire trainer
+* derrière le mouvement.
 */
-.reviews-row__item[data-blur] {
-  filter: blur(var(--blur, 0px));
+.reviews-row__item[data-soft] {
+  filter: blur(calc(var(--soft, 0) * 1.6px));
+  opacity: calc(1 - var(--soft, 0) * 0.2);
 }
 
 .review-card {
@@ -1996,8 +2006,9 @@ html {
     filter: none;
   }
 
-  .reviews-row__item[data-blur] {
+  .reviews-row__item[data-soft] {
     filter: none;
+    opacity: 1;
   }
 
   .rail-wrap.reveal .review-card {
