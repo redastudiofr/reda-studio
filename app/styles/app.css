@@ -6374,7 +6374,9 @@ html {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-  max-width: 64rem;
+  /* Plus large que le reste du site : les vêtements sont le propos de cette
+     page, et quatre d'entre eux sur une ligne ont besoin de place. */
+  max-width: 76rem;
   margin: 0 auto;
   padding: 2rem 1.25rem 4rem;
 }
@@ -6439,7 +6441,7 @@ html {
 .pack__pieces {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2.75rem;
+  gap: 4rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -6449,43 +6451,62 @@ html {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
-/* Le « + » de l'équation. Un pseudo-élément et pas un élément : c'est de la
-   ponctuation visuelle, un lecteur d'écran n'a rien à en faire. */
-.pack__piece + .pack__piece::before {
+/*
+* Le « + » et le « = » de l'équation.
+*
+* Des pseudo-éléments et pas des éléments : c'est de la ponctuation visuelle,
+* un lecteur d'écran n'a rien à en faire. Ils sont accrochés à la photo et non
+* à la carte, pour tomber au milieu du vêtement quelles que soient les lignes
+* de texte en dessous — au-dessus de l'image sur téléphone, dans la gouttière
+* sur grand écran. À la taille d'un titre : un signe qu'on doit chercher ne
+* dit pas que les pièces vont ensemble.
+*/
+.pack__piece + .pack__piece .pack__shot::before {
   content: '+';
   position: absolute;
-  top: -1.95rem;
+  top: -2.6rem;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 1.15rem;
+  font-size: 1.75rem;
   font-weight: 700;
   line-height: 1;
-  color: var(--color-muted);
+  color: var(--color-ink);
 }
 
+/*
+* Le vêtement, posé sur la page et rien d'autre : ni cadre, ni fond, ni coins
+* arrondis. Une photo de produit détourée se suffit, et le moindre filet
+* autour ferait une vignette de catalogue là où on veut voir un vêtement.
+*
+* Cadre carré et `contain` : les photos de la boutique sont carrées, donc le
+* vêtement remplit toute la place qu'on lui donne, montré entier et jamais
+* recadré. Pas de `overflow: hidden` — rien ne dépasse d'un `contain`, et les
+* signes de l'équation, eux, doivent pouvoir sortir de la photo.
+*/
 .pack__shot {
   position: relative;
   display: block;
-  aspect-ratio: 4 / 5;
-  overflow: hidden;
-  border-radius: 4px;
-  background: var(--color-tile);
+  aspect-ratio: 1 / 1;
 }
 
-/* « offert », écrit sur la photo de la pièce offerte. Sur l'image parce que
-   c'est là qu'on regarde, et en noir et blanc comme le reste : une pastille
-   de couleur serait la seule du site. */
+/*
+* « offert », posé sur le vêtement lui-même plutôt que dans un coin de la
+* photo : c'est le tshirt qu'on regarde, et c'est de lui qu'il faut
+* comprendre en une seconde qu'il est le cadeau. En noir et blanc comme le
+* reste du site — une pastille de couleur serait la seule de la boutique.
+*/
 .pack__free-tag {
   position: absolute;
-  bottom: 0.6rem;
-  left: 0.6rem;
-  padding: 0.3rem 0.6rem;
-  font-size: 0.62rem;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.45rem 0.95rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--color-paper);
   background: var(--color-ink);
@@ -6504,7 +6525,7 @@ html {
 .pack__shot img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .pack__piece-price {
@@ -6527,7 +6548,7 @@ html {
 }
 
 /* La pièce offerte ferme l'équation : « = » et non « + ». */
-.pack__piece + .pack__piece--free::before {
+.pack__piece + .pack__piece--free .pack__shot::before {
   content: '=';
 }
 
@@ -6726,12 +6747,15 @@ html {
 @media (min-width: 64em) {
   .pack__pieces {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 2rem;
+    /* Large : la gouttière porte le signe, et deux vêtements qui se touchent
+       presque se lisent comme un seul. */
+    gap: 3.5rem;
   }
 
-  .pack__piece + .pack__piece::before {
-    top: 30%;
-    left: -1rem;
+  .pack__piece + .pack__piece .pack__shot::before {
+    top: 50%;
+    left: -1.75rem;
+    font-size: 2.1rem;
     transform: translate(-50%, -50%);
   }
 }
