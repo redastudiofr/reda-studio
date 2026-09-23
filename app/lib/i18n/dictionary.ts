@@ -202,7 +202,7 @@ export const en = {
   'pack.eyebrow': 'the pack',
   'pack.title': 'signature pack',
   'pack.intro':
-    'Three pieces that work together, each in the size you choose — jeans, longsleeve and shirt.',
+    'Three pieces that work together, each in the size you choose — jeans, longsleeve and tee.',
   'pack.imageAlt':
     'A reda studio outfit worn outside: white top and washed jeans',
   'pack.piecesTitle': 'the three pieces',
@@ -691,7 +691,7 @@ export const fr: Record<TranslationKey, string> = {
   'pack.eyebrow': 'le pack',
   'pack.title': 'pack signature',
   'pack.intro':
-    'Trois pièces qui vont ensemble, chacune dans la taille de votre choix — jean, longsleeve et chemise.',
+    'Trois pièces qui vont ensemble, chacune dans la taille de votre choix — jean, longsleeve et t-shirt.',
   'pack.imageAlt':
     'Une tenue reda studio portée en extérieur : haut blanc et jean délavé',
   'pack.piecesTitle': 'les trois pièces',

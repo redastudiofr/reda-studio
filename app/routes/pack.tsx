@@ -19,13 +19,14 @@ import {useI18n, useT} from '~/lib/i18n';
  * and the basket is what actually applies it. Change a piece by changing a
  * handle here — nothing else knows which products these are.
  *
- * The catalogue holds no t-shirt today, so the third piece is the Heritage
- * Shirt. Swapping it for a tee later is one line.
+ * The t-shirts are the one piece here that the best-seller collection does not
+ * carry. The composition asked for — jeans, longsleeve, tee — wins over where
+ * each piece is filed: a "pack" whose third piece is a shirt is not the pack.
  */
 const PACK_HANDLES = {
   jean: 'kaizen-jeans-raw-denim-blue',
   longsleeve: 'reda-longsleeve-black',
-  third: 'heritage-shirt-blue',
+  third: 'tshirt-business-after-hour-white',
 } as const;
 
 /** The pack's lifestyle shot. Replace with a photo of the three pieces worn together. */
@@ -63,7 +64,7 @@ export const meta: Route.MetaFunction = () => {
     {
       name: 'description',
       content:
-        'Three reda studio best-sellers together: jeans, longsleeve and shirt, in the sizes you choose.',
+        'Three reda studio pieces together: jeans, longsleeve and tee, in the sizes you choose.',
     },
   ];
 };

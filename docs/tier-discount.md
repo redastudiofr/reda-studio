@@ -59,15 +59,15 @@ Changing a piece is one line in `routes/pack.tsx`:
 const PACK_HANDLES = {
   jean: 'kaizen-jeans-raw-denim-blue',
   longsleeve: 'reda-longsleeve-black',
-  third: 'heritage-shirt-blue',
+  third: 'tshirt-business-after-hour-white',
 };
 ```
 
 Two things to know:
 
-- **There is no t-shirt in the catalogue** (longsleeves, jeans, hoodies,
-  joggings, zips, one shirt, one short). The third piece is the Heritage Shirt
-  until a tee exists; then it is one handle to change.
+- The tee is the one piece the **best-seller collection does not carry** — the
+  two t-shirts are filed under `tshirt` only. The composition asked for wins
+  over where each piece is filed.
 - `PACK_IMAGE` is a placeholder (`/images/histoire-cerisiers.webp`). Replace it
   with a photo of the three pieces worn together when there is one.
 
