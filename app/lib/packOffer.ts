@@ -114,7 +114,7 @@ export const PACK_FALLBACK_LIST: string[] = PACK_SLOTS.flatMap((slot) =>
  * pieces.
  *
  * On, because a discount takes money off a line that exists — it does not
- * create one. The tee has to be in the basket for REDA1120 to bring it to
+ * create one. The tee has to be in the basket for FREEBSN to bring it to
  * zero, which is also why the page shows it as the fourth piece rather than
  * as a promise about checkout.
  *
