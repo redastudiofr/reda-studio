@@ -206,6 +206,7 @@ export const en = {
   'pack.imageAlt':
     'A reda studio outfit worn outside: white top and washed jeans',
   'pack.free': '+ 1 tee free',
+  'pack.equals': '= 1 tee free',
   'pack.freeNote':
     'The tee is given by the shop’s own discount, applied by Shopify at checkout.',
   'pack.piecesTitle': 'choose your three pieces',
@@ -704,6 +705,7 @@ export const fr: Record<TranslationKey, string> = {
   'pack.imageAlt':
     'Une tenue reda studio portée en extérieur : haut blanc et jean délavé',
   'pack.free': '+ 1 tshirt offert',
+  'pack.equals': '= 1 tshirt offert',
   'pack.freeNote':
     'Le tshirt est offert par la remise de la boutique, appliquée par Shopify au paiement.',
   'pack.piecesTitle': 'choisissez vos trois pièces',

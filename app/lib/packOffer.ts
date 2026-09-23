@@ -39,8 +39,11 @@ export const PACK_COLLECTION_HANDLE = 'pack-essentiel';
 
 export type PackSlot = 'jean' | 'longsleeve' | 'tshirt';
 
-/** The three choices, in the order the page presents them. */
-export const PACK_SLOTS: PackSlot[] = ['jean', 'longsleeve', 'tshirt'];
+/**
+ * The three choices, in the order the page presents them — the order the
+ * offer is said out loud: un tshirt, un jean, un longsleeve.
+ */
+export const PACK_SLOTS: PackSlot[] = ['tshirt', 'jean', 'longsleeve'];
 
 /** The slot the free piece comes from. */
 export const PACK_FREE_SLOT: PackSlot = 'tshirt';

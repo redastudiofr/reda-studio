@@ -292,85 +292,93 @@ export default function PackPage() {
       <Reveal as="section" className="pack__picker">
         <h2 className="pack__section-title">{t('pack.piecesTitle')}</h2>
 
+        {/* L'offre montrée plutôt qu'expliquée : les trois pièces en grand,
+            un « + » entre elles, le résultat dessous. */}
         <ul className="pack__pieces">
           {selection.map(({slot, pieces, piece, variant}) => (
             <li className="pack__piece" key={slot}>
               {piece?.featuredImage ? (
-                <Link to={`/products/${piece.handle}`} className="pack__thumb">
+                <Link to={`/products/${piece.handle}`} className="pack__shot">
                   <Image
                     data={piece.featuredImage}
                     alt={piece.featuredImage.altText || piece.title}
-                    sizes="96px"
+                    sizes="(min-width: 48em) 30vw, 88vw"
                     loading="lazy"
                   />
                 </Link>
               ) : (
-                <span className="pack__thumb" />
+                <span className="pack__shot" />
               )}
 
-              <div className="pack__piece-body">
-                <span className="pack__slot">
-                  {t(`pack.slot.${slot}` as TranslationKey)}
-                </span>
-                <select
-                  className="pack__select"
-                  aria-label={t(`pack.slot.${slot}` as TranslationKey)}
-                  value={choice[slot]?.product ?? ''}
-                  onChange={(event) => {
-                    const next = pieces.find(
-                      (node) => node.id === event.target.value,
-                    );
-                    setChoice((current) => ({
-                      ...current,
-                      [slot]: {
-                        product: event.target.value,
-                        // A size only means something on the piece it belongs
-                        // to: changing the piece starts its sizes over.
-                        variant: next ? (firstAvailable(next)?.id ?? '') : '',
-                      },
-                    }));
-                  }}
-                >
-                  {pieces.map((node) => (
-                    <option key={node.id} value={node.id}>
-                      {node.title}
-                    </option>
-                  ))}
-                </select>
+              <span className="pack__slot">
+                {t(`pack.slot.${slot}` as TranslationKey)}
+              </span>
+
+              <select
+                className="pack__select"
+                aria-label={t(`pack.slot.${slot}` as TranslationKey)}
+                value={choice[slot]?.product ?? ''}
+                onChange={(event) => {
+                  const next = pieces.find(
+                    (node) => node.id === event.target.value,
+                  );
+                  setChoice((current) => ({
+                    ...current,
+                    [slot]: {
+                      product: event.target.value,
+                      // A size only means something on the piece it belongs
+                      // to: changing the piece starts its sizes over.
+                      variant: next ? (firstAvailable(next)?.id ?? '') : '',
+                    },
+                  }));
+                }}
+              >
+                {pieces.map((node) => (
+                  <option key={node.id} value={node.id}>
+                    {node.title}
+                  </option>
+                ))}
+              </select>
+
+              <div className="pack__piece-foot">
                 <p className="pack__piece-price">
                   {variant ? <Money data={variant.price} /> : null}
                 </p>
-              </div>
 
-              <label className="pack__size">
-                <span className="pack__size-label">{t('pack.size')}</span>
-                <select
-                  value={choice[slot]?.variant ?? ''}
-                  onChange={(event) =>
-                    setChoice((current) => ({
-                      ...current,
-                      [slot]: {
-                        product: current[slot]?.product ?? '',
-                        variant: event.target.value,
-                      },
-                    }))
-                  }
-                >
-                  {(piece?.variants.nodes ?? []).map((node) => (
-                    <option
-                      key={node.id}
-                      value={node.id}
-                      disabled={!node.availableForSale}
-                    >
-                      {sizeLabel(node)}
-                      {node.availableForSale ? '' : ` — ${t('product.soldOut')}`}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                <label className="pack__size">
+                  <span className="pack__size-label">{t('pack.size')}</span>
+                  <select
+                    value={choice[slot]?.variant ?? ''}
+                    onChange={(event) =>
+                      setChoice((current) => ({
+                        ...current,
+                        [slot]: {
+                          product: current[slot]?.product ?? '',
+                          variant: event.target.value,
+                        },
+                      }))
+                    }
+                  >
+                    {(piece?.variants.nodes ?? []).map((node) => (
+                      <option
+                        key={node.id}
+                        value={node.id}
+                        disabled={!node.availableForSale}
+                      >
+                        {sizeLabel(node)}
+                        {node.availableForSale
+                          ? ''
+                          : ` — ${t('product.soldOut')}`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             </li>
           ))}
         </ul>
+
+        <p className="pack__equals">{t('pack.equals')}</p>
 
         <div className="pack__totals">
           <div className="pack__totals-row pack__totals-row--strong">
