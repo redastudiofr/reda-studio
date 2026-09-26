@@ -89,7 +89,7 @@ export function ProductPurchase({
           review metafields, never a placeholder score. */}
       {rating && (
         <div className="rating-summary">
-          <StarRating rating={rating.value} size={14} />
+          <StarRating rating={rating.value} size={18} />
           <span className="rating-summary__text">
             {t('product.ratedOutOf', {value: rating.value.toString()})}
             {typeof rating.count === 'number' && (
