@@ -12,8 +12,14 @@
  * See docs/tier-discount.md.
  */
 
-/** Set to false to take the offer off the whole storefront. */
-export const TIER_ENABLED = true;
+/**
+ * Set to false to take the offer off the whole storefront.
+ *
+ * Off: the shop runs a single second-piece offer at −30% (./offers.ts), and
+ * a line announcing −20% on the second piece would contradict it. The app in
+ * Shopify Admin has to be switched off with it, or both reductions apply.
+ */
+export const TIER_ENABLED = false;
 
 /** Percentage off by position in the basket: 1st, 2nd, 3rd and beyond. */
 export const TIER_PERCENTS = [0, 20, 30] as const;

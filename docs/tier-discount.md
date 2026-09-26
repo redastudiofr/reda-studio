@@ -1,5 +1,11 @@
 # Volume offer — 2nd piece −20%, 3rd and beyond −30%
 
+> **Switched off** (`TIER_ENABLED = false`). The shop now runs a single
+> second-piece offer at −30% through the code `REDA1120`
+> (`docs/second-item-offer.md`), and a line announcing −20% on the second
+> piece would contradict it. The tiered app in Shopify Admin must be off too,
+> or both reductions apply to the same basket.
+
 The whole catalogue, all the time: the first piece is full price, the second is
 20% off, the third and every one after it 30% off.
 

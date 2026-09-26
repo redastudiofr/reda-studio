@@ -19,7 +19,7 @@ Shopify. So the offer needs a real discount to exist in Shopify.
 
 1. **admin.shopify.com** → your store → **Discounts** → **Create discount** →
    **Buy X get Y**.
-2. **Method**: **Discount code**, spelled exactly `REDA1130` — uppercase, no
+2. **Method**: **Discount code**, spelled exactly `REDA1120` — uppercase, no
    spaces. It has to match `OFFER_DISCOUNT_CODE` in `app/lib/offers.ts`
    character for character.
 3. **Title**: what the customer will see on their receipt, e.g.

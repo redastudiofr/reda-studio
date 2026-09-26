@@ -1,5 +1,3 @@
-import {SECOND_ITEM_PERCENT} from './tierDiscount';
-
 /**
  * Second-piece offer — 30% off the second item in the basket.
  *
@@ -14,14 +12,10 @@ import {SECOND_ITEM_PERCENT} from './tierDiscount';
  */
 
 /**
- * Percentage taken off the second piece.
- *
- * Read from the storefront-wide volume offer rather than written twice: the
- * tiered app in Shopify Admin now decides what a second piece costs, and the
- * "take two" block on the product page has to say the same number as the line
- * under the price two centimetres above it.
+ * Percentage taken off the second piece — what the code below is set to in
+ * Shopify Admin. The two must always say the same number.
  */
-export const SECOND_ITEM_DISCOUNT_PERCENT = SECOND_ITEM_PERCENT;
+export const SECOND_ITEM_DISCOUNT_PERCENT = 30;
 
 /** Set to false to switch the offer off across the storefront. */
 export const OFFER_ENABLED = true;

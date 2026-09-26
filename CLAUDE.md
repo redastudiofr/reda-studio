@@ -23,8 +23,8 @@ tromper de code coûte de l'argent réel, en silence.
 | Offre | Code | Écrit dans |
 | --- | --- | --- |
 | Pack : 3 pièces, le tshirt Business After Hour offert | `FREEBSN` | `app/lib/packOffer.ts` |
-| Bloc « prenez-en deux » de la fiche produit | `REDA1120` | `app/lib/offers.ts` |
-| Paliers 2ᵉ −20 % / 3ᵉ −30 % (affichage seul) | — | `app/lib/tierDiscount.ts` |
+| Bloc « second produit −30 % » de la fiche produit | `REDA1120` | `app/lib/offers.ts` |
+| Paliers 2ᵉ −20 % / 3ᵉ −30 % — **désactivés** (`TIER_ENABLED = false`) | — | `app/lib/tierDiscount.ts` |
 
 Un panier ne porte **jamais** deux codes d'offre : la règle est dans
 `app/routes/cart.tsx`, et elle rend au panier le code qu'il portait avant
