@@ -1,11 +1,9 @@
 /**
  * Star rating: five square tiles, a white star cut out of each — the tile
  * fills, not the star, so a 4.5 reads as four full tiles and half a fifth.
- * Drawn inline so it needs no image request and scales cleanly.
- *
- * In the shop's ink rather than Trustpilot's green: that colour on this shape
- * is Trustpilot's mark, and reads as a Trustpilot-verified score, which this
- * shop doesn't have (see docs/synthetic-ratings.md).
+ * One colour for every tile, the shop's own --color-star; the unfilled part
+ * of a tile stays neutral grey, or a 4.5 would look like a 5. Drawn inline so
+ * it needs no image request and scales cleanly.
  */
 export function StarRating({
   rating,

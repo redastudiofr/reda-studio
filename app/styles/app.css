@@ -3444,7 +3444,7 @@ html {
 }
 
 .stars__tile-fill {
-  fill: var(--color-ink);
+  fill: var(--color-star);
 }
 
 .stars__glyph {
