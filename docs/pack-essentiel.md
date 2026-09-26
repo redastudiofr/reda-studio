@@ -74,12 +74,13 @@ The shop runs two coded offers, and they must never be confused:
 | Offer | Code | Where |
 | --- | --- | --- |
 | The pack — three pieces, the tee free | `FREEBSN` | `PACK_DISCOUNT_CODE`, app/lib/packOffer.ts |
-| The product page's "take two" box | `REDA1120` | `OFFER_DISCOUNT_CODE`, app/lib/offers.ts |
+| Second piece −30% | `REDA1130` | `OFFER_DISCOUNT_CODE`, app/lib/offers.ts |
 
 The pack has its own cart action, `PACK_ADD_ACTION`: it adds the four lines
 **and** attaches `FREEBSN` in the same request, replacing the other offer's
-code if the basket carried it. Every other line change attaches `REDA1120`,
-but only to a basket that carries no offer code yet — so a pack keeps its own.
+code if the basket carried it. Every other add attaches `REDA1130`, but only
+from the second piece and only to a basket that carries no offer code yet — so
+a pack keeps its own.
 
 A basket therefore never holds both. Whether two of the shop's codes would
 stack, fight or silently cancel each other depends on how each is set to

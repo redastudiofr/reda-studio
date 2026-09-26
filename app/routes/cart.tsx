@@ -4,7 +4,12 @@ import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
 import {useT} from '~/lib/i18n';
-import {BUNDLE_ADD_ACTION, OFFER_DISCOUNT_CODE} from '~/lib/offers';
+import {
+  BUNDLE_ADD_ACTION,
+  OFFER_DISCOUNT_CODE,
+  OFFER_MIN_PIECES,
+  RETIRED_OFFER_CODES,
+} from '~/lib/offers';
 import {PACK_ADD_ACTION, PACK_DISCOUNT_CODE} from '~/lib/packOffer';
 import {PREORDER_BLOCKED_VARIANT_IDS} from '~/lib/preorder';
 
@@ -16,6 +21,13 @@ export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
 
 /** The shop's own offer codes — one per offer, and never two on one basket. */
 const OFFER_CODES = [OFFER_DISCOUNT_CODE, PACK_DISCOUNT_CODE].filter(Boolean);
+
+/** A retired code of the second-piece offer is read as the current one. */
+const current = (code: string) =>
+  RETIRED_OFFER_CODES.includes(code) ? OFFER_DISCOUNT_CODE : code;
+
+const isShopCode = (code: string) =>
+  OFFER_CODES.includes(code) || RETIRED_OFFER_CODES.includes(code);
 
 /**
  * Runs a change to the cart and settles which offer code it comes out with.
@@ -51,7 +63,7 @@ async function withOfferCode(
   try {
     const before = await cart.get();
     carried = (before?.discountCodes ?? [])
-      .map((discount) => discount.code)
+      .map((discount) => current(discount.code))
       .filter((code) => OFFER_CODES.includes(code));
   } catch (error) {
     console.error('Cart could not be read before the change', error);
@@ -66,7 +78,7 @@ async function withOfferCode(
     );
 
     // Which offer the basket should end up under.
-    const offer =
+    const chosen =
       replace && attach
         ? [attach]
         : carried.length
@@ -75,9 +87,13 @@ async function withOfferCode(
             ? [attach]
             : [];
 
-    const typedByTheCustomer = now.filter(
-      (code) => !OFFER_CODES.includes(code),
+    // The second-piece code only once there is a second piece.
+    const pieces = result.cart.totalQuantity ?? 0;
+    const offer = [...new Set(chosen)].filter(
+      (code) => code !== OFFER_DISCOUNT_CODE || pieces >= OFFER_MIN_PIECES,
     );
+
+    const typedByTheCustomer = now.filter((code) => !isShopCode(code));
     const wanted = [...typedByTheCustomer, ...offer];
 
     const unchanged =
@@ -177,11 +193,14 @@ export async function action({request, context}: Route.ActionArgs) {
     }
     /*
      * Changing or removing a line never changes which offer the basket is
-     * under: it keeps the code it had. Attaching one here is what used to
-     * swap a pack for the other offer behind the customer's back.
+     * under: it keeps the code it had. A quantity raised to two pieces on a
+     * basket under no offer yet gets the second-piece code, like an add —
+     * a basket under the pack keeps the pack's (`withOfferCode`).
      */
     case CartForm.ACTIONS.LinesUpdate:
-      result = await withOfferCode(cart, () => cart.updateLines(inputs.lines));
+      result = await withOfferCode(cart, () => cart.updateLines(inputs.lines), {
+        attach: OFFER_DISCOUNT_CODE,
+      });
       break;
     case CartForm.ACTIONS.LinesRemove:
       result = await withOfferCode(cart, () => cart.removeLines(inputs.lineIds));

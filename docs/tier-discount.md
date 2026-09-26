@@ -1,7 +1,7 @@
 # Volume offer — 2nd piece −20%, 3rd and beyond −30%
 
 > **Switched off** (`TIER_ENABLED = false`). The shop now runs a single
-> second-piece offer at −30% through the code `REDA1120`
+> second-piece offer at −30% through the code `REDA1130`
 > (`docs/second-item-offer.md`), and a line announcing −20% on the second
 > piece would contradict it. The tiered app in Shopify Admin must be off too,
 > or both reductions apply to the same basket.
@@ -89,11 +89,11 @@ that link it would exist and be unreachable.
 
 ## The code the cart carries
 
-> **Settled.** `OFFER_DISCOUNT_CODE` is now `REDA1120` — the product page's
-> "take two" offer. The pack runs on a separate code, `FREEBSN`; see
-> `docs/pack-essentiel.md`. The section below described `REDA1130`, which the
-> storefront no longer applies; deactivate it in Shopify Admin if it is still
-> enabled there.
+> **Superseded.** `OFFER_DISCOUNT_CODE` is `REDA1130` again — 30% off the
+> second piece, attached once the basket holds two pieces; see
+> `docs/second-item-offer.md`. `REDA1120`, used in between, is retired: a
+> basket still carrying it is switched to `REDA1130` by the cart. The section
+> below is kept for the record only.
 
 ### For the record: the old second-piece code, REDA1130
 

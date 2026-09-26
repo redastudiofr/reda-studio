@@ -35,7 +35,21 @@ export const OFFER_ENABLED = true;
  * and an automatic discount for the same offer at once, or the reductions
  * stack.
  */
-export const OFFER_DISCOUNT_CODE: string = 'REDA1120';
+export const OFFER_DISCOUNT_CODE: string = 'REDA1130';
+
+/**
+ * Codes this offer ran on before, still possibly sitting on a basket saved in
+ * a browser. The cart swaps them for the current code rather than letting the
+ * two coexist or taking one for a code the customer typed.
+ */
+export const RETIRED_OFFER_CODES: string[] = ['REDA1120'];
+
+/**
+ * How many pieces a basket holds before the code goes on: it is a second-piece
+ * offer, so a single piece carries no code at all — attached at the second,
+ * taken off again if the basket goes back to one.
+ */
+export const OFFER_MIN_PIECES = 2;
 
 /**
  * Custom cart action: adds the pair's two lines in one request.

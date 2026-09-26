@@ -19,7 +19,7 @@ Shopify. So the offer needs a real discount to exist in Shopify.
 
 1. **admin.shopify.com** → your store → **Discounts** → **Create discount** →
    **Buy X get Y**.
-2. **Method**: **Discount code**, spelled exactly `REDA1120` — uppercase, no
+2. **Method**: **Discount code**, spelled exactly `REDA1130` — uppercase, no
    spaces. It has to match `OFFER_DISCOUNT_CODE` in `app/lib/offers.ts`
    character for character.
 3. **Title**: what the customer will see on their receipt, e.g.
@@ -45,8 +45,11 @@ allocated, so it stays correct either way.
 ## The code in use
 
 `REDA1130`, set in `app/lib/offers.ts`. The storefront attaches it to the cart
-after every change, so the customer never has to type it — they just get to see
-it, on the product page and in the cart.
+**once the basket holds two pieces** (`OFFER_MIN_PIECES`) — never on a single
+piece — and takes it off again if the basket goes back to one. The customer
+never has to type it; they just get to see it, on the product page and in the
+cart. A basket still carrying the retired `REDA1120` (`RETIRED_OFFER_CODES`)
+is switched to `REDA1130` at its next change.
 
 Renaming it means changing it in Shopify **and** in that file; the two must
 match exactly, including case.

@@ -23,7 +23,7 @@ tromper de code coûte de l'argent réel, en silence.
 | Offre | Code | Écrit dans |
 | --- | --- | --- |
 | Pack : 3 pièces, le tshirt Business After Hour offert | `FREEBSN` | `app/lib/packOffer.ts` |
-| Bloc « second produit −30 % » de la fiche produit | `REDA1120` | `app/lib/offers.ts` |
+| Second produit −30 % (posé à partir de 2 articles) | `REDA1130` | `app/lib/offers.ts` |
 | Paliers 2ᵉ −20 % / 3ᵉ −30 % — **désactivés** (`TIER_ENABLED = false`) | — | `app/lib/tierDiscount.ts` |
 
 Un panier ne porte **jamais** deux codes d'offre : la règle est dans
@@ -59,4 +59,5 @@ affichage du stock, vidéos produit portées, e-mails.
   `app/lib/packOffer.ts`, à tenir à jour à la main.
 - Remplacer la photo d'ambiance du pack (`PACK_IMAGE` dans
   `app/routes/pack.tsx`), aujourd'hui une image d'archive.
-- Vérifier que l'ancien code `REDA1130` est bien désactivé dans l'admin.
+- Désactiver l'ancien code `REDA1120` et l'app de paliers dans l'admin :
+  seul `REDA1130` porte le −30 % du second produit.
