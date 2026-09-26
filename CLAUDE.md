@@ -6,10 +6,14 @@ blanc, minuscules, pas de bandeau promo, pas de compte à rebours.
 
 ## Déploiement
 
-Pousser sur `main` suffit : GitHub Actions construit et publie sur Oxygen, en
-deux minutes environ. **Le propriétaire a donné son autorisation de pousser
-sans demander à chaque fois.** Vérifier ensuite en interrogeant le site en
-ligne plutôt qu'en le supposant.
+Pousser sur `main` déclenche GitHub Actions, qui construit et publie sur
+Oxygen en deux minutes environ. **Le propriétaire a donné son autorisation de
+pousser sans demander à chaque fois.**
+
+Vérifier que le run a bien démarré dans l'onglet Actions : un `git push` fait
+depuis une session Claude dans le cloud est arrivé sur `main` sans déclencher
+aucun déploiement, et le site est resté sur l'ancienne version en silence.
+Vérifier ensuite en interrogeant le site en ligne plutôt qu'en le supposant.
 
 ## Ce qu'il faut lire avant de toucher aux offres
 
