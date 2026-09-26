@@ -6418,200 +6418,6 @@ html {
   color: var(--color-muted);
 }
 
-.pack__picker {
-  display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
-}
-
-.pack__section-title {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--color-muted);
-}
-
-/*
-* L'offre écrite comme une équation : les trois pièces montrées en grand, un
-* « + » entre elles, le résultat en dessous. C'est la façon la plus courte de
-* dire ce qu'est le pack — trois vêtements, un quatrième offert — sans une
-* ligne d'explication.
-*/
-.pack__pieces {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 4rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.pack__piece {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-/*
-* Le « + » et le « = » de l'équation.
-*
-* Des pseudo-éléments et pas des éléments : c'est de la ponctuation visuelle,
-* un lecteur d'écran n'a rien à en faire. Ils sont accrochés à la photo et non
-* à la carte, pour tomber au milieu du vêtement quelles que soient les lignes
-* de texte en dessous — au-dessus de l'image sur téléphone, dans la gouttière
-* sur grand écran. À la taille d'un titre : un signe qu'on doit chercher ne
-* dit pas que les pièces vont ensemble.
-*/
-.pack__piece + .pack__piece .pack__shot::before {
-  content: '+';
-  position: absolute;
-  top: -2.6rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.75rem;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--color-ink);
-}
-
-/*
-* Le vêtement, posé sur la page et rien d'autre : ni cadre, ni fond, ni coins
-* arrondis. Une photo de produit détourée se suffit, et le moindre filet
-* autour ferait une vignette de catalogue là où on veut voir un vêtement.
-*
-* Cadre carré et `contain` : les photos de la boutique sont carrées, donc le
-* vêtement remplit toute la place qu'on lui donne, montré entier et jamais
-* recadré. Pas de `overflow: hidden` — rien ne dépasse d'un `contain`, et les
-* signes de l'équation, eux, doivent pouvoir sortir de la photo.
-*/
-.pack__shot {
-  position: relative;
-  display: block;
-  aspect-ratio: 1 / 1;
-}
-
-/*
-* « offert », posé sur le vêtement lui-même plutôt que dans un coin de la
-* photo : c'est le tshirt qu'on regarde, et c'est de lui qu'il faut
-* comprendre en une seconde qu'il est le cadeau. En noir et blanc comme le
-* reste du site — une pastille de couleur serait la seule de la boutique.
-*/
-.pack__free-tag {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 0.45rem 0.95rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-paper);
-  background: var(--color-ink);
-  border-radius: 2px;
-}
-
-.pack__free-name {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.pack__piece-price--free {
-  text-transform: lowercase;
-}
-
-.pack__shot img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.pack__piece-price {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-/* Prix à gauche, taille à droite : la ligne qui ferme chaque pièce. */
-.pack__piece-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.pack__size {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* La pièce offerte ferme l'équation : « = » et non « + ». */
-.pack__piece + .pack__piece--free .pack__shot::before {
-  content: '=';
-}
-
-.pack__size-label {
-  font-size: 0.66rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-muted);
-}
-
-.pack__size select {
-  padding: 0.5rem 0.6rem;
-  font-size: 0.8rem;
-  color: var(--color-ink);
-  background: var(--color-paper);
-  border: 1px solid var(--color-line);
-  border-radius: 2px;
-}
-
-.pack__totals {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--color-line);
-}
-
-.pack__totals-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  font-size: 0.85rem;
-  color: var(--color-muted);
-}
-
-.pack__totals-row--strong {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-/* Le créneau que la pièce occupe dans le pack — « le jean », « le tshirt » —
-   au-dessus du nom du produit choisi. */
-.pack__slot {
-  display: block;
-  font-size: 0.62rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--color-muted);
-}
-
-.pack__select {
-  width: 100%;
-  margin-top: 0.35rem;
-  padding: 0.45rem 0.5rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--color-ink);
-  background: var(--color-paper);
-  border: 1px solid var(--color-line);
-  border-radius: 2px;
-}
-
 /* La pièce offerte : une ligne de texte. Pas de prix barré — il n'y a pas de
    prix à barrer, la remise est appliquée par Shopify au paiement — et pas de
    pastille criarde, qui serait la seule du site. */
@@ -6620,18 +6426,6 @@ html {
   font-size: 0.9rem;
   font-weight: 600;
 }
-
-.pack__free-note {
-  font-size: 0.7rem;
-  line-height: 1.6;
-  color: var(--color-muted);
-}
-
-/*
-* --------------------------------------------------
-* Le pack ailleurs sur le site
-* --------------------------------------------------
-*/
 
 /* Sous le prix d'une pièce du pack, sur sa fiche produit. */
 .pack-note {
@@ -6650,113 +6444,382 @@ html {
   color: var(--color-ink);
 }
 
-/* Les trois pièces du jour, en petit, au-dessus du texte. */
-.pack-teaser__pieces {
-  display: flex;
-  justify-content: center;
-  gap: 0.6rem;
-  margin: 0 0 0.5rem;
-  padding: 0;
-  list-style: none;
-}
-
-.pack-teaser__piece {
-  width: 5.5rem;
-  aspect-ratio: 4 / 5;
-  overflow: hidden;
-  border-radius: 3px;
-  background: var(--color-tile);
-}
-
-.pack-teaser__piece a,
-.pack-teaser__piece img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Sur la page d'accueil : un paragraphe entre deux filets, pas une bannière. */
-.pack-teaser {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.55rem;
-  max-width: 44rem;
-  margin: 3rem auto;
-  padding: 2.25rem 1.25rem;
-  text-align: center;
+/*
+* --------------------------------------------------
+* Le pack, composé sur place (accueil et /pack)
+* --------------------------------------------------
+*
+* L'offre écrite comme une équation — pièce + pièce + pièce = tshirt offert —
+* et composée là où elle est annoncée, sans page intermédiaire.
+*
+* Deux mises en page, pas une réduite : sur téléphone chaque pièce est une
+* ligne (photo à gauche, choix à droite) et les signes tombent entre les
+* photos, dans la colonne des vêtements ; à partir de 64em les quatre pièces
+* se rangent sur une ligne et les signes passent dans les gouttières, à
+* hauteur des photos.
+*/
+.pack-offer {
+  max-width: 76rem;
+  margin: 3.5rem auto;
+  padding: 3rem 1rem 3.5rem;
   border-top: 1px solid var(--color-line);
   border-bottom: 1px solid var(--color-line);
 }
 
-.pack-teaser__eyebrow {
+.pack-offer--page {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pack-offer__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  max-width: 40rem;
+  margin: 0 auto 2.75rem;
+  text-align: center;
+}
+
+.pack-offer__eyebrow {
   font-size: 0.62rem;
   text-transform: uppercase;
   letter-spacing: 0.22em;
   color: var(--color-muted);
 }
 
-.pack-teaser__title {
-  font-size: 1.35rem;
+.pack-offer__title {
+  font-size: clamp(1.55rem, 6.4vw, 2.9rem);
   font-weight: 800;
-  letter-spacing: -0.01em;
-  text-transform: lowercase;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  text-wrap: balance;
 }
 
-.pack-teaser__text {
+.pack-offer__intro {
   max-width: 34rem;
-  font-size: 0.85rem;
-  line-height: 1.6;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--color-muted);
+  text-wrap: pretty;
+}
+
+.pack-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+.pack-builder__equation {
+  /* L'écart entre deux pièces est ce qui porte le signe : il est lu par
+     `.pack-card__shot::before` pour s'y centrer. */
+  --pack-gap: 3.25rem;
+  /* Retrait du cadre de la pièce offerte, rattrapé par une marge négative :
+     son contenu s'aligne ainsi sur celui des trois autres. */
+  --pack-free-pad: 0.75rem;
+
+  display: grid;
+  gap: var(--pack-gap);
+}
+
+.pack-card {
+  display: grid;
+  grid-template-columns: minmax(0, 44%) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+  min-width: 0;
+}
+
+/*
+* Le vêtement posé sur la page, sans cadre ni fond : les photos de la boutique
+* sont carrées et détourées, `contain` les montre entières, jamais recadrées
+* ni écrasées.
+*/
+.pack-card__shot {
+  position: relative;
+  aspect-ratio: 1 / 1;
+}
+
+/* Posée en absolu : sans cela le cadre grandit à la hauteur naturelle de
+   l'image, et les textes des quatre pièces ne partent plus du même point. */
+.pack-card__shot img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/*
+* Le « + » et le « = ». Des pseudo-éléments : de la ponctuation visuelle, que
+* chaque carte nomme déjà pour un lecteur d'écran (« pièce 2 — le jean »).
+* Accrochés à la photo, pour tomber au milieu du vêtement quelle que soit la
+* longueur du texte à côté.
+*/
+.pack-card__shot[data-sign]::before {
+  content: attr(data-sign);
+  position: absolute;
+  top: calc(var(--pack-gap) / -2);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--color-ink);
+}
+
+.pack-card--free .pack-card__shot[data-sign]::before {
+  top: calc(var(--pack-gap) / -2 - var(--pack-free-pad));
+}
+
+/* La pièce offerte : un filet noir autour, le seul de la section — assez
+   pour qu'on la reconnaisse, sans couleur ni fond qui la feraient crier. */
+.pack-card--free {
+  margin-inline: calc(var(--pack-free-pad) * -1);
+  padding: var(--pack-free-pad);
+  border: 1px solid var(--color-ink);
+  border-radius: 8px;
+}
+
+.pack-card__badge {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+  background: var(--color-ink);
+  border-radius: 2px;
+}
+
+.pack-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.pack-card__slot {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
   color: var(--color-muted);
 }
 
-.pack-teaser__link {
-  margin-top: 0.35rem;
-  font-size: 0.78rem;
+.pack-card__index {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.pack-card__name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-ink);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+a.pack-card__name:hover {
   text-decoration: underline;
-  text-underline-offset: 4px;
+  text-underline-offset: 3px;
+}
+
+.pack-card__price {
+  font-size: 0.85rem;
+}
+
+.pack-card__price--free {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Les modèles du créneau, en vignettes : on choisit un vêtement en le
+   voyant, pas en lisant son nom dans une liste. */
+.pack-card__models {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+}
+
+.pack-card__model {
+  width: 2.4rem;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  transition: border-color 150ms var(--ease-out-soft);
+}
+
+.pack-card__model:hover {
+  border-color: var(--color-muted);
+}
+
+.pack-card__model[aria-checked='true'] {
+  border-color: var(--color-ink);
+  box-shadow: inset 0 0 0 1px var(--color-ink);
+}
+
+.pack-card__model img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Les tailles : les mêmes boutons que la fiche produit, un cran plus petits
+   pour tenir à côté de la photo sur téléphone. */
+.pack-card__sizes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr));
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+}
+
+.pack-card__size.option-btn {
+  min-height: 40px;
+  padding: 0 0.2rem;
+  font-size: 0.72rem;
+}
+
+.pack-builder__checkout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: 100%;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.pack-builder__total {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.pack-builder__total strong {
+  font-weight: 700;
+}
+
+.pack-builder__total--free {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+
+.pack-builder__total--free span:last-child {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.pack-builder__add {
+  margin-top: 0.6rem;
+  min-height: 54px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pack-builder__points {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+.pack-builder__points li {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Un trait court en guise de puce : de quoi aligner trois phrases, rien de
+   plus. */
+.pack-builder__points li::before {
+  content: '';
+  flex: none;
+  width: 0.9rem;
+  height: 1px;
+  margin-top: 0.75em;
+  background: var(--color-ink);
 }
 
 @media (min-width: 48em) {
-  .pack-teaser {
-    margin: 4rem auto;
-    padding: 2.75rem 1.5rem;
+  .pack-offer {
+    margin: 4.5rem auto;
+    padding: 4rem 1.5rem 4.5rem;
   }
 
-  .pack-teaser__title {
-    font-size: 1.6rem;
-  }
-
-  .pack-teaser__piece {
-    width: 7rem;
+  .pack-offer--page {
+    margin: 0;
+    padding: 0;
   }
 }
 
-
-.pack__note {
-  font-size: 0.7rem;
-  line-height: 1.6;
-  color: var(--color-muted);
-}
-
-/* Les quatre pièces sur une ligne — trois, plus celle qui est offerte : les
-   signes quittent le haut des cartes pour les gouttières, à hauteur des
-   photos. En dessous de cette largeur elles restent empilées : quatre
-   colonnes sur une tablette ne montreraient plus les vêtements. */
+/* Les quatre pièces sur une ligne. En dessous de cette largeur elles restent
+   en lignes : quatre colonnes sur une tablette ne montreraient plus les
+   vêtements. */
 @media (min-width: 64em) {
-  .pack__pieces {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    /* Large : la gouttière porte le signe, et deux vêtements qui se touchent
-       presque se lisent comme un seul. */
-    gap: 3.5rem;
+  .pack-builder {
+    max-width: 72rem;
+    gap: 3rem;
   }
 
-  .pack__piece + .pack__piece .pack__shot::before {
+  .pack-builder__equation {
+    --pack-gap: 4rem;
+    --pack-free-pad: 0.9rem;
+
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .pack-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.1rem;
+  }
+
+  .pack-card__shot[data-sign]::before,
+  .pack-card--free .pack-card__shot[data-sign]::before {
     top: 50%;
-    left: -1.75rem;
-    font-size: 2.1rem;
-    transform: translate(-50%, -50%);
+    left: calc(var(--pack-gap) / -2);
+    font-size: 2.4rem;
+  }
+
+  .pack-builder__checkout {
+    max-width: 30rem;
+    margin: 0 auto;
+  }
+
+  .pack-builder__points {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+    max-width: 60rem;
+    margin: 0 auto;
+    text-align: left;
   }
 }
 

@@ -6,13 +6,14 @@ import {ProductItem} from '~/components/ProductItem';
 import {CollectionsSlider} from '~/components/CollectionsSlider';
 import {CollectionProductShowcase} from '~/components/CollectionProductShowcase';
 import {CommunitySlider} from '~/components/CommunitySlider';
-import {PackTeaser} from '~/components/PackTeaser';
+import {PackOffer} from '~/components/PackOffer';
 import {AnimatedHero} from '~/components/AnimatedHero';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
 import {HomeReviews} from '~/components/HomeReviews';
 import {HelpFaq} from '~/components/HelpFaq';
 import {withoutHomeHiddenCollections} from '~/lib/collections';
+import {loadPack} from '~/lib/packProducts';
 import {useT} from '~/lib/i18n';
 
 /**
@@ -86,18 +87,10 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
   const [{collections}] = await Promise.all([
     context.storefront.query(HOME_COLLECTIONS_QUERY),
   ]);
-  /*
-   * The day, used to draw the three pieces shown in the pack block. Drawn on
-   * the server and handed to the browser rather than drawn in the component:
-   * a `Math.random()` there would pick different pieces on the server and on
-   * hydration, and React would find a page that does not match the one it was
-   * sent. A new draw each day is random enough for a shop window.
-   */
-  const packDraw = new Date().toISOString().slice(0, 10);
   // « summer drop » et « all in drop » restent visibles dans le header, sur
   // /collections et dans la vitrine des pages produit, mais pas sur l'accueil.
   const visible = withoutHomeHiddenCollections(collections.nodes);
-  return {collections: visible, packDraw};
+  return {collections: visible};
 }
 
 function loadDeferredData({context}: Route.LoaderArgs) {
@@ -137,11 +130,18 @@ function loadDeferredData({context}: Route.LoaderArgs) {
         return null;
       });
 
+  // Deferred like the rest: the pack section streams in after the catalogue
+  // and never holds up the top of the page.
+  const pack = loadPack(context.storefront).catch((error: Error) => {
+    console.error(error);
+    return null;
+  });
+
   const automneDrop = showcase('automne-drop');
   const summer = showcase('summer');
   const bestSeller = showcase('best-seller');
 
-  return {allProducts, automneDrop, summer, bestSeller};
+  return {allProducts, pack, automneDrop, summer, bestSeller};
 }
 
 export default function Homepage() {
@@ -169,7 +169,7 @@ export default function Homepage() {
 
       {/* Après le catalogue, pas avant : on propose un ensemble à quelqu'un
           qui a déjà vu les pièces. */}
-      <PackTeaser products={data.allProducts} draw={data.packDraw} />
+      <PackOffer pack={data.pack} />
 
       <CommunitySlider />
 

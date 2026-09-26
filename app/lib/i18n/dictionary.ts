@@ -214,7 +214,6 @@ export const en = {
   'pack.bundleCta': 'build the pack',
   'pack.freeNote':
     'The fourth tee goes into the basket with the rest and the code {code} takes it off — attached to your basket for you, and visible on it.',
-  'pack.piecesTitle': 'choose your three pieces',
   'pack.slot.jean': 'the jeans',
   'pack.slot.longsleeve': 'the longsleeve',
   'pack.slot.tshirt': 'the tee',
@@ -222,13 +221,16 @@ export const en = {
   'pack.total': 'the three pieces',
   'pack.add': 'add the pack to the cart',
   'pack.unavailable': 'one of the pieces is sold out',
-  'pack.note':
-    'Each piece goes into the basket at its own price — nothing here changes what you pay, the discount does that at checkout.',
   'pack.badge': 'part of the essential pack — 1 tee free',
-  'pack.teaserTitle': 'any three pieces',
-  'pack.teaserText':
-    'Build the pack from whatever you like — the Business After Hour tee comes free with it.',
-  'pack.teaserLink': 'discover the pack',
+  'pack.offerTitle': '3 pieces bought = 1 free',
+  'pack.offerIntro':
+    'Build your pack from three pieces of your choice — a tee, a pair of jeans, a longsleeve — and the Business After Hour tee is added, free.',
+  'pack.piece': 'piece {n}',
+  'pack.model': 'model',
+  'pack.point.choice': 'The model and the size of each piece, your choice.',
+  'pack.point.free':
+    'The Business After Hour tee is added to your order automatically.',
+  'pack.point.cart': 'The offer is applied in the cart, with the code {code}.',
   'cookies.title': 'cookies',
   'cookies.text':
     'we use cookies for the cart, your language and our own visit statistics. no advertising trackers.',
@@ -718,7 +720,6 @@ export const fr: Record<TranslationKey, string> = {
   'pack.bundleCta': 'composer le pack',
   'pack.freeNote':
     'Le quatrième tshirt entre au panier avec les autres et le code {code} le déduit — ajouté à votre panier pour vous, et visible dessus.',
-  'pack.piecesTitle': 'choisissez vos trois pièces',
   'pack.slot.jean': 'le jean',
   'pack.slot.longsleeve': 'le longsleeve',
   'pack.slot.tshirt': 'le tshirt',
@@ -726,13 +727,16 @@ export const fr: Record<TranslationKey, string> = {
   'pack.total': 'les trois pièces',
   'pack.add': 'ajouter le pack au panier',
   'pack.unavailable': 'une des pièces est épuisée',
-  'pack.note':
-    'Chaque pièce entre au panier à son prix — rien ici ne change ce que vous payez, c’est la remise qui s’en charge au paiement.',
   'pack.badge': 'fait partie du pack essentiel — 1 tshirt offert',
-  'pack.teaserTitle': 'trois pièces au choix',
-  'pack.teaserText':
-    'Composez le pack avec les pièces que vous voulez — le tshirt Business After Hour est offert avec.',
-  'pack.teaserLink': 'découvrir le pack',
+  'pack.offerTitle': '3 produits achetés = 1 offert',
+  'pack.offerIntro':
+    'Composez votre pack avec trois pièces de votre choix — un tshirt, un jean, un longsleeve — et recevez automatiquement le tshirt Business After Hour offert.',
+  'pack.piece': 'pièce {n}',
+  'pack.model': 'modèle',
+  'pack.point.choice': 'Le modèle et la taille de chaque pièce, au choix.',
+  'pack.point.free':
+    'Le tshirt Business After Hour est ajouté automatiquement à votre commande.',
+  'pack.point.cart': 'Offre appliquée directement au panier, avec le code {code}.',
   'cookies.title': 'cookies',
   'cookies.text':
     'nous utilisons des cookies pour le panier, votre langue et nos propres statistiques de visite. aucun traceur publicitaire.',

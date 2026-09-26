@@ -89,17 +89,26 @@ from the pack plus the Business After Hour tee, that tee at 100% off.
 
 | Where | What | Component |
 | --- | --- | --- |
-| `/pack` | tee + jeans + longsleeve = the offered tee, each with its size | `app/routes/pack.tsx` |
-| Homepage | a paragraph between two hairlines, after the catalogue | `PackTeaser` |
+| Homepage, after the catalogue | "3 produits achetés = 1 offert", the pack composed and added on the spot | `PackOffer` → `PackBuilder` |
+| `/pack` | the same builder, under the page's photo | `app/routes/pack.tsx` → `PackBuilder` |
 | Product page of a pack piece | the offer box, in place of the "take two" one | `PackBundle` |
 | Product page, under the price | one line | `PackNote` |
 | Footer | "pack essentiel" under informations | `Footer` |
 
+Both places use one component, `PackBuilder`, fed by one loader,
+`loadPack` in `app/lib/packProducts.ts` — so the homepage and the pack page
+can never offer two different lists. Each piece is chosen by its thumbnail
+and its size by the product page's own size buttons; the button adds the
+four lines through `PACK_ADD_ACTION` and opens the cart drawer, with no page
+in between. The homepage section renders nothing unless every slot has a
+piece in stock and the offered tee is found: an offer the button cannot
+honour is not shown.
+
 Products outside the pack keep the "take two" box (`BundleOffer`) exactly as
 before.
 
-No banner, no countdown, no badge beyond the word `offert` on the photo of the
-piece that is actually offered.
+No banner, no countdown, no struck-through price, no badge beyond the word
+`offert` on the photo of the piece that is actually offered.
 
 ## Turning it off
 
