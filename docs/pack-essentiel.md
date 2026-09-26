@@ -1,7 +1,6 @@
 # Pack essentiel — three pieces, the Business After Hour tee free
 
-The customer picks a pair of jeans, a longsleeve and a tee, each in their
-size. A fourth piece — the **Tshirt Business After Hour — White** — goes into
+The customer picks a top, a bottom and a longsleeve, each in their size. A fourth piece — the **Tshirt Business After Hour — White** — goes into
 the basket with them and the code **FREEBSN** takes it off.
 
 **The storefront never decides what anyone pays.** The reduction is a Shopify
@@ -37,10 +36,22 @@ Two things are filtered out of whatever the sources return: anything with no
 variant in stock, and the pre-ordered piece, whose lines the cart refuses
 outright (`app/lib/preorder.ts`).
 
-Each product is filed under jeans / longsleeve / tee by what it is — type,
-title, handle — so a product added to the collection lands in the right slot
-on its own. Anything matching none of the three is left out rather than filed
-under a guess.
+Each product is filed by what it is — type, title, handle — so a product
+added to the collection lands in the right slot on its own
+(`slotForProduct`). Anything matching none of the three is left out rather
+than filed under a guess.
+
+| Slot | Shown as | Takes |
+| --- | --- | --- |
+| `top` | haut / top | tees, hoodies, zips, knits, pulls, sweatshirts, polos, shirts… |
+| `bottom` | bas / bottom | jeans, joggings, cargos, shorts, pants… |
+| `longsleeve` | longsleeve | longsleeves — and never counted as a top |
+
+**A broad slot is not a broad offer.** Which products the page offers is
+still decided by the sources above, and a hoodie only appears once it is in
+the `pack-essentiel` collection (or the fallback list). Put it there only if
+FREEBSN's rule covers it too: otherwise the page offers a pack Shopify will
+not discount.
 
 ### The product-page line
 
@@ -94,6 +105,11 @@ from the pack plus the Business After Hour tee, that tee at 100% off.
 | Product page of a pack piece | the offer box, in place of the "take two" one | `PackBundle` |
 | Product page, under the price | one line | `PackNote` |
 | Footer | "pack essentiel" under informations | `Footer` |
+
+On a phone each slot is a horizontal slider — the piece in the middle is
+the one chosen, its neighbours show on either side. It is native scrolling
+with scroll-snap, sized on its frame with container units; on desktop the
+same track is one photo wide and the thumbnails drive it.
 
 Both places use one component, `PackBuilder`, fed by one loader,
 `loadPack` in `app/lib/packProducts.ts` — so the homepage and the pack page

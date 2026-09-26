@@ -37,16 +37,16 @@ export const PACK_PATH = '/pack';
  */
 export const PACK_COLLECTION_HANDLE = 'pack-essentiel';
 
-export type PackSlot = 'jean' | 'longsleeve' | 'tshirt';
-
 /**
- * The three choices, in the order the page presents them — the order the
- * offer is said out loud: un tshirt, un jean, un longsleeve.
+ * The three kinds of piece the pack is built from. Broad on purpose: a
+ * « haut » is a tee, a hoodie, a zip or a knit, a « bas » is jeans, a jogging,
+ * a cargo or shorts — so a new product finds its place without a code change.
+ * Longsleeves keep a slot of their own and never count as a « haut ».
  */
-export const PACK_SLOTS: PackSlot[] = ['tshirt', 'jean', 'longsleeve'];
+export type PackSlot = 'top' | 'bottom' | 'longsleeve';
 
-/** The slot the free piece comes from. */
-export const PACK_FREE_SLOT: PackSlot = 'tshirt';
+/** The three choices, in the order the page presents them. */
+export const PACK_SLOTS: PackSlot[] = ['top', 'bottom', 'longsleeve'];
 
 /**
  * The piece that is given — a named product, not "a tee".
@@ -89,7 +89,8 @@ export const PACK_ADD_ACTION = 'CustomPackAdd' as const;
  * pack containing one could never be added).
  */
 export const PACK_FALLBACK_HANDLES: Record<PackSlot, string[]> = {
-  jean: [
+  top: ['tshirt-business-after-hour-white', 'im-scared-of-girls-tshirt-white'],
+  bottom: [
     'reda-jeans-raw-denim-blue-1',
     'kaizen-jeans-raw-denim-blue',
     'sherif-jeans-washed-blue-blue',
@@ -101,7 +102,6 @@ export const PACK_FALLBACK_HANDLES: Record<PackSlot, string[]> = {
     'focused-on-million-longsleeve-blanc',
     'i-only-want-baddies-longsleeve-white',
   ],
-  tshirt: ['tshirt-business-after-hour-white', 'im-scared-of-girls-tshirt-white'],
 };
 
 /** Every fallback handle, in slot order, with the pre-ordered piece removed. */
@@ -123,24 +123,36 @@ export const PACK_FALLBACK_LIST: string[] = PACK_SLOTS.flatMap((slot) =>
  */
 export const PACK_ADDS_FREE_LINE = true;
 
+/*
+ * Tested in this order, and the order matters: a longsleeve is a top by
+ * shape but has its own slot, and « sweatpants » must land in the bottoms
+ * before the word « sweat » can file it among the tops.
+ */
+const LONGSLEEVE = /long\s*-?\s*sleeve|manches?\s+longues?/i;
+const BOTTOM =
+  /\b(jeans?|denim|jogg(?:ing|er)s?|sweat\s*-?\s*pants?|track\s*-?\s*pants?|pants?|pantalons?|cargos?|shorts?(?!\s*-?\s*sleeves?)|bermudas?|trousers?|chinos?)\b/i;
+const TOP =
+  /\b(t\s*-?\s*shirts?|tee\s*-?\s*shirts?|tees?|hoodies?|hoody|zip(?:\s*-?\s*hoodie)?s?|knits?|knitwear|pulls?|pullovers?|sweaters?|sweat\s*-?\s*shirts?|sweats?|crewnecks?|polos?|shirts?|chemises?|tank\s*-?\s*tops?|tops?|cardigans?|mailles?)\b/i;
+
 /**
- * Which slot a product belongs to, read from what it is rather than from a
- * list: a product added to the pack collection in Shopify lands in the right
- * slot on its own. Falls back to null for anything that matches none of them,
- * which the page then leaves out rather than filing under a guess.
+ * Which slot a product belongs to, read from what it is — its type, title and
+ * handle — rather than from a list: a product added to the pack collection in
+ * Shopify lands in the right slot on its own. Null for anything that matches
+ * none of them, which the page then leaves out rather than filing under a
+ * guess.
  */
 export function slotForProduct(product: {
   handle: string;
   title: string;
   productType?: string | null;
 }): PackSlot | null {
-  const text = `${product.productType ?? ''} ${product.title} ${product.handle}`;
+  // Handles separate words with hyphens; spaces let the patterns read them
+  // the same way as titles.
+  const text = `${product.productType ?? ''} ${product.title} ${product.handle.replace(/-/g, ' ')}`;
 
-  // Order matters: "longsleeve" must be tested before "tee", and a t-shirt
-  // whose name mentions a colour must not be caught by the jeans test.
-  if (/long\s*-?\s*sleeve/i.test(text)) return 'longsleeve';
-  if (/t-?\s?shirt|\btee\b/i.test(text)) return 'tshirt';
-  if (/jean|denim/i.test(text)) return 'jean';
+  if (LONGSLEEVE.test(text)) return 'longsleeve';
+  if (BOTTOM.test(text)) return 'bottom';
+  if (TOP.test(text)) return 'top';
   return null;
 }
 

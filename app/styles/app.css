@@ -3419,18 +3419,42 @@ html {
   gap: 0.35rem;
 }
 
+/*
+* Des carrés pleins, une étoile blanche évidée au milieu, serrés les uns contre
+* les autres. La taille vient du composant (--star-size) et grandit un peu sur
+* grand écran, où la même taille en pixels paraît plus petite.
+*/
 .stars__icons {
+  --star-scale: 1;
+  --star-box: calc(var(--star-size, 14px) * var(--star-scale));
+
   display: inline-flex;
-  gap: 1px;
+  gap: calc(var(--star-box) * 0.14);
   line-height: 0;
 }
 
-.stars__star-bg {
-  fill: var(--color-line);
+.stars__star {
+  display: block;
+  width: var(--star-box);
+  height: var(--star-box);
 }
 
-.stars__star-fg {
-  fill: var(--color-star);
+.stars__tile {
+  fill: #d6d6d2;
+}
+
+.stars__tile-fill {
+  fill: var(--color-ink);
+}
+
+.stars__glyph {
+  fill: var(--color-paper);
+}
+
+@media (min-width: 48em) {
+  .stars__icons {
+    --star-scale: 1.12;
+  }
 }
 
 .stars__value {
@@ -6509,59 +6533,65 @@ html {
 .pack-builder {
   display: flex;
   flex-direction: column;
-  gap: 2.25rem;
+  gap: 2rem;
   max-width: 36rem;
   margin: 0 auto;
 }
 
+/* « glissez pour choisir » : dit une fois, au-dessus des sliders, et
+   seulement là où l'on glisse. */
+.pack-builder__hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: -0.75rem;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-muted);
+}
+
+.pack-builder__hint::before,
+.pack-builder__hint::after {
+  content: '';
+  width: 1.5rem;
+  height: 1px;
+  background: currentColor;
+}
+
 .pack-builder__equation {
-  /* L'écart entre deux pièces est ce qui porte le signe : il est lu par
-     `.pack-card__shot::before` pour s'y centrer. */
-  --pack-gap: 3.25rem;
+  /* L'écart entre deux pièces porte le signe « + » ou « = ». */
+  --pack-gap: 3.5rem;
   /* Retrait du cadre de la pièce offerte, rattrapé par une marge négative :
      son contenu s'aligne ainsi sur celui des trois autres. */
   --pack-free-pad: 0.75rem;
+  /* Largeur d'un vêtement dans son slider : assez pour le voir en entier,
+     assez peu pour que ses voisins dépassent et invitent à glisser. */
+  --pack-slide: 0.6;
+  /* De combien le slider déborde de la colonne pour aller jusqu'aux bords
+     de l'écran — la marge latérale de la section. */
+  --pack-bleed: 1rem;
 
   display: grid;
   gap: var(--pack-gap);
 }
 
 .pack-card {
-  display: grid;
-  grid-template-columns: minmax(0, 44%) minmax(0, 1fr);
-  gap: 1rem;
-  align-items: start;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
   min-width: 0;
 }
 
 /*
-* Le vêtement posé sur la page, sans cadre ni fond : les photos de la boutique
-* sont carrées et détourées, `contain` les montre entières, jamais recadrées
-* ni écrasées.
-*/
-.pack-card__shot {
-  position: relative;
-  aspect-ratio: 1 / 1;
-}
-
-/* Posée en absolu : sans cela le cadre grandit à la hauteur naturelle de
-   l'image, et les textes des quatre pièces ne partent plus du même point. */
-.pack-card__shot img {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/*
 * Le « + » et le « = ». Des pseudo-éléments : de la ponctuation visuelle, que
-* chaque carte nomme déjà pour un lecteur d'écran (« pièce 2 — le jean »).
-* Accrochés à la photo, pour tomber au milieu du vêtement quelle que soit la
-* longueur du texte à côté.
+* chaque carte nomme déjà pour un lecteur d'écran (« pièce 2 — bas »). Sur
+* téléphone ils tombent entre deux pièces, au milieu ; sur grand écran ils
+* passent dans la gouttière, à hauteur des photos (voir plus bas).
 */
-.pack-card__shot[data-sign]::before {
+.pack-card[data-sign]::before {
   content: attr(data-sign);
   position: absolute;
   top: calc(var(--pack-gap) / -2);
@@ -6573,12 +6603,154 @@ html {
   color: var(--color-ink);
 }
 
-.pack-card--free .pack-card__shot[data-sign]::before {
-  top: calc(var(--pack-gap) / -2 - var(--pack-free-pad));
+.pack-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-/* La pièce offerte : un filet noir autour, le seul de la section — assez
-   pour qu'on la reconnaisse, sans couleur ni fond qui la feraient crier. */
+.pack-card__slot {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.66rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-muted);
+}
+
+.pack-card__index {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.pack-card__count {
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+* Le slider d'un créneau.
+*
+* Le défilement est celui du navigateur, aimanté (scroll-snap) : l'inertie et
+* le rebond natifs d'iPhone et d'Android, sans bibliothèque. Le rail déborde
+* de la colonne jusqu'aux bords de l'écran — c'est le seul élément de la page
+* qui défile de côté, et il ne dépasse jamais de la largeur de l'écran.
+*
+* Les marges intérieures valent la moitié de ce qui reste autour d'un
+* vêtement : le premier et le dernier peuvent ainsi venir au centre.
+*/
+.pack-card__stage {
+  position: relative;
+  min-width: 0;
+  /* Les tailles du rail se calculent sur la largeur de ce cadre (cqw) : un
+     pourcentage, lui, se rapporterait tantôt au rail, tantôt à son contenu,
+     et le dernier vêtement n'arriverait plus au centre. */
+  container-type: inline-size;
+}
+
+.pack-card__track {
+  --pack-track-w: calc(100cqw + var(--pack-bleed) * 2);
+  --pack-slide-w: calc(var(--pack-track-w) * var(--pack-slide));
+
+  display: flex;
+  gap: 0.75rem;
+  margin-inline: calc(var(--pack-bleed) * -1);
+  padding-inline: calc((var(--pack-track-w) - var(--pack-slide-w)) / 2);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pack-card__track::-webkit-scrollbar {
+  display: none;
+}
+
+.pack-card__slide {
+  position: relative;
+  flex: 0 0 var(--pack-slide-w);
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  scroll-snap-align: center;
+  /* Les voisins reculent un peu : on voit qu'ils sont là, et lequel est
+     choisi. Transform et une opacité partielle seulement — un vêtement
+     n'est jamais masqué, quoi que fasse l'animation. */
+  transform: scale(0.88);
+  opacity: 0.55;
+  transition:
+    transform 450ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 450ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.pack-card__slide[data-active='true'] {
+  transform: none;
+  opacity: 1;
+  cursor: default;
+}
+
+.pack-card__slide:focus-visible {
+  outline: 1px solid var(--color-ink);
+  outline-offset: 4px;
+}
+
+/* Une seule pièce dans le créneau : rien à faire défiler. */
+.pack-card__track[data-single='true'] {
+  overflow-x: visible;
+  scroll-snap-type: none;
+}
+
+.pack-card__slide img,
+.pack-card__solo img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pack-card__dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+
+.pack-card__dot {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: var(--color-line);
+  transition:
+    width 300ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    background 300ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.pack-card__dot[data-active='true'] {
+  width: 1.1rem;
+  background: var(--color-ink);
+}
+
+/* La pièce offerte : une photo, pas de slider, à la taille du vêtement
+   choisi dans les autres. */
+.pack-card__solo {
+  position: relative;
+  width: calc(var(--pack-slide) * 100%);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+}
+
+/* Un filet noir autour, le seul de la section — assez pour qu'on la
+   reconnaisse, sans couleur ni fond qui la feraient crier. */
 .pack-card--free {
   margin-inline: calc(var(--pack-free-pad) * -1);
   padding: var(--pack-free-pad);
@@ -6604,27 +6776,14 @@ html {
 .pack-card__body {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.45rem;
   min-width: 0;
-}
-
-.pack-card__slot {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  font-size: 0.62rem;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--color-muted);
-}
-
-.pack-card__index {
-  font-weight: 700;
-  color: var(--color-ink);
+  text-align: center;
 }
 
 .pack-card__name {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.3;
   color: var(--color-ink);
@@ -6648,10 +6807,10 @@ a.pack-card__name:hover {
   text-transform: uppercase;
 }
 
-/* Les modèles du créneau, en vignettes : on choisit un vêtement en le
-   voyant, pas en lisant son nom dans une liste. */
+/* Les vignettes des modèles : sur grand écran seulement, où il n'y a pas de
+   voisins à faire glisser. */
 .pack-card__models {
-  display: flex;
+  display: none;
   flex-wrap: wrap;
   gap: 0.3rem;
   margin-top: 0.2rem;
@@ -6685,18 +6844,19 @@ a.pack-card__name:hover {
   object-fit: contain;
 }
 
-/* Les tailles : les mêmes boutons que la fiche produit, un cran plus petits
-   pour tenir à côté de la photo sur téléphone. */
+/* Les tailles : les mêmes boutons que la fiche produit. */
 .pack-card__sizes {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr));
-  gap: 0.35rem;
-  margin-top: 0.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
 }
 
 .pack-card__size.option-btn {
-  min-height: 40px;
-  padding: 0 0.2rem;
+  min-width: 2.9rem;
+  min-height: 42px;
+  padding: 0 0.6rem;
   font-size: 0.72rem;
 }
 
@@ -6781,32 +6941,90 @@ a.pack-card__name:hover {
   }
 }
 
-/* Les quatre pièces sur une ligne. En dessous de cette largeur elles restent
-   en lignes : quatre colonnes sur une tablette ne montreraient plus les
-   vêtements. */
+@media (min-width: 48em) {
+  .pack-builder__equation {
+    --pack-slide: 0.56;
+    --pack-bleed: 1.5rem;
+  }
+}
+
+/* Les quatre pièces sur une ligne. Le slider devient une photo, pilotée par
+   les vignettes ; les signes quittent le haut des cartes pour les
+   gouttières, à hauteur des photos. En dessous de cette largeur, les
+   pièces restent l'une sous l'autre : quatre colonnes sur une tablette ne
+   montreraient plus les vêtements. */
 @media (min-width: 64em) {
   .pack-builder {
     max-width: 72rem;
     gap: 3rem;
   }
 
+  .pack-builder__hint {
+    display: none;
+  }
+
   .pack-builder__equation {
     --pack-gap: 4rem;
     --pack-free-pad: 0.9rem;
+    --pack-slide: 1;
+    --pack-bleed: 0px;
 
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .pack-card {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1.1rem;
+    gap: 1rem;
   }
 
-  .pack-card__shot[data-sign]::before,
-  .pack-card--free .pack-card__shot[data-sign]::before {
+  /* Son cadre remonte d'autant qu'il est épais : les quatre photos partent
+     ainsi de la même ligne. */
+  .pack-card--free {
+    margin-top: calc(var(--pack-free-pad) * -1);
+  }
+
+  .pack-card[data-sign]::before {
+    content: none;
+  }
+
+  .pack-card__stage[data-sign]::before {
+    content: attr(data-sign);
+    position: absolute;
     top: 50%;
     left: calc(var(--pack-gap) / -2);
+    transform: translate(-50%, -50%);
     font-size: 2.4rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--color-ink);
+  }
+
+  .pack-card__track {
+    padding-inline: 0;
+  }
+
+  .pack-card__slide {
+    transform: none;
+    opacity: 1;
+  }
+
+  .pack-card__dots {
+    display: none;
+  }
+
+  .pack-card__body,
+  .pack-card__sizes {
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .pack-card__models {
+    display: flex;
+  }
+
+  .pack-card__size.option-btn {
+    min-width: 2.6rem;
+    min-height: 40px;
   }
 
   .pack-builder__checkout {
@@ -6820,6 +7038,13 @@ a.pack-card__name:hover {
     max-width: 60rem;
     margin: 0 auto;
     text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pack-card__slide,
+  .pack-card__dot {
+    transition: none;
   }
 }
 

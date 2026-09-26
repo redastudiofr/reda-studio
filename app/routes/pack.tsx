@@ -30,7 +30,7 @@ export const meta: Route.MetaFunction = () => {
     {
       name: 'description',
       content:
-        'Jeans, longsleeve and tee in the sizes you choose — with a fourth tee on us.',
+        'A top, a bottom and a longsleeve in the sizes you choose — with a tee on us.',
     },
   ];
 };

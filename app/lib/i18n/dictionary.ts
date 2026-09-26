@@ -202,7 +202,7 @@ export const en = {
   'pack.eyebrow': 'the pack',
   'pack.title': 'essential pack',
   'pack.intro':
-    'Pick a pair of jeans, a longsleeve and a tee, each in your size. Three pieces that go together, and a fourth on us.',
+    'Pick a top, a bottom and a longsleeve, each in your size. Three pieces that go together, and a fourth on us.',
   'pack.imageAlt':
     'A reda studio outfit worn outside: white top and washed jeans',
   'pack.free': '+ the Business After Hour tee, free',
@@ -210,13 +210,13 @@ export const en = {
   'pack.freeSlot': 'the tee we add',
   'pack.bundleTitle': 'the essential pack',
   'pack.bundleText':
-    'Jeans, a longsleeve and a tee, each in the size you choose — and the Business After Hour tee comes free with them.',
+    'A top, a bottom and a longsleeve, each in the size you choose — and the Business After Hour tee comes free with them.',
   'pack.bundleCta': 'build the pack',
   'pack.freeNote':
     'The fourth tee goes into the basket with the rest and the code {code} takes it off — attached to your basket for you, and visible on it.',
-  'pack.slot.jean': 'the jeans',
-  'pack.slot.longsleeve': 'the longsleeve',
-  'pack.slot.tshirt': 'the tee',
+  'pack.slot.top': 'top',
+  'pack.slot.bottom': 'bottom',
+  'pack.slot.longsleeve': 'longsleeve',
   'pack.size': 'size',
   'pack.total': 'the three pieces',
   'pack.add': 'add the pack to the cart',
@@ -224,9 +224,11 @@ export const en = {
   'pack.badge': 'part of the essential pack — 1 tee free',
   'pack.offerTitle': '3 pieces bought = 1 free',
   'pack.offerIntro':
-    'Build your pack from three pieces of your choice — a tee, a pair of jeans, a longsleeve — and the Business After Hour tee is added, free.',
+    'Build your pack from three pieces of your choice — a top, a bottom, a longsleeve — and the Business After Hour tee is added, free.',
   'pack.piece': 'piece {n}',
   'pack.model': 'model',
+  'pack.swipe': 'swipe to choose',
+  'pack.position': '{n} of {total}',
   'pack.point.choice': 'The model and the size of each piece, your choice.',
   'pack.point.free':
     'The Business After Hour tee is added to your order automatically.',
@@ -708,7 +710,7 @@ export const fr: Record<TranslationKey, string> = {
   'pack.eyebrow': 'le pack',
   'pack.title': 'pack essentiel',
   'pack.intro':
-    'Choisissez un jean, un longsleeve et un tshirt, chacun dans votre taille. Trois pièces qui vont ensemble, et une quatrième offerte.',
+    'Choisissez un haut, un bas et un longsleeve, chacun dans votre taille. Trois pièces qui vont ensemble, et une quatrième offerte.',
   'pack.imageAlt':
     'Une tenue reda studio portée en extérieur : haut blanc et jean délavé',
   'pack.free': '+ le tshirt Business After Hour, offert',
@@ -716,13 +718,13 @@ export const fr: Record<TranslationKey, string> = {
   'pack.freeSlot': 'le tshirt offert',
   'pack.bundleTitle': 'le pack essentiel',
   'pack.bundleText':
-    'Un jean, un longsleeve et un tshirt, chacun dans la taille de votre choix — et le tshirt Business After Hour est offert avec.',
+    'Un haut, un bas et un longsleeve, chacun dans la taille de votre choix — et le tshirt Business After Hour est offert avec.',
   'pack.bundleCta': 'composer le pack',
   'pack.freeNote':
     'Le quatrième tshirt entre au panier avec les autres et le code {code} le déduit — ajouté à votre panier pour vous, et visible dessus.',
-  'pack.slot.jean': 'le jean',
-  'pack.slot.longsleeve': 'le longsleeve',
-  'pack.slot.tshirt': 'le tshirt',
+  'pack.slot.top': 'haut',
+  'pack.slot.bottom': 'bas',
+  'pack.slot.longsleeve': 'longsleeve',
   'pack.size': 'taille',
   'pack.total': 'les trois pièces',
   'pack.add': 'ajouter le pack au panier',
@@ -730,9 +732,11 @@ export const fr: Record<TranslationKey, string> = {
   'pack.badge': 'fait partie du pack essentiel — 1 tshirt offert',
   'pack.offerTitle': '3 produits achetés = 1 offert',
   'pack.offerIntro':
-    'Composez votre pack avec trois pièces de votre choix — un tshirt, un jean, un longsleeve — et recevez automatiquement le tshirt Business After Hour offert.',
+    'Composez votre pack avec trois pièces de votre choix — un haut, un bas, un longsleeve — et recevez automatiquement le tshirt Business After Hour offert.',
   'pack.piece': 'pièce {n}',
   'pack.model': 'modèle',
+  'pack.swipe': 'glissez pour choisir',
+  'pack.position': '{n} sur {total}',
   'pack.point.choice': 'Le modèle et la taille de chaque pièce, au choix.',
   'pack.point.free':
     'Le tshirt Business After Hour est ajouté automatiquement à votre commande.',
