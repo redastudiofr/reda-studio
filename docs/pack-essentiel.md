@@ -53,13 +53,6 @@ the `pack-essentiel` collection (or the fallback list). Put it there only if
 FREEBSN's rule covers it too: otherwise the page offers a pack Shopify will
 not discount.
 
-### The product-page line
-
-`PackNote` (the line under the price) checks `PACK_FALLBACK_HANDLES` and
-nothing else: the browser has no idea what a Shopify collection contains. **If
-you switch to the collection, keep these handles equal to it**, or that line
-appears on the wrong products.
-
 ## Why the free tee is added to the basket
 
 A discount takes money off a line that exists — **it does not create one**. So
@@ -102,8 +95,6 @@ from the pack plus the Business After Hour tee, that tee at 100% off.
 | --- | --- | --- |
 | Homepage, after the catalogue | "3 produits achetés = 1 offert", the pack composed and added on the spot | `PackOffer` → `PackBuilder` |
 | `/pack` | the same builder, under the page's photo | `app/routes/pack.tsx` → `PackBuilder` |
-| Product page of a pack piece | the offer box, in place of the "take two" one | `PackBundle` |
-| Product page, under the price | one line | `PackNote` |
 | Footer | "pack essentiel" under informations | `Footer` |
 
 On a phone each slot is a horizontal slider — the piece in the middle is
@@ -120,8 +111,9 @@ in between. The homepage section renders nothing unless every slot has a
 piece in stock and the offered tee is found: an offer the button cannot
 honour is not shown.
 
-Products outside the pack keep the "take two" box (`BundleOffer`) exactly as
-before.
+**Never on the product page.** Every product page shows the "take two"
+box (`BundleOffer`), pack piece or not — the pack is sold on the homepage
+and on `/pack` only.
 
 No banner, no countdown, no struck-through price, no badge beyond the word
 `offert` on the photo of the piece that is actually offered.

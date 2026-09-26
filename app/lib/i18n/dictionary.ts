@@ -208,12 +208,6 @@ export const en = {
   'pack.free': '+ the Business After Hour tee, free',
   'pack.freeTag': 'free',
   'pack.freeSlot': 'the tee we add',
-  'pack.bundleTitle': 'the essential pack',
-  'pack.bundleText':
-    'A top, a bottom and a longsleeve, each in the size you choose — and the Business After Hour tee comes free with them.',
-  'pack.bundleCta': 'build the pack',
-  'pack.freeNote':
-    'The fourth tee goes into the basket with the rest and the code {code} takes it off — attached to your basket for you, and visible on it.',
   'pack.slot.top': 'top',
   'pack.slot.bottom': 'bottom',
   'pack.slot.longsleeve': 'longsleeve',
@@ -221,7 +215,6 @@ export const en = {
   'pack.total': 'the three pieces',
   'pack.add': 'add the pack to the cart',
   'pack.unavailable': 'one of the pieces is sold out',
-  'pack.badge': 'part of the essential pack — 1 tee free',
   'pack.offerTitle': '3 pieces bought = 1 free',
   'pack.offerIntro':
     'Build your pack from three pieces of your choice — a top, a bottom, a longsleeve — and the Business After Hour tee is added, free.',
@@ -716,12 +709,6 @@ export const fr: Record<TranslationKey, string> = {
   'pack.free': '+ le tshirt Business After Hour, offert',
   'pack.freeTag': 'offert',
   'pack.freeSlot': 'le tshirt offert',
-  'pack.bundleTitle': 'le pack essentiel',
-  'pack.bundleText':
-    'Un haut, un bas et un longsleeve, chacun dans la taille de votre choix — et le tshirt Business After Hour est offert avec.',
-  'pack.bundleCta': 'composer le pack',
-  'pack.freeNote':
-    'Le quatrième tshirt entre au panier avec les autres et le code {code} le déduit — ajouté à votre panier pour vous, et visible dessus.',
   'pack.slot.top': 'haut',
   'pack.slot.bottom': 'bas',
   'pack.slot.longsleeve': 'longsleeve',
@@ -729,7 +716,6 @@ export const fr: Record<TranslationKey, string> = {
   'pack.total': 'les trois pièces',
   'pack.add': 'ajouter le pack au panier',
   'pack.unavailable': 'une des pièces est épuisée',
-  'pack.badge': 'fait partie du pack essentiel — 1 tshirt offert',
   'pack.offerTitle': '3 produits achetés = 1 offert',
   'pack.offerIntro':
     'Composez votre pack avec trois pièces de votre choix — un haut, un bas, un longsleeve — et recevez automatiquement le tshirt Business After Hour offert.',

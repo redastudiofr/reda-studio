@@ -155,11 +155,3 @@ export function slotForProduct(product: {
   if (TOP.test(text)) return 'top';
   return null;
 }
-
-/** Whether a product page should mention the pack. */
-export function isPackProduct(
-  handle: string,
-  eligible: string[] = PACK_FALLBACK_LIST,
-): boolean {
-  return PACK_ENABLED && eligible.includes(handle);
-}

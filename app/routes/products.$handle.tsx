@@ -16,7 +16,6 @@ import {ProductWornVideos} from '~/components/ProductWornVideos';
 import {VisionSection} from '~/components/VisionSection';
 import {CollectionShowcase} from '~/components/CollectionShowcase';
 import {BundleOffer} from '~/components/BundleOffer';
-import {PackBundle} from '~/components/PackBundle';
 import type {SizeEntry} from '~/components/ProductSizeGuide';
 import {Accordion} from '~/components/Accordion';
 import {ProductReviews} from '~/components/ProductReviews';
@@ -27,7 +26,6 @@ import {parseRating} from '~/lib/rating';
 import {onlyShowcaseCollections} from '~/lib/collections';
 import {getRatingForSeed, reviewCountForProduct} from '~/data/reviews';
 import {isPreorderHandle} from '~/lib/preorder';
-import {isPackProduct} from '~/lib/packOffer';
 import {useT} from '~/lib/i18n';
 
 export const meta: Route.MetaFunction = ({data}) => {
@@ -281,7 +279,6 @@ export default function Product() {
             available={available}
             quantityAvailable={selectedVariant?.quantityAvailable ?? null}
             productId={product.id}
-            handle={product.handle}
             shortDescription={shortenDescription(description ?? '')}
             variantId={selectedVariant?.id}
             preorder={preorder}
@@ -295,29 +292,26 @@ export default function Product() {
             }
           />
 
-          {/* The offer block. A piece of the pack says so and links to it; every
-              other product keeps the "take two" box. Skipped entirely during
-              pre-order — both exist to add a product to the cart, which is
-              exactly what is not allowed yet. */}
-          {!preorder &&
-            (isPackProduct(product.handle) ? (
-              <PackBundle />
-            ) : (
-              <Suspense fallback={null}>
-                <Await resolve={pairChoices}>
-                  {(choices) => (
-                    <BundleOffer
-                      productTitle={title}
-                      productImage={product.images.nodes[0] ?? selectedVariant?.image}
-                      productPrice={selectedVariant?.price}
-                      productVariantId={selectedVariant?.id}
-                      choices={choices}
-                      available={available}
-                    />
-                  )}
-                </Await>
-              </Suspense>
-            ))}
+          {/* The "take two" box, on every product — the pack is sold on the
+              homepage and /pack, never here. Skipped during pre-order: it
+              exists to add a product to the cart, which is exactly what is
+              not allowed yet. */}
+          {!preorder && (
+            <Suspense fallback={null}>
+              <Await resolve={pairChoices}>
+                {(choices) => (
+                  <BundleOffer
+                    productTitle={title}
+                    productImage={product.images.nodes[0] ?? selectedVariant?.image}
+                    productPrice={selectedVariant?.price}
+                    productVariantId={selectedVariant?.id}
+                    choices={choices}
+                    available={available}
+                  />
+                )}
+              </Await>
+            </Suspense>
+          )}
 
           {/* Description, characteristics and FAQ sit in the right column,
               directly under the payment buttons. */}

@@ -6451,23 +6451,6 @@ html {
   font-weight: 600;
 }
 
-/* Sous le prix d'une pièce du pack, sur sa fiche produit. */
-.pack-note {
-  margin-top: 0.4rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.04em;
-}
-
-.pack-note a {
-  color: var(--color-muted);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.pack-note a:hover {
-  color: var(--color-ink);
-}
-
 /*
 * --------------------------------------------------
 * Le pack, composé sur place (accueil et /pack)
