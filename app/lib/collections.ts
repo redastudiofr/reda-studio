@@ -28,10 +28,15 @@ const HIDDEN_FROM_HOME = [
 
 /**
  * The only collections shown in the "join the community" showcase closing each
- * product page. An allowlist rather than an exclusion list: new collections
- * created in Shopify stay out of it until they are named here on purpose.
+ * product page, in this order. An allowlist rather than an exclusion list: new
+ * collections created in Shopify stay out of it until they are named here on
+ * purpose.
+ *
+ * An entry is a name (matched on handle or title) or a Shopify collection ID —
+ * the number at the end of its admin URL, admin.shopify.com/…/collections/ID.
+ * An ID keeps matching whatever the collection is renamed to.
  */
-const SHOWCASE_ONLY = ['win drop', 'all in drop'];
+const SHOWCASE_ONLY = ['698209173843', 'win drop', 'all in drop'];
 
 /** "SUMMER DROP" / "summer-drop" → "summer drop". */
 function normalize(value: string): string {
@@ -92,9 +97,17 @@ export function withoutHomeHiddenCollections<
  * every time.
  */
 export function onlyShowcaseCollections<
-  T extends {handle: string; title: string},
+  T extends {id?: string; handle: string; title: string},
 >(collections: T[]): T[] {
-  return SHOWCASE_ONLY.flatMap(
-    (name) => collections.filter((collection) => matches(collection, [name])),
+  const picked = SHOWCASE_ONLY.flatMap((entry) =>
+    collections.filter((collection) =>
+      /^\d+$/.test(entry)
+        ? collection.id === `gid://shopify/Collection/${entry}`
+        : matches(collection, [entry]),
+    ),
+  );
+  // One tile per collection, even if it is listed by ID and by name.
+  return picked.filter(
+    (collection, index) => picked.indexOf(collection) === index,
   );
 }
