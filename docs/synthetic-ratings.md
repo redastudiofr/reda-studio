@@ -62,3 +62,19 @@ Nothing here needs to change. The moment Shopify's `reviews.rating` /
 `reviews.rating_count` metafields carry real data for a product,
 `parseRating()` picks them up and neither of the code paths above ever
 runs for it again.
+
+## Reviews received by e-mail (September 2026)
+
+`app/data/reviews.ts` also holds 25 reviews the shop received by e-mail and
+asked to publish, worded exactly as sent: 10 with a first name, a city and a
+date (the surname is cut to its initial — a customer's full name is not
+published without their say-so), 15 with no name or date, shown as
+« client ». **None came with stars**, so none carries a rating: they are
+shown without stars and left out of every average and count. If the shop
+supplies the stars each one received, add `rating` to the entry and it counts
+from then on.
+
+The rating a product shows is never set by hand — not a fixed 4.6, not a
+review count larger than the reviews that exist. A count is read by a shopper
+as a number of real reviews; displaying more than there are is a misleading
+commercial practice under French consumer law.

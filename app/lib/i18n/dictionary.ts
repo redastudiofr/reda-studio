@@ -111,6 +111,7 @@ export const en = {
   'cart.add': 'add',
 
   // — reviews —
+  'reviews.anonymous': 'customer',
   'reviews.title': 'what our customers say',
   'reviews.subtitle':
     'honest words from the reda studio community, on pieces made to last.',
@@ -611,6 +612,7 @@ export const fr: Record<TranslationKey, string> = {
   'cart.add': 'ajouter',
 
   // — avis —
+  'reviews.anonymous': 'client',
   'reviews.title': 'ce que disent nos clients',
   'reviews.subtitle':
     'des mots sincères de la communauté reda studio, sur des pièces faites pour durer.',

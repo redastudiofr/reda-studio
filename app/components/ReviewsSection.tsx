@@ -16,13 +16,20 @@ import {useI18n, useT} from '~/lib/i18n';
  */
 function ReviewCard({review}: {review: Review}) {
   const {locale} = useI18n();
+  const t = useT();
   const [open, close] = locale === 'fr' ? ['« ', ' »'] : ['“', '”'];
+  const place = [review.city, review.country].filter(Boolean).join(', ');
+  const meta = [place, review.date].filter(Boolean).join(' · ');
 
   return (
     <article className="review-card">
       <header className="review-card__head">
-        <StarRating rating={review.rating} className="review-card__stars" />
-        <span className="review-card__name">{review.name}</span>
+        {typeof review.rating === 'number' && (
+          <StarRating rating={review.rating} className="review-card__stars" />
+        )}
+        <span className="review-card__name">
+          {review.name ?? t('reviews.anonymous')}
+        </span>
       </header>
 
       <p className="review-card__text">
@@ -31,9 +38,7 @@ function ReviewCard({review}: {review: Review}) {
         {close}
       </p>
 
-      <p className="review-card__meta">
-        {review.city}, {review.country} · {review.date}
-      </p>
+      {meta && <p className="review-card__meta">{meta}</p>}
     </article>
   );
 }

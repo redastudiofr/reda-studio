@@ -1,11 +1,14 @@
 export interface Review {
   /** Stable identifier, used as the React key. */
   id: string;
-  /** First and last name, printed as-is under the review. */
-  name: string;
-  /** Where the customer wrote from, printed as "city, country". */
-  city: string;
-  country: string;
+  /**
+   * How the customer is named. Absent when the review reached the shop with
+   * no name attached: the card then says « client » rather than inventing one.
+   */
+  name?: string;
+  /** Where the customer wrote from, printed as "city, country", if known. */
+  city?: string;
+  country?: string;
   /**
    * The date the review was left, exactly as the shop supplied it
    * (DD/MM/YYYY). Printed verbatim rather than reformatted per language: a
@@ -13,8 +16,13 @@ export interface Review {
    * cause of a hydration mismatch, and reformatting someone's review record
    * is not this component's job.
    */
-  date: string;
-  rating: number;
+  date?: string;
+  /**
+   * Stars given, when the customer gave some. A review received as a plain
+   * message has none: it is shown without stars and left out of the averages
+   * rather than given a score it never had.
+   */
+  rating?: number;
   /**
    * The review in full, in the language the customer wrote it. Never
    * translated: a customer's own words are not interface copy, and putting
@@ -32,7 +40,7 @@ export interface Review {
  * also what the star summaries average: getRatingForSeed below never invents
  * a score, it sums the reviews actually on display.
  */
-const REVIEW_POOL: Review[] = [
+const SUPPLIED_REVIEWS: Review[] = [
   {
     id: 'r01',
     name: 'Lucas Martin',
@@ -188,7 +196,65 @@ const REVIEW_POOL: Review[] = [
   },
 ];
 
-/** Every review, in the order the shop supplied them. */
+/**
+ * Reviews the shop received by e-mail, September 2026, exactly as worded.
+ * Named ones carry the first name and the initial of the surname: a
+ * customer's full name is not published without their say-so. None came with
+ * stars, so none carries a rating.
+ */
+const EMAILED_NAMED: Review[] = [
+  ['e01', 'Lucas M.', 'Nantes', '28/09/2026', 'Reçu rapidement, franchement très bonne qualité.'],
+  ['e02', 'Hugo B.', 'Paris', '26/09/2026', 'La qualité est vraiment propre, rien à dire.'],
+  ['e03', 'Enzo M.', 'Lyon', '24/09/2026', 'Très satisfait, le t-shirt tombe super bien.'],
+  ['e04', 'Nathan L.', 'Bordeaux', '22/09/2026', 'Bonne qualité et livraison rapide.'],
+  ['e05', 'Théo G.', 'Lille', '20/09/2026', 'Le rendu est encore mieux en vrai.'],
+  ['e06', 'Mathis R.', 'Rennes', '18/09/2026', 'Franchement pas déçu, très bonne pièce.'],
+  ['e07', 'Jules P.', 'Toulouse', '16/09/2026', 'Très bonne coupe, exactement ce que je voulais.'],
+  ['e08', 'Tom R.', 'Montpellier', '14/09/2026', 'Conforme aux photos, bonne qualité.'],
+  ['e09', 'Yanis F.', 'Marseille', '12/09/2026', 'La matière est vraiment qualitative.'],
+  ['e10', 'Maxime F.', 'Strasbourg', '10/09/2026', 'Livraison rapide, produit nickel.'],
+].map(([id, name, city, date, text]) => ({id, name, city, country: 'France', date, text}));
+
+/** The same batch, received without a name or a date. */
+const EMAILED_ANONYMOUS: Review[] = [
+  'Taille parfaitement, je recommande.',
+  'Qualité au rendez-vous, j’aime beaucoup.',
+  'Livraison rapide et produit conforme.',
+  'Le tissu est vraiment agréable.',
+  'Simple, efficace, très bonne qualité.',
+  'Bien reçu, la pièce est vraiment propre.',
+  'Très satisfait de mon achat.',
+  'La coupe est vraiment sympa.',
+  'Rien à redire, très belle pièce.',
+  'Je pensais pas que la qualité serait aussi bonne.',
+  'Très propre porté, je recommande.',
+  'Bonne surprise, je valide.',
+  'Très content de la pièce.',
+  'Belle coupe et bonne finition.',
+  'Ça taille bien, aucun souci.',
+].map((text, index) => ({id: `a${String(index + 1).padStart(2, '0')}`, text}));
+
+/**
+ * Every review, the three sources dealt in turn. A product page shows a
+ * contiguous slice of this list; dealing them in turn means each slice mixes
+ * named, anonymous and rated reviews instead of landing on one kind only.
+ */
+const REVIEW_POOL: Review[] = interleave(
+  EMAILED_NAMED,
+  EMAILED_ANONYMOUS,
+  SUPPLIED_REVIEWS,
+);
+
+function interleave<T>(...lists: T[][]): T[] {
+  const longest = Math.max(...lists.map((list) => list.length));
+  const out: T[] = [];
+  for (let i = 0; i < longest; i++) {
+    for (const list of lists) if (i < list.length) out.push(list[i]);
+  }
+  return out;
+}
+
+/** Every review, dealt as described above. */
 export function getAllReviews(): Review[] {
   return REVIEW_POOL;
 }
@@ -266,11 +332,15 @@ export function getRatingForSeed(
   seed: string,
   count = 12,
 ): {value: number; count: number} | null {
-  const reviews = getReviewsForSeed(seed, count);
-  if (!reviews.length) return null;
-  const sum = reviews.reduce((total, review) => total + review.rating, 0);
+  // Only reviews that came with stars count, and the count says how many.
+  const rated = getReviewsForSeed(seed, count).filter(
+    (review): review is Review & {rating: number} =>
+      typeof review.rating === 'number',
+  );
+  if (!rated.length) return null;
+  const sum = rated.reduce((total, review) => total + review.rating, 0);
   return {
-    value: Math.round((sum / reviews.length) * 10) / 10,
-    count: reviews.length,
+    value: Math.round((sum / rated.length) * 10) / 10,
+    count: rated.length,
   };
 }
