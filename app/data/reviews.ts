@@ -349,12 +349,21 @@ export function getRatingForSeed(
  * Test ratings: 4.5 out of 5 from a per-product number of reviews between 87
  * and 344, stable for a given product so every part of the page agrees.
  *
- * **Local development only** (`npm run dev`, where Vite sets DEV). A
- * production build never shows them: on redastudio.fr a shopper reads
+ * Never on the shop's own domain. On redastudio.fr a shopper reads
  * "4,5 — 287 reviews" as 287 real reviews, whatever the intent, and the
- * design gives them no way to tell otherwise. See docs/synthetic-ratings.md.
+ * design gives them no way to tell otherwise. They exist to check the
+ * interface: in local development (`npm run dev`), and on an Oxygen preview
+ * whose environment sets DEMO_RATINGS=true. See docs/synthetic-ratings.md.
  */
-export const DEMO_RATINGS: boolean = import.meta.env?.DEV === true;
+const SHOP_HOSTS = ['redastudio.fr', 'www.redastudio.fr'];
+
+export function demoRatingsEnabled(
+  env: {DEMO_RATINGS?: string},
+  request: Request,
+): boolean {
+  if (SHOP_HOSTS.includes(new URL(request.url).hostname)) return false;
+  return import.meta.env?.DEV === true || env.DEMO_RATINGS === 'true';
+}
 
 export function demoRatingForProduct(seed: string): {
   value: number;
@@ -365,13 +374,14 @@ export function demoRatingForProduct(seed: string): {
 
 /**
  * The rating a product shows when Shopify has no real one: the test figures
- * in local development, the summary of its displayed reviews everywhere else.
- * The single place both the buy box and the recommendation row ask.
+ * where they are enabled, the summary of its displayed reviews everywhere
+ * else. The single place both the buy box and the recommendation row ask.
  */
 export function fallbackRating(
   seed: string,
-  createdAt?: string | null,
+  createdAt: string | null | undefined,
+  demo: boolean,
 ): {value: number; count: number} | null {
-  if (DEMO_RATINGS) return demoRatingForProduct(seed);
+  if (demo) return demoRatingForProduct(seed);
   return getRatingForSeed(seed, reviewCountForProduct(seed, createdAt));
 }

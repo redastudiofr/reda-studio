@@ -19,5 +19,11 @@ declare global {
     // redastudio.fr@gmail.com by e-mail — see docs/store-notifications.md
     // and app/lib/email.ts.
     RESEND_API_KEY?: string;
+
+    // Test review counts (4.5 from 87–344 reviews per product) for checking
+    // the interface on an Oxygen preview. Set it on the Preview environment
+    // only; it is refused on redastudio.fr whatever its value — see
+    // app/data/reviews.ts and docs/synthetic-ratings.md.
+    DEMO_RATINGS?: string;
   }
 }

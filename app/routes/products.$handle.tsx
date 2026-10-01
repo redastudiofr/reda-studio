@@ -24,7 +24,11 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {getProductFaq} from '~/data/faq';
 import {parseRating} from '~/lib/rating';
 import {onlyShowcaseCollections} from '~/lib/collections';
-import {fallbackRating, reviewCountForProduct} from '~/data/reviews';
+import {
+  demoRatingsEnabled,
+  fallbackRating,
+  reviewCountForProduct,
+} from '~/data/reviews';
 import {isPreorderHandle} from '~/lib/preorder';
 import {useT} from '~/lib/i18n';
 
@@ -70,7 +74,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
-  return {product};
+  return {product, demoRatings: demoRatingsEnabled(context.env, request)};
 }
 
 const MAX_RECOMMENDATIONS = 16;
@@ -82,10 +86,11 @@ const MAX_RECOMMENDATIONS = 16;
  * catalogue products either way, never placeholders.
  */
 function loadDeferredData(
-  {context}: Route.LoaderArgs,
+  {context, request}: Route.LoaderArgs,
   productId: string,
   handle: string,
 ) {
+  const demoRatings = demoRatingsEnabled(context.env, request);
   const recommended = Promise.all([
     context.storefront
       .query(PRODUCT_RECOMMENDATIONS_QUERY, {variables: {productId}})
@@ -130,7 +135,7 @@ function loadDeferredData(
     return merged.map((item) => {
       if (parseRating(item.rating, item.ratingCount)) return item;
 
-      const rating = fallbackRating(item.id, item.createdAt);
+      const rating = fallbackRating(item.id, item.createdAt, demoRatings);
       if (!rating) return item;
       return {
         ...item,
@@ -211,7 +216,7 @@ function shortenDescription(description: string): string {
 }
 
 export default function Product() {
-  const {product, recommended, showcaseCollections, pairChoices} =
+  const {product, recommended, showcaseCollections, pairChoices, demoRatings} =
     useLoaderData<typeof loader>();
 
   const selectedVariant = useOptimisticVariant(
@@ -285,7 +290,7 @@ export default function Product() {
               // from fewer of them for a product that hasn't been live long
               // enough to plausibly have a dozen reviews yet.
               parseRating(product.rating, product.ratingCount) ??
-              fallbackRating(product.id, product.createdAt)
+              fallbackRating(product.id, product.createdAt, demoRatings)
             }
           />
 

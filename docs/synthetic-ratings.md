@@ -79,11 +79,18 @@ review count larger than the reviews that exist. A count is read by a shopper
 as a number of real reviews; displaying more than there are is a misleading
 commercial practice under French consumer law.
 
-## Test ratings (local development only)
+## Test ratings (local and Oxygen preview only)
 
-`DEMO_RATINGS` in `app/data/reviews.ts`: under `npm run dev`, every product
+`demoRatingsEnabled` in `app/data/reviews.ts`: where it is on, every product
 without a real Shopify rating shows 4.5 out of 5 from a number of reviews
 between 87 and 344, drawn per product and identical in the buy box and the
-recommendation row (`fallbackRating`). A production build — the one deployed
-to redastudio.fr — never shows them: the flag is Vite's `DEV`, false in every
-build. Do not wire it to anything a production deployment can switch on.
+recommendation row (`fallbackRating`). It is on:
+
+- under `npm run dev`;
+- on an Oxygen deployment whose environment sets `DEMO_RATINGS=true` — set it
+  on the **Preview** environment only (Shopify Admin → Hydrogen → the
+  storefront → Environments and variables). Every push to a branch other
+  than `main` deploys there, at a private URL.
+
+It is **always off on redastudio.fr**, whatever the variable says: a shopper
+reads "4,5 — 287 reviews" as 287 real reviews. Do not remove that guard.
