@@ -78,3 +78,12 @@ The rating a product shows is never set by hand — not a fixed 4.6, not a
 review count larger than the reviews that exist. A count is read by a shopper
 as a number of real reviews; displaying more than there are is a misleading
 commercial practice under French consumer law.
+
+## Test ratings (local development only)
+
+`DEMO_RATINGS` in `app/data/reviews.ts`: under `npm run dev`, every product
+without a real Shopify rating shows 4.5 out of 5 from a number of reviews
+between 87 and 344, drawn per product and identical in the buy box and the
+recommendation row (`fallbackRating`). A production build — the one deployed
+to redastudio.fr — never shows them: the flag is Vite's `DEV`, false in every
+build. Do not wire it to anything a production deployment can switch on.

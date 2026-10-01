@@ -24,7 +24,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {getProductFaq} from '~/data/faq';
 import {parseRating} from '~/lib/rating';
 import {onlyShowcaseCollections} from '~/lib/collections';
-import {getRatingForSeed, reviewCountForProduct} from '~/data/reviews';
+import {fallbackRating, reviewCountForProduct} from '~/data/reviews';
 import {isPreorderHandle} from '~/lib/preorder';
 import {useT} from '~/lib/i18n';
 
@@ -130,10 +130,7 @@ function loadDeferredData(
     return merged.map((item) => {
       if (parseRating(item.rating, item.ratingCount)) return item;
 
-      const rating = getRatingForSeed(
-        item.id,
-        reviewCountForProduct(item.id, item.createdAt),
-      );
+      const rating = fallbackRating(item.id, item.createdAt);
       if (!rating) return item;
       return {
         ...item,
@@ -288,7 +285,7 @@ export default function Product() {
               // from fewer of them for a product that hasn't been live long
               // enough to plausibly have a dozen reviews yet.
               parseRating(product.rating, product.ratingCount) ??
-              getRatingForSeed(product.id, reviewCount)
+              fallbackRating(product.id, product.createdAt)
             }
           />
 

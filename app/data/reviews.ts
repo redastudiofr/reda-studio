@@ -344,3 +344,34 @@ export function getRatingForSeed(
     count: rated.length,
   };
 }
+
+/**
+ * Test ratings: 4.5 out of 5 from a per-product number of reviews between 87
+ * and 344, stable for a given product so every part of the page agrees.
+ *
+ * **Local development only** (`npm run dev`, where Vite sets DEV). A
+ * production build never shows them: on redastudio.fr a shopper reads
+ * "4,5 — 287 reviews" as 287 real reviews, whatever the intent, and the
+ * design gives them no way to tell otherwise. See docs/synthetic-ratings.md.
+ */
+export const DEMO_RATINGS: boolean = import.meta.env?.DEV === true;
+
+export function demoRatingForProduct(seed: string): {
+  value: number;
+  count: number;
+} {
+  return {value: 4.5, count: seededInt(`demo-rating:${seed}`, 87, 344)};
+}
+
+/**
+ * The rating a product shows when Shopify has no real one: the test figures
+ * in local development, the summary of its displayed reviews everywhere else.
+ * The single place both the buy box and the recommendation row ask.
+ */
+export function fallbackRating(
+  seed: string,
+  createdAt?: string | null,
+): {value: number; count: number} | null {
+  if (DEMO_RATINGS) return demoRatingForProduct(seed);
+  return getRatingForSeed(seed, reviewCountForProduct(seed, createdAt));
+}
