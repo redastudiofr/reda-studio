@@ -88,9 +88,6 @@ export function ProductPurchase({
           <StarRating rating={rating.value} size={18} />
           <span className="rating-summary__text">
             {t('product.ratedOutOf', {value: rating.value.toString()})}
-            {typeof rating.count === 'number' && (
-              <> {t('product.fromReviews', {count: rating.count})}</>
-            )}
           </span>
         </div>
       )}
