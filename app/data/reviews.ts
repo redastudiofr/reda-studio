@@ -235,7 +235,17 @@ const EMAILED_ANONYMOUS: Review[] = [
 ].map((text, index) => ({id: `a${String(index + 1).padStart(2, '0')}`, text}));
 
 /**
- * Every review, the three sources dealt in turn. A product page shows a
+ * Reviews received as Instagram direct messages, October 2026, exactly as
+ * worded. Published without the sender's handle — it is their account, not a
+ * name they chose to sign with — and without stars, since none came with any.
+ */
+const INSTAGRAM_DMS: Review[] = [
+  'J’ai reçus mon colis tout étais parfait je recommande la marque',
+  'Hello I all is good I have receveid my jeans , very clean thanks',
+].map((text, index) => ({id: `d${String(index + 1).padStart(2, '0')}`, text}));
+
+/**
+ * Every review, the four sources dealt in turn. A product page shows a
  * contiguous slice of this list; dealing them in turn means each slice mixes
  * named, anonymous and rated reviews instead of landing on one kind only.
  */
@@ -243,6 +253,7 @@ const REVIEW_POOL: Review[] = interleave(
   EMAILED_NAMED,
   EMAILED_ANONYMOUS,
   SUPPLIED_REVIEWS,
+  INSTAGRAM_DMS,
 );
 
 function interleave<T>(...lists: T[][]): T[] {
