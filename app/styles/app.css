@@ -1123,6 +1123,10 @@ html {
   .hero__img--desktop {
     display: block;
     object-fit: cover;
+    /* Recadré par le bas plutôt qu'au centre : sur la photo de Milan, les
+       pieds touchent le bord inférieur, et le haut passe de toute façon sous
+       l'en-tête. */
+    object-position: 50% 80%;
   }
 }
 

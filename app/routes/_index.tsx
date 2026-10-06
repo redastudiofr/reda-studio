@@ -55,7 +55,7 @@ export function links() {
     {
       rel: 'preload',
       as: 'image',
-      href: '/images/home-hero-desktop.jpg',
+      href: '/images/home-hero-desktop-milan.webp',
       media: '(min-width: 48em)',
     },
   ];
@@ -72,8 +72,8 @@ const HERO_IMAGE_MOBILE = {
 };
 
 const HERO_IMAGE_DESKTOP = {
-  src: '/images/home-hero-desktop.jpg',
-  alt: 'A man in a reda studio t-shirt and sweatpants leaning against a black Porsche, a horse behind him',
+  src: '/images/home-hero-desktop-milan.webp',
+  alt: 'A man in a black leopard-print zip hoodie, white tee and black baggy jeans, sitting on a block in front of a tower covered in greenery',
 };
 
 export async function loader(args: Route.LoaderArgs) {
