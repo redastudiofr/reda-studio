@@ -1567,26 +1567,47 @@ html {
 }
 
 /*
-* Nom de la collection : encre noire posée directement sur la photo, sans
-* pastille. Le halo clair est un text-shadow, pas un fond : il décolle les
-* lettres des zones sombres de l'image sans ajouter de bloc opaque.
+* Nom de la collection : dans une pastille noire, texte blanc. Posé à même la
+* photo, le nom se perdait sur les images claires comme sur les sombres ; la
+* pastille le rend lisible sur n'importe laquelle, et reprend l'étiquette des
+* collections qui ferment la fiche produit. Elle s'inverse au survol de la
+* tuile, comme les boutons du site.
 */
 .collections-slider__label {
   position: absolute;
-  left: 0.9rem;
-  bottom: 0.9rem;
-  background: transparent;
-  color: var(--color-ink);
-  font-size: 0.8rem;
-  text-transform: lowercase;
-  letter-spacing: 0.03em;
-  text-shadow:
-    0 0 6px rgba(255, 255, 255, 0.85),
-    0 0 2px rgba(255, 255, 255, 0.95);
-  max-width: calc(100% - 1.8rem);
+  left: 0.75rem;
+  bottom: 0.75rem;
+  max-width: calc(100% - 1.5rem);
+  padding: 0.55rem 0.9rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+  background: var(--color-ink);
+  border-radius: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition:
+    background 200ms var(--ease-out-soft),
+    color 200ms var(--ease-out-soft);
+}
+
+.collections-slider__tile:hover .collections-slider__label,
+.collections-slider__tile:focus-visible .collections-slider__label {
+  color: var(--color-ink);
+  background: var(--color-paper);
+}
+
+@media (min-width: 48em) {
+  .collections-slider__label {
+    left: 1rem;
+    bottom: 1rem;
+    padding: 0.65rem 1.05rem;
+    font-size: 0.72rem;
+  }
 }
 
 /*
