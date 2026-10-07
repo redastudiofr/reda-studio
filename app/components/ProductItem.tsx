@@ -131,11 +131,7 @@ export function ProductItem({
           )}
         </div>
         {rating && (
-          <StarRating
-            rating={rating.value}
-            count={rating.count}
-            className="product-card__rating"
-          />
+          <StarRating rating={rating.value} className="product-card__rating" />
         )}
       </div>
     </Link>
