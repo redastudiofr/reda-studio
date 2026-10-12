@@ -24,12 +24,19 @@ type GridProduct =
   | HomeProductFragment
   | ShowcaseProductFragment;
 
+// Les largeurs des grilles de collection : 4, 3 puis 2 colonnes.
+const DEFAULT_SIZES = '(min-width: 64em) 25vw, (min-width: 48em) 33vw, 50vw';
+
 export function ProductItem({
   product,
   loading,
+  sizes = DEFAULT_SIZES,
 }: {
   product: GridProduct;
   loading?: 'eager' | 'lazy';
+  /** Largeur affichée de la photo, pour une grille plus large que 3 ou 4
+   *  colonnes (l'accueil, en 2 colonnes partout). */
+  sizes?: string;
 }) {
   const t = useT();
   // Inside TikTok's or Instagram's browser a card never swaps to video: that
@@ -104,7 +111,7 @@ export function ProductItem({
               aspectRatio="1/1"
               data={image}
               loading={loading}
-              sizes="(min-width: 64em) 25vw, (min-width: 48em) 33vw, 50vw"
+              sizes={sizes}
               className="product-card__img product-card__img--main"
             />
           )
@@ -115,7 +122,7 @@ export function ProductItem({
             aspectRatio="1/1"
             data={altImage}
             loading="lazy"
-            sizes="(min-width: 64em) 25vw, (min-width: 48em) 33vw, 50vw"
+            sizes={sizes}
             className="product-card__img product-card__img--alt"
           />
         )}

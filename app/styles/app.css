@@ -1220,25 +1220,14 @@ html {
   padding: 0.75rem;
 }
 
-/* The homepage catalogue only, and only on mobile: the first sixteen cards
-   show up front and the rest wait behind "view more".
-   .product-grid--capped is what limits it to that one grid — the same
-   .product-grid class dresses every collection page, where there is no
-   "view more" button, so an unscoped rule left every product past the
-   sixteenth invisible there with no way to reach it.
-   Keep the 17 in step with MOBILE_INITIAL_PRODUCT_COUNT in
-   app/routes/_index.tsx; nth-child can't read a custom property, so this is
-   the one number that lives in two files. A card re-entering via
-   .product-grid--expanded restarts its animation — see @keyframes
-   product-reveal. */
-@media (max-width: 47.99em) {
-  .product-grid--capped:not(.product-grid--expanded) > *:nth-child(n + 17) {
-    display: none;
-  }
-
-  .product-grid--capped.product-grid--expanded > *:nth-child(n + 17) {
-    animation: product-reveal 480ms var(--ease-out-soft) both;
-  }
+/* Le catalogue de l'accueil : 2 colonnes à toutes les largeurs (5 lignes
+   de 2 au chargement, voir HOME_PRODUCTS_STEP dans app/routes/_index.tsx),
+   plafonné en largeur pour que les photos restent à taille de carte sur
+   grand écran. Ce que la grille montre est décidé côté React : aucune règle
+   CSS n'y masque de produit. Chaque carte entre avec product-reveal, si bien
+   que celles ajoutées par « voir plus de produits » arrivent en douceur. */
+.product-grid--home > * {
+  animation: product-reveal 480ms var(--ease-out-soft) both;
 }
 
 /* Movement only — same reason as @keyframes app-enter: these keyframes carry
@@ -1254,12 +1243,12 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .product-grid--capped.product-grid--expanded > *:nth-child(n + 13) {
+  .product-grid--home > * {
     animation: none;
   }
 }
 
-.view-more-mobile {
+.view-more {
   display: block;
   width: calc(100% - 1.5rem);
   margin: 0.75rem auto 0;
@@ -1286,7 +1275,7 @@ html {
  * deliberate movement while staying a single 320ms transition on one
  * property, which is as light as this can be.
  */
-.view-more-mobile {
+.view-more {
   background-image: linear-gradient(
     to right,
     var(--color-ink) 0 50%,
@@ -1301,7 +1290,7 @@ html {
     transform 200ms var(--ease-out-soft);
 }
 
-.view-more-mobile:hover {
+.view-more:hover {
   background-position: 0 0;
   color: var(--color-paper);
   box-shadow: var(--shadow-sm);
@@ -1309,7 +1298,7 @@ html {
 
 /* Presses in rather than just losing its shadow, so a tap on a phone —
    where there is no hover to see — still answers. */
-.view-more-mobile:active {
+.view-more:active {
   background-position: 0 0;
   color: var(--color-paper);
   transform: scale(0.985);
@@ -1317,19 +1306,19 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .view-more-mobile {
+  .view-more {
     transition: none;
   }
 }
 
-.view-more-mobile:focus-visible {
+.view-more:focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;
 }
 
 @media (min-width: 48em) {
-  .view-more-mobile {
-    display: none;
+  .view-more {
+    max-width: 30rem;
   }
 }
 
@@ -1350,6 +1339,15 @@ html {
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     padding: 1.25rem;
+  }
+}
+
+/* Après les règles de colonnes ci-dessus, pour garder 2 colonnes. */
+@media (min-width: 48em) {
+  .product-grid--home {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 64rem;
+    margin-inline: auto;
   }
 }
 

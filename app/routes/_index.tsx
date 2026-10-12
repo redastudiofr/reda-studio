@@ -17,16 +17,19 @@ import {loadPack} from '~/lib/packProducts';
 import {useT} from '~/lib/i18n';
 
 /**
- * Products beyond this many are hidden on mobile behind "view more" — eight
- * rows of the 2-up mobile grid.
+ * Le catalogue de l'accueil montre 10 produits (5 lignes de 2), puis 10 de
+ * plus à chaque clic sur « voir plus de produits », et jamais autrement.
  *
- * This number decides only whether the button is worth showing; what's
- * actually hidden is `.product-grid`'s `nth-child(n + 17)` rule in app.css
- * (mobile-only there too, so desktop always shows the full grid). nth-child
- * can't read a custom property, so the two have to be changed together —
- * the CSS rule carries the same warning.
+ * Seules les cartes à afficher sont rendues. Avant, les 100 produits étaient
+ * dans la page et une règle CSS en masquait une partie, sur mobile seulement :
+ * sur ordinateur, le bouton était caché et le défilement faisait apparaître
+ * tout le catalogue.
  */
-const MOBILE_INITIAL_PRODUCT_COUNT = 16;
+const HOME_PRODUCTS_STEP = 10;
+
+// Photo d'une grille de 2 colonnes, plafonnée à 64rem de large sur
+// ordinateur (voir .product-grid--home dans app.css).
+const HOME_PRODUCT_SIZES = '(min-width: 48em) 32rem, 50vw';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -262,10 +265,7 @@ function AllProducts({
   products: Promise<AllProductsQuery | null>;
 }) {
   const t = useT();
-  // Mobile-only — see .product-grid's nth-child rule in app.css, which is
-  // itself scoped to the same breakpoint. Desktop ignores this entirely and
-  // always renders every product, exactly as before.
-  const [expanded, setExpanded] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(HOME_PRODUCTS_STEP);
 
   return (
     <section aria-labelledby="catalogue-heading">
@@ -279,24 +279,25 @@ function AllProducts({
           {(response) =>
             response ? (
               <>
-                <div
-                  className={`product-grid product-grid--capped ${
-                    expanded ? 'product-grid--expanded' : ''
-                  }`}
-                >
-                  {response.products.nodes.map((product, index) => (
-                    <ProductItem
-                      key={product.id}
-                      product={product}
-                      loading={index < 4 ? 'eager' : undefined}
-                    />
-                  ))}
+                <div className="product-grid product-grid--home">
+                  {response.products.nodes
+                    .slice(0, visibleCount)
+                    .map((product, index) => (
+                      <ProductItem
+                        key={product.id}
+                        product={product}
+                        loading={index < 4 ? 'eager' : undefined}
+                        sizes={HOME_PRODUCT_SIZES}
+                      />
+                    ))}
                 </div>
-                {!expanded && response.products.nodes.length > MOBILE_INITIAL_PRODUCT_COUNT && (
+                {visibleCount < response.products.nodes.length && (
                   <button
                     type="button"
-                    className="view-more-mobile"
-                    onClick={() => setExpanded(true)}
+                    className="view-more"
+                    onClick={() =>
+                      setVisibleCount((count) => count + HOME_PRODUCTS_STEP)
+                    }
                   >
                     {t('home.viewMore')}
                   </button>
