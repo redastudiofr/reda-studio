@@ -45,6 +45,7 @@ const glassButtonClassName =
 export function AnimatedHero({
   imageMobile,
   imageDesktop,
+  badge,
   eyebrow,
   title,
   description,
@@ -53,6 +54,8 @@ export function AnimatedHero({
 }: {
   imageMobile: HeroImage;
   imageDesktop: HeroImage;
+  /** Petite image au-dessus de l'eyebrow, une version par largeur d'écran. */
+  badge?: {mobile: string; desktop: string; alt: string};
   eyebrow?: string;
   title: ReactNode;
   description?: string;
@@ -115,6 +118,14 @@ export function AnimatedHero({
         animate="visible"
         className="relative z-[1] flex h-full w-full max-w-xl flex-col items-start justify-end px-6 pb-10 text-left sm:px-8 sm:pb-14 md:px-12 md:pb-20"
       >
+        {badge && (
+          <motion.picture variants={itemVariants} className="hero__badge">
+            {/* Même seuil que les photos du hero (48em) : un seul des deux
+                fichiers est téléchargé. */}
+            <source media="(min-width: 48em)" srcSet={badge.desktop} />
+            <img src={badge.mobile} alt={badge.alt} decoding="async" />
+          </motion.picture>
+        )}
         {eyebrow && (
           <motion.p variants={itemVariants} className="text-[11px] uppercase tracking-[0.14em] text-white/70 sm:text-xs">
             {eyebrow}

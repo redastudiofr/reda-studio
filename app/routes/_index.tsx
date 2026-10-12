@@ -153,6 +153,11 @@ export default function Homepage() {
       <AnimatedHero
         imageMobile={HERO_IMAGE_MOBILE}
         imageDesktop={HERO_IMAGE_DESKTOP}
+        badge={{
+          mobile: '/images/trustpilot-mobile.webp',
+          desktop: '/images/trustpilot-desktop.webp',
+          alt: t('home.trustAlt'),
+        }}
         eyebrow={t('home.eyebrow')}
         title="reda studio"
         description={t('home.tagline')}

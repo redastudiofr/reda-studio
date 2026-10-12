@@ -34,6 +34,7 @@ export const en = {
 
   // — home —
   'home.eyebrow': 'new collection',
+  'home.trustAlt': 'Rated 4.7/5 on Trustpilot, over 10,000 orders',
   'home.tagline': 'designed for people with ambition.',
   'home.shopNow': 'shop now',
   'home.ourStory': 'our story',
@@ -533,6 +534,7 @@ export const fr: Record<TranslationKey, string> = {
 
   // — accueil —
   'home.eyebrow': 'nouvelle collection',
+  'home.trustAlt': 'Noté 4,7/5 sur Trustpilot, plus de 10 000 commandes',
   'home.tagline': 'pensé pour celles et ceux qui ont de l’ambition.',
   'home.shopNow': 'découvrir',
   'home.ourStory': 'notre histoire',

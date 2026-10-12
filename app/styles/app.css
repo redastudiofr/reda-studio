@@ -1116,6 +1116,24 @@ html {
   display: none;
 }
 
+/* Note Trustpilot au-dessus de « nouvelle collection » : en petit, l'image
+   (fond transparent) porte son propre texte blanc. Les deux fichiers sont
+   rognés au plus près, la largeur suffit à fixer la taille. */
+.hero__badge {
+  display: block;
+  margin-bottom: 0.875rem;
+}
+.hero__badge img {
+  display: block;
+  width: 11rem;
+  height: auto;
+}
+@media (min-width: 48em) {
+  .hero__badge img {
+    width: 20rem;
+  }
+}
+
 @media (min-width: 48em) {
   .hero__img--mobile {
     display: none;
