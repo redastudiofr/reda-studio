@@ -131,14 +131,13 @@ export function AnimatedHero({
             {eyebrow}
           </motion.p>
         )}
-        <motion.h1
-          variants={itemVariants}
-          className="mt-3 text-3xl font-bold leading-[1.1] text-white sm:mt-4 sm:text-5xl md:text-6xl"
-        >
-          {title}
-        </motion.h1>
+        {/* Le titre n'est plus affiché, à la demande du propriétaire : seul le
+            slogan reste sous « nouvelle collection ». Il reste dans la page,
+            masqué, pour les lecteurs d'écran et les moteurs de recherche, qui
+            attendent un titre principal. */}
+        <h1 className="sr-only">{title}</h1>
         {description && (
-          <motion.p variants={itemVariants} className="mt-4 max-w-md text-sm leading-relaxed text-white/80 sm:text-base">
+          <motion.p variants={itemVariants} className="mt-3 max-w-md text-sm leading-relaxed text-white/80 sm:text-base">
             {description}
           </motion.p>
         )}
