@@ -22,7 +22,7 @@ export function ProductReviews({
   if (!reviews.length) return null;
   return (
     <ReviewsSection
-      heading={t('reviews.forProduct', {product: productTitle.toLowerCase()})}
+      heading={t('reviews.forProduct')}
       reviews={reviews}
       productTitle={productTitle}
     />

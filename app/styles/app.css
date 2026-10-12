@@ -1125,12 +1125,12 @@ html {
 }
 .hero__badge img {
   display: block;
-  width: 14rem;
+  width: 18rem;
   height: auto;
 }
 @media (min-width: 48em) {
   .hero__badge img {
-    width: 25rem;
+    width: 32rem;
   }
 }
 
