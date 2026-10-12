@@ -6,14 +6,12 @@ import {ProductItem} from '~/components/ProductItem';
 import {CollectionsSlider} from '~/components/CollectionsSlider';
 import {CollectionProductShowcase} from '~/components/CollectionProductShowcase';
 import {CommunitySlider} from '~/components/CommunitySlider';
-import {PackOffer} from '~/components/PackOffer';
 import {AnimatedHero} from '~/components/AnimatedHero';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
 import {HomeReviews} from '~/components/HomeReviews';
 import {HelpFaq} from '~/components/HelpFaq';
 import {withoutHomeHiddenCollections} from '~/lib/collections';
-import {loadPack} from '~/lib/packProducts';
 import {useT} from '~/lib/i18n';
 
 /**
@@ -133,18 +131,11 @@ function loadDeferredData({context}: Route.LoaderArgs) {
         return null;
       });
 
-  // Deferred like the rest: the pack section streams in after the catalogue
-  // and never holds up the top of the page.
-  const pack = loadPack(context.storefront).catch((error: Error) => {
-    console.error(error);
-    return null;
-  });
-
   const automneDrop = showcase('automne-drop');
   const summer = showcase('summer');
   const bestSeller = showcase('best-seller');
 
-  return {allProducts, pack, automneDrop, summer, bestSeller};
+  return {allProducts, automneDrop, summer, bestSeller};
 }
 
 export default function Homepage() {
@@ -175,9 +166,8 @@ export default function Homepage() {
 
       <AllProducts products={data.allProducts} />
 
-      {/* Après le catalogue, pas avant : on propose un ensemble à quelqu'un
-          qui a déjà vu les pièces. */}
-      <PackOffer pack={data.pack} />
+      {/* Plus de section pack ici : le propriétaire la trouvait envahissante
+          sur l'accueil. L'offre reste sur /pack et au panier. */}
 
       <CommunitySlider />
 
