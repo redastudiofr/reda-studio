@@ -25,12 +25,12 @@ import {useT} from '~/lib/i18n';
  * layered on top by useHorizontalRail, and never touch the touch path.
  */
 /*
- * Five copies of the photos rather than three: with six photos, one copy is
+ * Seven copies of the photos rather than three: with six photos, one copy is
  * barely four screens wide on a phone, and a strong swipe could run past it
- * before coming to rest. Two copies on each side of the middle leave room
+ * before coming to rest. Three copies on each side of the middle leave room
  * for any swipe; the photos are lazy-loaded and share the same files.
  */
-const LOOP_COPIES = 5;
+const LOOP_COPIES = 7;
 
 export function CommunitySlider() {
   const t = useT();

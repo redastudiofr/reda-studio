@@ -70,10 +70,11 @@ export function useHorizontalRail<T extends HTMLElement>({
      * finger is still on the rail, or while its momentum is still carrying
      * it, makes the browser lose the gesture: the swipe jumped back, then
      * fought the correction, and ended up barely moving at all — the
-     * "stuck" carousel. The flanking copies are there so a single swipe,
-     * however strong, never reaches the real end before it comes to rest.
-     * Only if it gets within a quarter of a copy of that end is the rail
-     * moved mid-gesture, as a last resort.
+     * "stuck" carousel. The rail is also put back on the middle copy the
+     * moment a finger lands, before any movement, so every swipe starts with
+     * the flanking copies' full length ahead of it, in both directions. Only
+     * if a swipe still gets within a quarter of a copy of the real end is
+     * the rail moved mid-gesture, as a last resort.
      */
     let touching = false;
     let settle = 0;
@@ -91,6 +92,7 @@ export function useHorizontalRail<T extends HTMLElement>({
     const onTouchStart = () => {
       touching = true;
       window.clearTimeout(settle);
+      recentre();
     };
     const onTouchEnd = () => {
       touching = false;
@@ -214,11 +216,21 @@ export function useHorizontalRail<T extends HTMLElement>({
       }
     };
 
+    /*
+     * The items are often links (a product, the brand's Instagram). Pulled
+     * with the mouse, a link starts the browser's own drag-and-drop of its
+     * URL, which ends the pointer events: the rail never moved. Images
+     * already carry draggable={false}; this covers the links around them.
+     */
+    const onDragStart = (e: DragEvent) => e.preventDefault();
+
     node.addEventListener('pointerdown', onPointerDown);
     node.addEventListener('click', onClickCapture, true);
+    node.addEventListener('dragstart', onDragStart);
     return () => {
       node.removeEventListener('pointerdown', onPointerDown);
       node.removeEventListener('click', onClickCapture, true);
+      node.removeEventListener('dragstart', onDragStart);
       endDrag();
     };
   }, []);
