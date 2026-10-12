@@ -24,9 +24,10 @@ function ReviewCard({review}: {review: Review}) {
   return (
     <article className="review-card">
       <header className="review-card__head">
-        {typeof review.rating === 'number' && (
-          <StarRating rating={review.rating} className="review-card__stars" />
-        )}
+        {/* Un avis reçu sans étoiles s'affiche avec 5, à la demande du
+            propriétaire. Affichage seul : `review.rating` reste vide, et ces
+            avis n'entrent toujours dans aucune moyenne (getRatingForSeed). */}
+        <StarRating rating={review.rating ?? 5} className="review-card__stars" />
         <span className="review-card__name">
           {review.name ?? t('reviews.anonymous')}
         </span>
