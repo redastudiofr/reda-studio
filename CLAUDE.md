@@ -6,14 +6,33 @@ blanc, minuscules, pas de bandeau promo, pas de compte à rebours.
 
 ## Déploiement
 
-Pousser sur `main` déclenche GitHub Actions, qui construit et publie sur
-Oxygen en deux minutes environ. **Le propriétaire a donné son autorisation de
-pousser sans demander à chaque fois.**
+**Consigne du propriétaire (12 octobre 2026) :** une fois les modifications
+terminées et vérifiées (lint, types, build, test dans un navigateur), les
+déployer directement en production sur Oxygen, sans lui demander de
+confirmation. GitHub ne sert plus que de sauvegarde : GitHub Actions ne se
+déclenche plus pour les sessions Claude, un push sur `main` ne déploie rien.
 
-Vérifier que le run a bien démarré dans l'onglet Actions : un `git push` fait
-depuis une session Claude dans le cloud est arrivé sur `main` sans déclencher
-aucun déploiement, et le site est resté sur l'ancienne version en silence.
-Vérifier ensuite en interrogeant le site en ligne plutôt qu'en le supposant.
+Il faut que l'environnement de la session fournisse
+`SHOPIFY_HYDROGEN_DEPLOYMENT_TOKEN`. La branche locale doit s'appeler `main` :
+c'est le nom de branche qui envoie en production.
+
+```sh
+git branch -f main HEAD && git checkout main
+CI=true NODE_USE_ENV_PROXY=1 npx shopify hydrogen deploy --no-json-output \
+  --metadata-description "<ce qui change>"
+```
+
+Sans `NODE_USE_ENV_PROXY=1`, l'outil Shopify ne passe pas par le proxy de la
+session et ne trouve pas `oxygen.shopifyapps.com`.
+
+Pour tester avant la production sur les vrais produits : la même commande
+avec `--preview --auth-bypass-token --json-output`. L'adresse de l'aperçu et
+le jeton (à envoyer dans l'en-tête `oxygen-auth-bypass-token`) sont dans
+`h2_deploy_log.json`, à supprimer ensuite.
+
+Vérifier ensuite sur redastudio.fr que la nouvelle version est en ligne,
+plutôt que le supposer, puis pousser le code sur la branche de la session
+pour que la session suivante reparte du code publié.
 
 ## Ce qu'il faut lire avant de toucher aux offres
 
