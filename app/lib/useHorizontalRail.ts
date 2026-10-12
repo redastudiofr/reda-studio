@@ -7,59 +7,126 @@ import {useCallback, useEffect, useRef, useState} from 'react';
  * `pointerType === 'mouse'`), an arrow-driven `scrollByCard`, and — when
  * `loop` is on — a seamless infinite wrap.
  *
- * Infinite looping expects the caller to render its items three times in a
- * row (`[...items, ...items, ...items]`, unique React keys per copy). The
- * rail starts scrolled to the middle copy; once the user scrolls into the
- * first or third copy, the position is silently snapped back by exactly one
- * copy's width — same content, so nothing visibly changes.
+ * Infinite looping expects the caller to render its items `copies` times in
+ * a row (`[...items, ...items, ...items]`, unique React keys per copy, an odd
+ * count). The rail starts on the middle copy; once a gesture has come to
+ * rest, the position is moved back by whole copies to the middle one — same
+ * content at the same place, so nothing visibly changes.
  */
 export function useHorizontalRail<T extends HTMLElement>({
   loop = false,
-}: {loop?: boolean} = {}) {
+  copies = 3,
+}: {loop?: boolean; copies?: number} = {}) {
   const ref = useRef<T | null>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
   const dragState = useRef({startX: 0, startScroll: 0, active: false, moved: false});
 
-  // Seamless infinite wrap: start centred in the middle copy, then correct
-  // back into it whenever a scroll carries the viewport into a flanking one.
+  // Seamless infinite wrap.
   useEffect(() => {
     const node = ref.current;
     if (!node || !loop) return;
 
-    node.scrollLeft = node.scrollWidth / 3;
+    /*
+     * One copy's exact width, measured between the first item of two
+     * consecutive copies. `scrollWidth / copies` is not that: it also
+     * shares out the rail's side padding and is one gap short, so every wrap
+     * used to land the photos a few pixels off.
+     */
+    const copyWidth = () => {
+      const perCopy = node.children.length / copies;
+      const first = node.children[0] as HTMLElement | undefined;
+      const next = node.children[perCopy] as HTMLElement | undefined;
+      return first && next ? next.offsetLeft - first.offsetLeft : 0;
+    };
+    const middle = (copy: number) => copy * Math.floor(copies / 2);
 
     /*
      * Moving the rail by one copy has to move the drag's own reference point
      * with it. Without this, a mouse drag that crossed a copy boundary was
      * corrected here and then immediately undone by the next pointermove —
-     * which sets scrollLeft from the position the drag started at — so the
-     * rail sat there refusing to go any further, in both directions.
+     * which sets scrollLeft from the position the drag started at.
      */
     const shiftBy = (delta: number) => {
-      node.scrollLeft += delta;
+      node.scrollTo({left: node.scrollLeft + delta, behavior: 'instant'});
       if (dragState.current.active) dragState.current.startScroll += delta;
     };
 
-    let frame = 0;
-    const onScroll = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = 0;
-        const oneCopy = node.scrollWidth / 3;
-        if (node.scrollLeft < oneCopy * 0.5) {
-          shiftBy(oneCopy);
-        } else if (node.scrollLeft > oneCopy * 1.5) {
-          shiftBy(-oneCopy);
-        }
-      });
+    // Back to the same spot inside the middle copy, by whole copies.
+    const recentre = () => {
+      const copy = copyWidth();
+      if (!copy) return;
+      const base = middle(copy);
+      const offset = node.scrollLeft - base;
+      const wrapped = ((((offset + copy / 2) % copy) + copy) % copy) - copy / 2;
+      const delta = wrapped - offset;
+      if (Math.abs(delta) >= 1) shiftBy(delta);
     };
+
+    node.scrollTo({left: middle(copyWidth()), behavior: 'instant'});
+
+    /*
+     * The wrap waits for the rail to be at rest. Moving scrollLeft while a
+     * finger is still on the rail, or while its momentum is still carrying
+     * it, makes the browser lose the gesture: the swipe jumped back, then
+     * fought the correction, and ended up barely moving at all — the
+     * "stuck" carousel. The flanking copies are there so a single swipe,
+     * however strong, never reaches the real end before it comes to rest.
+     * Only if it gets within a quarter of a copy of that end is the rail
+     * moved mid-gesture, as a last resort.
+     */
+    let touching = false;
+    let settle = 0;
+    const onScroll = () => {
+      const copy = copyWidth();
+      const max = node.scrollWidth - node.clientWidth;
+      if (copy && (node.scrollLeft < copy / 4 || node.scrollLeft > max - copy / 4)) {
+        recentre();
+      }
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        if (!touching && !dragState.current.active) recentre();
+      }, 150);
+    };
+    const onTouchStart = () => {
+      touching = true;
+      window.clearTimeout(settle);
+    };
+    const onTouchEnd = () => {
+      touching = false;
+      // A tap, or a swipe that ended exactly at rest, fires no more scroll
+      // events: give it the same settle delay.
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        if (!dragState.current.active) recentre();
+      }, 150);
+    };
+    const onPointerUp = () => {
+      window.clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        if (!touching) recentre();
+      }, 150);
+    };
+    // Item widths are percentages of the rail: a resize changes the copy
+    // width, so the position is re-measured.
+    const resize = new ResizeObserver(() => recentre());
+    resize.observe(node);
+
     node.addEventListener('scroll', onScroll, {passive: true});
+    node.addEventListener('touchstart', onTouchStart, {passive: true});
+    node.addEventListener('touchend', onTouchEnd, {passive: true});
+    node.addEventListener('touchcancel', onTouchEnd, {passive: true});
+    window.addEventListener('pointerup', onPointerUp);
     return () => {
       node.removeEventListener('scroll', onScroll);
-      if (frame) cancelAnimationFrame(frame);
+      node.removeEventListener('touchstart', onTouchStart);
+      node.removeEventListener('touchend', onTouchEnd);
+      node.removeEventListener('touchcancel', onTouchEnd);
+      window.removeEventListener('pointerup', onPointerUp);
+      resize.disconnect();
+      window.clearTimeout(settle);
     };
-  }, [loop]);
+  }, [loop, copies]);
 
   // Non-looping rails track their ends so the caller can disable/hide an
   // arrow that would otherwise scroll nowhere.

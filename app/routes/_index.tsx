@@ -15,8 +15,9 @@ import {withoutHomeHiddenCollections} from '~/lib/collections';
 import {useT} from '~/lib/i18n';
 
 /**
- * Le catalogue de l'accueil montre 10 produits (5 lignes de 2), puis 10 de
- * plus à chaque clic sur « voir plus de produits », et jamais autrement.
+ * Le catalogue de l'accueil montre 10 produits (5 lignes de 2 sur mobile),
+ * puis 10 de plus à chaque clic sur « voir plus de produits », et jamais
+ * autrement.
  *
  * Seules les cartes à afficher sont rendues. Avant, les 100 produits étaient
  * dans la page et une règle CSS en masquait une partie, sur mobile seulement :
@@ -25,9 +26,9 @@ import {useT} from '~/lib/i18n';
  */
 const HOME_PRODUCTS_STEP = 10;
 
-// Photo d'une grille de 2 colonnes, plafonnée à 64rem de large sur
-// ordinateur (voir .product-grid--home dans app.css).
-const HOME_PRODUCT_SIZES = '(min-width: 48em) 32rem, 50vw';
+// Largeur des photos : 4 colonnes dans 68rem sur ordinateur, 3 colonnes sur
+// tablette, 2 sur mobile (voir .product-grid--home dans app.css).
+const HOME_PRODUCT_SIZES = '(min-width: 64em) 17rem, (min-width: 48em) 33vw, 50vw';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -169,6 +170,8 @@ export default function Homepage() {
       {/* Plus de section pack ici : le propriétaire la trouvait envahissante
           sur l'accueil. L'offre reste sur /pack et au panier. */}
 
+      <HomeReviews />
+
       <CommunitySlider />
 
       <Suspense fallback={null}>
@@ -237,8 +240,6 @@ export default function Homepage() {
           }
         </Await>
       </Suspense>
-
-      <HomeReviews />
 
       <HelpFaq />
 

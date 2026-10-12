@@ -24,19 +24,28 @@ import {useT} from '~/lib/i18n';
  * JavaScript drag handler does as well. Mouse drag and the arrows are
  * layered on top by useHorizontalRail, and never touch the touch path.
  */
+/*
+ * Five copies of the photos rather than three: with six photos, one copy is
+ * barely four screens wide on a phone, and a strong swipe could run past it
+ * before coming to rest. Two copies on each side of the middle leave room
+ * for any swipe; the photos are lazy-loaded and share the same files.
+ */
+const LOOP_COPIES = 5;
+
 export function CommunitySlider() {
   const t = useT();
-  // Looping needs enough photos to fill the rail three times over; below
-  // that it would just be the same two pictures repeating on screen.
+  // Looping needs at least three photos; below that it would just be the
+  // same two pictures repeating on screen.
   const loop = COMMUNITY_IMAGES.length >= 3;
   const {ref, scrollByCard, atStart, atEnd} = useHorizontalRail<HTMLDivElement>({
     loop,
+    copies: LOOP_COPIES,
   });
 
   if (!COMMUNITY_IMAGES.length) return null;
 
   const tiles = loop
-    ? [...COMMUNITY_IMAGES, ...COMMUNITY_IMAGES, ...COMMUNITY_IMAGES]
+    ? Array.from({length: LOOP_COPIES}, () => COMMUNITY_IMAGES).flat()
     : COMMUNITY_IMAGES;
 
   return (
