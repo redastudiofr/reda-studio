@@ -1220,14 +1220,21 @@ html {
   padding: 0.75rem;
 }
 
-/* Le catalogue de l'accueil : 2 colonnes sur mobile, 3 sur tablette, 4 sur
-   ordinateur (voir HOME_PRODUCTS_STEP dans app/routes/_index.tsx pour le
-   nombre affiché), plafonné en largeur sur ordinateur pour garder des cartes
-   de taille moyenne. Ce que la grille montre est décidé côté React : aucune règle
-   CSS n'y masque de produit. Chaque carte entre avec product-reveal, si bien
-   que celles ajoutées par « voir plus de produits » arrivent en douceur. */
+/* Le catalogue de l'accueil : les colonnes de toutes les grilles (2, 3 puis
+   4), sur toute la largeur. Ce que la grille montre est décidé côté React,
+   par lignes entières (voir HOME_PRODUCTS_PER_STEP dans
+   app/routes/_index.tsx). La seule règle qui masque ici : avant
+   l'hydratation, le serveur rend 12 cartes et le mobile n'en montre que 10.
+   Chaque carte entre avec product-reveal, si bien que celles ajoutées par
+   « voir plus de produits » arrivent en douceur. */
 .product-grid--home > * {
   animation: product-reveal 480ms var(--ease-out-soft) both;
+}
+
+@media (max-width: 47.99em) {
+  .product-grid--home:not([data-columns]) > :nth-child(n + 11) {
+    display: none;
+  }
 }
 
 /* Movement only — same reason as @keyframes app-enter: these keyframes carry
@@ -1342,15 +1349,6 @@ html {
   }
 }
 
-/* Les colonnes sont celles de toutes les grilles (3 puis 4, ci-dessus) ;
-   sur ordinateur, la grille de l'accueil est seulement plafonnée en largeur,
-   pour des cartes d'environ 16rem au lieu d'un quart de l'écran. */
-@media (min-width: 64em) {
-  .product-grid--home {
-    max-width: 68rem;
-    margin-inline: auto;
-  }
-}
 
 .view-all {
   display: flex;

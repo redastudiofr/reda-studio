@@ -1,6 +1,6 @@
 import {Await, useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/_index';
-import {Suspense, useState} from 'react';
+import {Suspense, useEffect, useState} from 'react';
 import type {AllProductsQuery} from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 import {CollectionsSlider} from '~/components/CollectionsSlider';
@@ -15,20 +15,48 @@ import {withoutHomeHiddenCollections} from '~/lib/collections';
 import {useT} from '~/lib/i18n';
 
 /**
- * Le catalogue de l'accueil montre 10 produits (5 lignes de 2 sur mobile),
- * puis 10 de plus à chaque clic sur « voir plus de produits », et jamais
- * autrement.
+ * Le catalogue de l'accueil se remplit par lignes entières, jamais par
+ * défilement : au chargement puis à chaque clic sur « voir plus de
+ * produits », autant de produits par écran.
  *
- * Seules les cartes à afficher sont rendues. Avant, les 100 produits étaient
- * dans la page et une règle CSS en masquait une partie, sur mobile seulement :
- * sur ordinateur, le bouton était caché et le défilement faisait apparaître
- * tout le catalogue.
+ * - mobile, 2 colonnes : 10 (5 lignes) ;
+ * - tablette, 3 colonnes : 12 (4 lignes) ;
+ * - ordinateur, 4 colonnes : 12 (3 lignes).
+ *
+ * Le total affiché s'arrête au dernier multiple du nombre de colonnes, pour
+ * que la dernière ligne ne soit jamais à moitié vide ; les produits restants
+ * sont dans « tout voir ». Seules les cartes à afficher sont rendues.
  */
-const HOME_PRODUCTS_STEP = 10;
+const HOME_PRODUCTS_PER_STEP: Record<GridColumns, number> = {2: 10, 3: 12, 4: 12};
 
-// Largeur des photos : 4 colonnes dans 68rem sur ordinateur, 3 colonnes sur
-// tablette, 2 sur mobile (voir .product-grid--home dans app.css).
-const HOME_PRODUCT_SIZES = '(min-width: 64em) 17rem, (min-width: 48em) 33vw, 50vw';
+/**
+ * Avant que le navigateur ait dit sa largeur (rendu serveur), 12 cartes :
+ * lignes pleines en 2, 3 comme en 4 colonnes. Sur mobile, les deux de trop
+ * sont masquées jusqu'à l'hydratation (voir .product-grid--home dans
+ * app.css), le temps d'un instant.
+ */
+const HOME_PRODUCTS_BEFORE_HYDRATION = 12;
+
+type GridColumns = 2 | 3 | 4;
+
+/** Le nombre de colonnes de .product-grid, aux mêmes seuils que app.css. */
+function useGridColumns(): GridColumns | null {
+  const [columns, setColumns] = useState<GridColumns | null>(null);
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 64em)');
+    const tablet = window.matchMedia('(min-width: 48em)');
+    const update = () =>
+      setColumns(desktop.matches ? 4 : tablet.matches ? 3 : 2);
+    update();
+    desktop.addEventListener('change', update);
+    tablet.addEventListener('change', update);
+    return () => {
+      desktop.removeEventListener('change', update);
+      tablet.removeEventListener('change', update);
+    };
+  }, []);
+  return columns;
+}
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -256,7 +284,10 @@ function AllProducts({
   products: Promise<AllProductsQuery | null>;
 }) {
   const t = useT();
-  const [visibleCount, setVisibleCount] = useState(HOME_PRODUCTS_STEP);
+  const columns = useGridColumns();
+  // Nombre de clics sur « voir plus », plutôt qu'un nombre de produits : il
+  // reste juste si l'écran change de nombre de colonnes.
+  const [steps, setSteps] = useState(1);
 
   return (
     <section aria-labelledby="catalogue-heading">
@@ -267,35 +298,48 @@ function AllProducts({
       </Reveal>
       <Suspense fallback={<div className="product-grid" aria-hidden="true" />}>
         <Await resolve={products}>
-          {(response) =>
-            response ? (
+          {(response) => {
+            if (!response) return null;
+            const products = response.products.nodes;
+            // Lignes pleines jusqu'au bout : un catalogue plus court qu'une
+            // ligne s'affiche quand même en entier.
+            const fullRows = columns
+              ? products.length < columns
+                ? products.length
+                : products.length - (products.length % columns)
+              : products.length;
+            const visible = Math.min(
+              fullRows,
+              columns
+                ? HOME_PRODUCTS_PER_STEP[columns] * steps
+                : HOME_PRODUCTS_BEFORE_HYDRATION,
+            );
+            return (
               <>
-                <div className="product-grid product-grid--home">
-                  {response.products.nodes
-                    .slice(0, visibleCount)
-                    .map((product, index) => (
-                      <ProductItem
-                        key={product.id}
-                        product={product}
-                        loading={index < 4 ? 'eager' : undefined}
-                        sizes={HOME_PRODUCT_SIZES}
-                      />
-                    ))}
+                <div
+                  className="product-grid product-grid--home"
+                  data-columns={columns ?? undefined}
+                >
+                  {products.slice(0, visible).map((product, index) => (
+                    <ProductItem
+                      key={product.id}
+                      product={product}
+                      loading={index < 4 ? 'eager' : undefined}
+                    />
+                  ))}
                 </div>
-                {visibleCount < response.products.nodes.length && (
+                {columns !== null && visible < fullRows && (
                   <button
                     type="button"
                     className="view-more"
-                    onClick={() =>
-                      setVisibleCount((count) => count + HOME_PRODUCTS_STEP)
-                    }
+                    onClick={() => setSteps((count) => count + 1)}
                   >
                     {t('home.viewMore')}
                   </button>
                 )}
               </>
-            ) : null
-          }
+            );
+          }}
         </Await>
       </Suspense>
       <div className="view-all">
