@@ -3078,6 +3078,372 @@ html {
   text-underline-offset: 3px;
 }
 
+/* Measured guide: type and cut, the drawing, the table, the size finder.
+   Same lowercase, black-on-white idiom as the rest of the buy box. */
+.size-guide__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.size-guide__kind {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.size-guide__badge {
+  flex: none;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  text-transform: lowercase;
+}
+
+.size-guide__figure {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  margin-bottom: 0.9rem;
+  background: var(--color-tile);
+  border-radius: 4px;
+}
+
+.size-guide__drawing {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.size-guide__drawing-shape {
+  fill: var(--color-paper);
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.size-guide__drawing-line {
+  stroke: var(--color-ink);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.size-guide__drawing-letter {
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--color-ink);
+}
+
+.size-guide__keys {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.74rem;
+  text-transform: lowercase;
+}
+
+.size-guide__keys li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.size-guide__key {
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+/* Never wider than the buy box: at most five measures, and the table
+   scrolls sideways on its own if a narrow phone still can't fit it. */
+.size-guide__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.size-guide__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.size-guide__table th,
+.size-guide__table td {
+  padding: 0.5rem 0.35rem;
+  border-bottom: 1px solid var(--color-line);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.size-guide__table thead th {
+  font-weight: 700;
+  font-size: 0.68rem;
+  text-transform: lowercase;
+}
+
+.size-guide__table abbr {
+  text-decoration: none;
+}
+
+.size-guide__table tbody th {
+  text-align: left;
+  font-weight: 600;
+}
+
+.size-guide__table tr[data-unavailable] td,
+.size-guide__table tr[data-unavailable] .size-guide__size {
+  color: var(--color-muted);
+}
+
+.size-guide__table tr.is-recommended th,
+.size-guide__table tr.is-recommended td {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.size-guide__out {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 400;
+  text-transform: lowercase;
+}
+
+.size-guide__estimate {
+  white-space: nowrap;
+}
+
+.size-guide__legend {
+  margin-top: 0.6rem;
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+.size-finder {
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.size-finder__title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+.size-finder__intro {
+  margin-top: 0.3rem;
+  font-size: 0.74rem;
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+.size-finder__form {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.85rem;
+}
+
+.size-finder__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.size-finder__field {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  text-transform: lowercase;
+}
+
+/* 16px: below that, iOS zooms the page in on focus. */
+.size-finder__field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 16px;
+  appearance: textfield;
+}
+
+.size-finder__field input:focus-visible {
+  outline: none;
+  border-color: var(--color-ink);
+}
+
+.size-finder__field input[aria-invalid] {
+  border-color: var(--color-sale);
+}
+
+.size-finder__field input::-webkit-outer-spin-button,
+.size-finder__field input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.size-finder__prefs {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.size-finder__prefs legend {
+  margin-bottom: 0.3rem;
+  font-size: 0.72rem;
+  text-transform: lowercase;
+}
+
+.size-finder__pref-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+
+.size-finder__pref {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  font-size: 0.74rem;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition:
+    border-color 200ms var(--ease-out-soft),
+    background-color 200ms var(--ease-out-soft),
+    color 200ms var(--ease-out-soft);
+}
+
+.size-finder__pref input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.size-finder__pref[data-selected='true'] {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.size-finder__pref:has(input:focus-visible) {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.size-finder__error {
+  font-size: 0.72rem;
+  color: var(--color-sale);
+}
+
+.size-finder__submit {
+  min-height: 44px;
+}
+
+.size-finder__result {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--color-tile);
+  border-radius: 4px;
+}
+
+.size-finder__label {
+  font-size: 0.68rem;
+  color: var(--color-muted);
+  text-transform: lowercase;
+}
+
+.size-finder__size {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0.15rem 0 0.6rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.size-finder__reasons {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.size-finder__reasons li {
+  padding-left: 0.9rem;
+  position: relative;
+}
+
+.size-finder__reasons li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 0.35rem;
+  height: 1px;
+  background: var(--color-ink);
+}
+
+.size-finder__measures {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.35rem 1rem;
+  margin: 0.3rem 0 0.9rem;
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.size-finder__measures div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.size-finder__measures dt {
+  text-transform: lowercase;
+  color: var(--color-muted);
+}
+
+.size-finder__choose {
+  min-height: 44px;
+}
+
+.size-finder__selected {
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.size-finder__disclaimer {
+  margin-top: 0.7rem;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
 /*
 * Quantity stepper
 */

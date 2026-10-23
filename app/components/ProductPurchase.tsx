@@ -6,7 +6,11 @@ import {ProductForm} from '~/components/ProductForm';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {BuyNowButton} from '~/components/BuyNowButton';
 import {QuantitySelector} from '~/components/QuantitySelector';
-import {ProductSizeGuide, type SizeEntry} from '~/components/ProductSizeGuide';
+import {
+  ProductSizeGuide,
+  type SizeEntry,
+  type SizeGuideProduct,
+} from '~/components/ProductSizeGuide';
 import {PreorderForm} from '~/components/PreorderForm';
 import {StarRating} from '~/components/StarRating';
 import {useAside} from '~/components/Aside';
@@ -31,6 +35,7 @@ export function ProductPurchase({
   compareAtPrice,
   productOptions,
   sizes,
+  sizeGuideProduct,
   available,
   quantityAvailable,
   productId,
@@ -44,6 +49,8 @@ export function ProductPurchase({
   compareAtPrice?: MoneyV2 | null;
   productOptions: MappedProductOptions[];
   sizes: SizeEntry[];
+  /** What the size guide reads the garment's type and cut from. */
+  sizeGuideProduct: SizeGuideProduct;
   available: boolean;
   quantityAvailable: number | null;
   /** Stable seed for the availability line — see app/lib/stock.ts. */
@@ -126,7 +133,7 @@ export function ProductPurchase({
 
           <ProductForm productOptions={productOptions} />
 
-          <ProductSizeGuide sizes={sizes} />
+          <ProductSizeGuide sizes={sizes} product={sizeGuideProduct} />
 
           <QuantitySelector
             value={quantity}

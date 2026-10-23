@@ -55,7 +55,8 @@ Détails et pièges dans `docs/pack-essentiel.md` et `docs/tier-discount.md`.
 ## Le reste de la documentation
 
 `docs/` : pages légales, précommande, notifications, avis de synthèse,
-affichage du stock, vidéos produit portées, e-mails.
+affichage du stock, vidéos produit portées, e-mails, guide des tailles
+(`docs/size-guide.md` : les mesures affichées sont des estimations).
 
 ## Principes tenus dans ce code
 

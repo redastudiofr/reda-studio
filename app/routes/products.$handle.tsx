@@ -258,6 +258,8 @@ export default function Product() {
   const sizes: SizeEntry[] = (sizeOption?.optionValues ?? []).map((value) => ({
     name: value.name,
     available: value.available,
+    selected: value.selected,
+    query: value.variantUriQuery,
   }));
 
   return (
@@ -278,6 +280,7 @@ export default function Product() {
             compareAtPrice={selectedVariant?.compareAtPrice}
             productOptions={productOptions}
             sizes={sizes}
+            sizeGuideProduct={{handle: product.handle, title, description}}
             available={available}
             quantityAvailable={selectedVariant?.quantityAvailable ?? null}
             productId={product.id}
