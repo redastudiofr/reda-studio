@@ -3145,7 +3145,6 @@ html {
   display: grid;
   gap: 0.3rem;
   font-size: 0.74rem;
-  text-transform: lowercase;
 }
 
 .size-guide__keys li {
@@ -3191,7 +3190,6 @@ html {
 .size-guide__table thead th {
   font-weight: 700;
   font-size: 0.68rem;
-  text-transform: lowercase;
 }
 
 .size-guide__table abbr {
@@ -3369,7 +3367,6 @@ html {
 .size-finder__label {
   font-size: 0.68rem;
   color: var(--color-muted);
-  text-transform: lowercase;
 }
 
 .size-finder__size {
@@ -3434,7 +3431,6 @@ html {
 .size-finder__selected {
   font-size: 0.74rem;
   font-weight: 600;
-  text-transform: lowercase;
 }
 
 .size-finder__disclaimer {
