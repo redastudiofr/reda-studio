@@ -1513,9 +1513,32 @@ html {
   grid-auto-columns: 78%;
   gap: 0.9rem;
   overflow-x: auto;
+  /* Le glissement s'arrête au bord du rail : il ne déclenche pas le retour
+     arrière du navigateur. */
+  overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   padding: 0 1.25rem;
+  /* L'aimantation s'aligne sur la marge intérieure, pas sur le bord de
+     l'écran : sans elle, chaque arrêt après le premier collait la tuile au
+     bord gauche. Tenu égal au padding à chaque palier ci-dessous. */
+  scroll-padding-inline: 1.25rem;
+  cursor: grab;
+}
+
+.collections-slider__track:active {
+  cursor: grabbing;
+}
+
+/* Section bord à bord : les flèches restent dans l'écran (voir la même
+   règle pour .collection-feature plus bas). */
+.collections-slider .rail-arrow--prev {
+  left: 0.25rem;
+}
+
+.collections-slider .rail-arrow--next {
+  right: 0.25rem;
 }
 
 .collections-slider__track::-webkit-scrollbar {
@@ -1527,6 +1550,7 @@ html {
     grid-auto-columns: 40%;
     gap: 1.1rem;
     padding: 0 1.5rem;
+    scroll-padding-inline: 1.5rem;
   }
 }
 
@@ -1542,6 +1566,7 @@ html {
 @media (orientation: landscape) and (max-width: 47.99em) {
   .collections-slider__track {
     padding: 0 1.5rem;
+    scroll-padding-inline: 1.5rem;
     gap: 1rem;
   }
 }
@@ -1855,10 +1880,11 @@ html {
   display: flex;
   gap: 0.6rem;
   overflow-x: auto;
-  /* Le doigt ne fait que du gauche-droite ici : pan-x interdit au geste
-     vertical de partir en défilement, donc les cartes ne bougent jamais de
-     haut en bas. Hors de cette bande, la page défile normalement. */
-  touch-action: pan-x;
+  /* Pas de touch-action: pan-x ici : il interdisait au navigateur de faire
+     défiler la page quand le doigt partait d'une carte, et les deux rangées
+     couvrent presque un écran de téléphone — la page s'y bloquait. Les
+     cartes ne bougent pas de haut en bas pour autant : voir la règle
+     overflow-y commune aux rails, en fin de fichier. */
   /* Le geste s'arrête au bord de la rangée : il ne déclenche pas le retour
      arrière du navigateur et ne fait pas défiler la page. */
   overscroll-behavior-x: contain;
@@ -7448,4 +7474,19 @@ a.pack-card__name:hover {
   .pack__hero-image {
     aspect-ratio: 3 / 4;
   }
+}
+
+/* Les rails horizontaux ne défilent jamais en hauteur. overflow-x: auto
+   rend aussi overflow-y défilable : un rail dont le contenu dépasse d'un
+   ou deux pixels en hauteur (celui de la communauté : 2 px) devenait
+   lui-même défilable verticalement, captait le geste vertical sur mobile,
+   et la page restait bloquée tant que le doigt partait de lui. */
+.collections-slider__track,
+.reviews-row,
+.community__rail,
+.collection-feature__rail,
+.showcase__rail,
+.related-rail,
+.worn-rail {
+  overflow-y: hidden;
 }
