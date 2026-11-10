@@ -104,20 +104,32 @@ function ReviewRow({
 }
 
 /**
- * One row, travelling right.
+ * Three rows, travelling right, left, then right again.
  *
- * It was two, in opposite directions. One row shows fewer reviews at a time
- * and reads as a single thing going somewhere, rather than as a wall of text
- * sliding both ways at once — and it leaves the cards the room to be bigger.
+ * Reviews are dealt across them in turn, so each row holds different ones and
+ * no review is shown twice on screen. A page with only a handful (a product
+ * page summarises as few as three) gets fewer rows: a row needs about three
+ * reviews before its loop stops showing the same card back to back.
  */
-const ROW_DIRECTION = 'right' as const;
+const ROW_DIRECTIONS = ['right', 'left', 'right'] as const;
+const MIN_REVIEWS_PER_ROW = 3;
+
+function dealIntoRows(reviews: Review[]): Review[][] {
+  const count = Math.max(
+    1,
+    Math.min(ROW_DIRECTIONS.length, Math.floor(reviews.length / MIN_REVIEWS_PER_ROW)),
+  );
+  const rows: Review[][] = Array.from({length: count}, () => []);
+  reviews.forEach((review, index) => rows[index % count].push(review));
+  return rows;
+}
 
 /**
  * Customer reviews, shared by the homepage and every product page.
  *
- * One row, holding every review in the order they were left, travelling on
- * its own and scrollable by hand. The same cards are shown at every screen
- * width; only how many fit changes.
+ * Up to three rows (see ROW_DIRECTIONS), each travelling on its own and
+ * scrollable by hand. The same cards are shown at every screen width; only
+ * how many fit changes.
  */
 export function ReviewsSection({
   heading,
@@ -148,7 +160,13 @@ export function ReviewsSection({
       </div>
 
       <div className="reviews__rows">
-        <ReviewRow reviews={reviews} direction={ROW_DIRECTION} />
+        {dealIntoRows(reviews).map((row, index) => (
+          <ReviewRow
+            key={row[0].id}
+            reviews={row}
+            direction={ROW_DIRECTIONS[index]}
+          />
+        ))}
       </div>
 
       <div className="reviews__cta">
