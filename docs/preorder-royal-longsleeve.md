@@ -1,5 +1,14 @@
 # "Royal Longsleeve — White" — pre-order waitlist
 
+> **Désactivée depuis le 14 novembre 2026.** Le Royal Longsleeve — White est
+> en vente normalement : sa fiche affiche de nouveau « ajouter au panier » et
+> « acheter maintenant ». `PREORDER_PRODUCT_HANDLE` vaut `null` et
+> `PREORDER_BLOCKED_VARIANT_IDS` est vide dans `app/lib/preorder.ts`. Le
+> formulaire et la route restent dans le code, prêts pour une prochaine
+> précommande. Les inscrits restent retrouvables par leur tag,
+> `preorder-royal-longsleeve-white`, et le code `ROYALVIP10` leur était
+> promis au lancement (voir « The launch offer » plus bas).
+
 This one product is not for sale yet. Its product page shows a single
 **pre-order** button instead of add-to-cart/buy-now; clicking it opens a
 form asking for an email and/or phone number, which joins a waitlist —

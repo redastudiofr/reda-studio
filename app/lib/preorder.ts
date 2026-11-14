@@ -1,13 +1,17 @@
 /**
- * "Royal Longsleeve — White" pre-order / waitlist — see
- * docs/preorder-royal-longsleeve.md for the full picture. Everything that
- * scopes the feature to this one product lives here, so turning it on for a
- * different product (or off entirely) is a one-line change in one file.
+ * Pre-order / waitlist — see docs/preorder-royal-longsleeve.md for the full
+ * picture. Everything that scopes the feature to one product lives here, so
+ * turning it on for a product (or off entirely) is a change in one file.
+ *
+ * Off since 14 November 2026: the Royal Longsleeve — White, the only product
+ * it was ever used for, is on sale normally, with the usual buy box. To run
+ * a pre-order again, put that product's handle here and its variant ids in
+ * PREORDER_BLOCKED_VARIANT_IDS below.
  */
-export const PREORDER_PRODUCT_HANDLE = 'royal-longsleeve-white';
+export const PREORDER_PRODUCT_HANDLE: string | null = null;
 
 export function isPreorderHandle(handle: string): boolean {
-  return handle === PREORDER_PRODUCT_HANDLE;
+  return PREORDER_PRODUCT_HANDLE !== null && handle === PREORDER_PRODUCT_HANDLE;
 }
 
 /**
@@ -22,12 +26,10 @@ export function isPreorderHandle(handle: string): boolean {
  * here too — Shopify Admin → Products → Royal Longsleeve — White →
  * Variants → copy the numeric id from each variant's URL.
  */
-export const PREORDER_BLOCKED_VARIANT_IDS = new Set([
-  'gid://shopify/ProductVariant/54873314263379', // XS
-  'gid://shopify/ProductVariant/54873314296147', // S
-  'gid://shopify/ProductVariant/54873314328915', // M
-  'gid://shopify/ProductVariant/54873314361683', // L
-  'gid://shopify/ProductVariant/54873314394451', // XL
+export const PREORDER_BLOCKED_VARIANT_IDS = new Set<string>([
+  // Empty while no product is on pre-order. The Royal Longsleeve's were
+  // 54873314263379 (XS) to 54873314394451 (XL) — they must stay out of here
+  // now that it is for sale, or the cart would refuse it.
 ]);
 
 /**
@@ -38,5 +40,9 @@ export const PREORDER_BLOCKED_VARIANT_IDS = new Set([
  */
 export const PREORDER_LAUNCH_PROMO_CODE = 'ROYALVIP10';
 
-/** The tag every waitlist sign-up gets in Shopify Admin → Customers. */
-export const PREORDER_CUSTOMER_TAG = `preorder-${PREORDER_PRODUCT_HANDLE}`;
+/**
+ * The tag every waitlist sign-up gets in Shopify Admin → Customers. Kept on
+ * the Royal Longsleeve's handle: that is how the people who signed up for it
+ * are found in the admin.
+ */
+export const PREORDER_CUSTOMER_TAG = 'preorder-royal-longsleeve-white';
