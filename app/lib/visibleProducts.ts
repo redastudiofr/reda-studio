@@ -31,10 +31,10 @@ export const EXTRA_GALLERY_IMAGES: Record<
   string,
   Array<{url: string; altText: string; width: number; height: number}>
 > = {
+  // Seulement celles qui ne sont pas déjà dans Shopify : la rue en vertical
+  // et le bord du fleuve y sont (IMG_6576, IMG_7445), pas celles-ci.
   'royal-longsleeve-white': [
-    {url: '/v2/photo-street.webp', altText: 'Royal Longsleeve — White, worn on a city street', width: 1125, height: 2000},
     {url: '/v2/photo-studio.webp', altText: 'Royal Longsleeve — White, front and back, in a white studio', width: 941, height: 1672},
-    {url: '/v2/photo-river.webp', altText: 'Royal Longsleeve — White, worn by a river', width: 1400, height: 2489},
     {url: '/v2/photo-street-wide.webp', altText: 'Royal Longsleeve — White, worn by two men on a city street', width: 1400, height: 788},
   ],
 };
