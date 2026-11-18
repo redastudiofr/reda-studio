@@ -26,6 +26,7 @@ import {
   localeFromRequest,
 } from '~/lib/i18n/locale';
 import {PROMO_POPUP_ACTIVE} from '~/lib/newsletterPromo';
+import {isSingleProductMode} from '~/lib/singleProduct';
 
 export type RootLoader = typeof loader;
 
@@ -136,7 +137,11 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
   // Shopify auto-creates a "Home page" collection on every store; it isn't a
   // real product category. The rule lives in ~/lib/collections so the header
   // and the collections index can't drift apart.
-  const navCollections = withoutAutoCollections(collections.nodes);
+  // A single-product site (app/lib/singleProduct.ts) has no collections to
+  // browse: the menu keeps only the home page and the service links.
+  const navCollections = isSingleProductMode()
+    ? []
+    : withoutAutoCollections(collections.nodes);
 
   // Whether the language question has ever been answered — the pop-up is
   // rendered only when it hasn't, so it can't flash for someone who already

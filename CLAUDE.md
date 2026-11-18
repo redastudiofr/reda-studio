@@ -4,6 +4,23 @@ Boutique **Shopify Hydrogen** (React Router 7, Vite, Tailwind v4 en CSS-first),
 en ligne sur **redastudio.fr**. Streetwear français, premium et sobre : noir et
 blanc, minuscules, pas de bandeau promo, pas de compte à rebours.
 
+## ⚠️ Branche `version-produit-unique` : aperçus uniquement
+
+Cette branche est la **nouvelle version du site, centrée sur un seul
+produit** (le Royal Longsleeve — White, voir `docs/single-product.md`). Le
+propriétaire la construit à côté du site en ligne, qui ne doit pas changer
+tant qu'il n'a pas dit qu'elle est prête.
+
+- **Ne jamais la déployer en production.** Depuis cette branche, seulement
+  `--preview` (commande plus bas), et donner au propriétaire le lien
+  d'aperçu. La consigne de déploiement automatique ci-dessous vaut pour la
+  branche du site en ligne, pas pour celle-ci.
+- **Ne jamais la fusionner ni la pousser sur `main`**, ni sur la branche du
+  site en ligne (`claude/affectionate-planck-ulh53u`), tant que le
+  propriétaire n'a pas demandé la mise en ligne.
+- Une correction du site en ligne se fait sur sa propre branche, puis se
+  reporte ici si besoin.
+
 ## Déploiement
 
 **Consigne du propriétaire (12 octobre 2026) :** une fois les modifications

@@ -6,6 +6,7 @@ import {STORE_NOTIFICATION_EMAIL} from '~/lib/email';
 import {useT} from '~/lib/i18n';
 import type {TranslationKey} from '~/lib/i18n';
 import {Newsletter} from '~/components/Newsletter';
+import {isSingleProductMode} from '~/lib/singleProduct';
 
 interface FooterProps {
   header: HeaderQuery;
@@ -67,7 +68,10 @@ export function Footer({header}: FooterProps) {
         <nav className="site-footer__col" aria-label={t('footer.info')}>
           <h3 className="site-footer__col-title">{t('footer.info')}</h3>
           <ul>
-            {INFO_LINKS.map((link) => (
+            {INFO_LINKS.filter(
+              // The pack mixes several products: gone on a single-product site.
+              (link) => !(isSingleProductMode() && link.to === '/pack'),
+            ).map((link) => (
               <li key={link.to}>
                 <NavLink to={link.to} prefetch="intent">
                   {t(link.key)}

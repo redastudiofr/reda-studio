@@ -18,6 +18,7 @@ import {
   type NavCollection,
   type NavGroup,
 } from '~/lib/nav';
+import {isSingleProductMode} from '~/lib/singleProduct';
 
 export type {NavCollection};
 
@@ -79,13 +80,16 @@ export function Header({header, cart, navCollections}: HeaderProps) {
       </NavLink>
 
       <div className="site-header__side site-header__side--end">
-        <button
-          className="site-header__icon-btn"
-          onClick={() => open('search')}
-          aria-label={t('nav.search')}
-        >
-          <SearchIcon />
-        </button>
+        {/* Nothing to search on a single-product site. */}
+        {!isSingleProductMode() && (
+          <button
+            className="site-header__icon-btn"
+            onClick={() => open('search')}
+            aria-label={t('nav.search')}
+          >
+            <SearchIcon />
+          </button>
+        )}
         <CartToggle cart={cart} />
       </div>
     </header>

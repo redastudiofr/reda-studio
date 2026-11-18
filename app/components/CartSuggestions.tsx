@@ -11,6 +11,7 @@ import {AddToCartButton} from '~/components/AddToCartButton';
 import type {CartLayout} from '~/components/CartMain';
 import {isPreorderHandle} from '~/lib/preorder';
 import {useT} from '~/lib/i18n';
+import {isSingleProductMode} from '~/lib/singleProduct';
 
 /** How many suggestions the drawer offers before it starts nagging. */
 const MAX_SUGGESTIONS = 3;
@@ -41,6 +42,9 @@ export function CartSuggestions({
       'merchandise' in line ? line.merchandise.product.id : '',
     ),
   );
+
+  // A single-product site has nothing else to suggest.
+  if (isSingleProductMode()) return null;
 
   return (
     <Suspense fallback={null}>

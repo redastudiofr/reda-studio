@@ -5,6 +5,7 @@ import type {StoreCollectionFragment} from 'storefrontapi.generated';
 import {Reveal} from '~/components/Reveal';
 import {withoutAutoCollections} from '~/lib/collections';
 import {useT} from '~/lib/i18n';
+import {redirectHomeIfSingleProduct} from '~/lib/singleProduct';
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -24,6 +25,7 @@ export const meta: Route.MetaFunction = () => {
  * loading them all — `first: 100` covers the catalogue many times over.
  */
 export async function loader({context}: Route.LoaderArgs) {
+  redirectHomeIfSingleProduct();
   const {collections} = await context.storefront.query(COLLECTIONS_QUERY, {
     variables: {first: 100},
   });

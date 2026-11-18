@@ -6,12 +6,14 @@ import {ProductItem} from '~/components/ProductItem';
 import {TierNote} from '~/components/TierNote';
 import {useT} from '~/lib/i18n';
 import type {CollectionItemFragment} from 'storefrontapi.generated';
+import {redirectHomeIfSingleProduct} from '~/lib/singleProduct';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: 'reda studio | shop'}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
+  redirectHomeIfSingleProduct();
   const criticalData = await loadCriticalData(args);
   return {...criticalData};
 }

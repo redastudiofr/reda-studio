@@ -13,12 +13,14 @@ import type {
   PredictiveSearchQuery,
 } from 'storefrontapi.generated';
 import {useT} from '~/lib/i18n';
+import {redirectHomeIfSingleProduct} from '~/lib/singleProduct';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: 'reda studio | search'}];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {
+  redirectHomeIfSingleProduct();
   const url = new URL(request.url);
   const isPredictive = url.searchParams.has('predictive');
   const searchPromise: Promise<PredictiveSearchReturn | RegularSearchReturn> =

@@ -30,6 +30,10 @@ import {
   reviewCountForProduct,
 } from '~/data/reviews';
 import {isPreorderHandle} from '~/lib/preorder';
+import {
+  isSingleProductMode,
+  redirectHomeIfSingleProduct,
+} from '~/lib/singleProduct';
 import {useT} from '~/lib/i18n';
 
 export const meta: Route.MetaFunction = ({data}) => {
@@ -45,7 +49,18 @@ export const meta: Route.MetaFunction = ({data}) => {
 };
 
 export async function loader(args: Route.LoaderArgs) {
-  const criticalData = await loadCriticalData(args);
+  // In single-product mode the one product is the home page — see
+  // app/lib/singleProduct.ts — so every product URL leads there.
+  redirectHomeIfSingleProduct();
+  return loadProductPage(args, args.params.handle);
+}
+
+/** Everything a product page loads, for a given handle — also the home page's loader in single-product mode. */
+export async function loadProductPage(
+  args: Pick<Route.LoaderArgs, 'context' | 'request'>,
+  handle: string | undefined,
+) {
+  const criticalData = await loadCriticalData(args, handle);
   const deferredData = loadDeferredData(
     args,
     criticalData.product.id,
@@ -54,8 +69,10 @@ export async function loader(args: Route.LoaderArgs) {
   return {...deferredData, ...criticalData};
 }
 
-async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
-  const {handle} = params;
+async function loadCriticalData(
+  {context, request}: Pick<Route.LoaderArgs, 'context' | 'request'>,
+  handle: string | undefined,
+) {
   const {storefront} = context;
 
   if (!handle) {
@@ -86,12 +103,38 @@ const MAX_RECOMMENDATIONS = 16;
  * catalogue products either way, never placeholders.
  */
 function loadDeferredData(
-  {context, request}: Route.LoaderArgs,
+  {context, request}: Pick<Route.LoaderArgs, 'context' | 'request'>,
+  productId: string,
+  handle: string,
+) {
+  // Every deferred block below leads to other products; a single-product
+  // site shows none of them, so none of them is fetched.
+  if (isSingleProductMode()) {
+    return {
+      recommended: Promise.resolve([] as Awaited<ReturnType<typeof loadRecommended>>),
+      showcaseCollections: Promise.resolve(
+        [] as Awaited<ReturnType<typeof loadShowcaseCollections>>,
+      ),
+      pairChoices: Promise.resolve([] as Awaited<ReturnType<typeof loadPairChoices>>),
+    };
+  }
+  return {
+    recommended: loadRecommended(context, request, productId, handle),
+    showcaseCollections: loadShowcaseCollections(context),
+    pairChoices: loadPairChoices(context, handle),
+  };
+}
+
+type LoaderContext = Pick<Route.LoaderArgs, 'context'>['context'];
+
+function loadRecommended(
+  context: LoaderContext,
+  request: Request,
   productId: string,
   handle: string,
 ) {
   const demoRatings = demoRatingsEnabled(context.env, request);
-  const recommended = Promise.all([
+  return Promise.all([
     context.storefront
       .query(PRODUCT_RECOMMENDATIONS_QUERY, {variables: {productId}})
       .catch((error: Error) => {
@@ -144,21 +187,25 @@ function loadDeferredData(
       };
     });
   });
+}
 
+function loadShowcaseCollections(context: LoaderContext) {
   /*
    * The "join the community" showcase closing the page. It is deliberately
    * restricted to the drops named in ~/lib/collections — an allowlist, so a
    * new collection created in Shopify does not silently appear here. Every
    * tile still comes from a real Shopify collection, so none of them 404.
    */
-  const showcaseCollections = context.storefront
+  return context.storefront
     .query(SHOWCASE_COLLECTIONS_QUERY, {variables: {first: 50}})
     .then((data) => onlyShowcaseCollections(data?.collections?.nodes ?? []))
     .catch((error: Error) => {
       console.error(error);
       return [];
     });
+}
 
+function loadPairChoices(context: LoaderContext, handle: string) {
   /*
    * The pieces the customer can choose from as the second half of the pair.
    *
@@ -167,7 +214,7 @@ function loadDeferredData(
    * applies to any second item. Now it offers a real choice, drawn from the
    * catalogue, and the customer picks.
    */
-  const pairChoices = context.storefront
+  return context.storefront
     .query(PAIR_CHOICES_QUERY, {variables: {first: 12}})
     .then((data) =>
       (data?.products?.nodes ?? [])
@@ -202,8 +249,6 @@ function loadDeferredData(
       console.error(error);
       return [];
     });
-
-  return {recommended, showcaseCollections, pairChoices};
 }
 
 /** First sentence of the product description, for the short blurb in the buy box. */
@@ -246,6 +291,11 @@ export default function Product() {
 
   const available = Boolean(selectedVariant?.availableForSale);
 
+  // One product for sale on the whole site (app/lib/singleProduct.ts): the
+  // blocks that lead to other products — the pair offer, "you may also
+  // like", the collection tiles — are left out.
+  const singleProduct = isSingleProductMode();
+
   // Scoped to exactly one product handle — see app/lib/preorder.ts. Every
   // other product's buy box, bundle offer and cart behaviour is untouched.
   const preorder = isPreorderHandle(product.handle);
@@ -268,7 +318,7 @@ export default function Product() {
           CONTAINER's box (not to its own grid area), so every section that
           comes after the gallery must stay OUTSIDE this wrapper — otherwise
           the sticky panel can travel down over them. */}
-      <div className="pdp__main">
+      <div className="pdp__main" id="acheter">
         <div className="pdp__gallery">
           <ProductGallery images={galleryImages} title={title} />
         </div>
@@ -301,7 +351,7 @@ export default function Product() {
               homepage and /pack, never here. Skipped during pre-order: it
               exists to add a product to the cart, which is exactly what is
               not allowed yet. */}
-          {!preorder && (
+          {!preorder && !singleProduct && (
             <Suspense fallback={null}>
               <Await resolve={pairChoices}>
                 {(choices) => (
@@ -349,11 +399,13 @@ export default function Product() {
           page's full width, which only starts here, once that column ends. */}
       <ProductWornVideos />
 
-      <Suspense fallback={null}>
-        <Await resolve={recommended}>
-          {(items) => (items.length ? <RelatedProductsRail items={items} /> : null)}
-        </Await>
-      </Suspense>
+      {!singleProduct && (
+        <Suspense fallback={null}>
+          <Await resolve={recommended}>
+            {(items) => (items.length ? <RelatedProductsRail items={items} /> : null)}
+          </Await>
+        </Suspense>
+      )}
 
       <VisionSection />
 
@@ -366,16 +418,18 @@ export default function Product() {
       </div>
 
       {/* Closing the page: full-bleed collection tiles. */}
-      <Suspense fallback={null}>
-        <Await resolve={showcaseCollections}>
-          {(collections) => (
-            <CollectionShowcase
-              collections={collections}
-              heading="join the community"
-            />
-          )}
-        </Await>
-      </Suspense>
+      {!singleProduct && (
+        <Suspense fallback={null}>
+          <Await resolve={showcaseCollections}>
+            {(collections) => (
+              <CollectionShowcase
+                collections={collections}
+                heading="join the community"
+              />
+            )}
+          </Await>
+        </Suspense>
+      )}
 
       <Analytics.ProductView
         data={{

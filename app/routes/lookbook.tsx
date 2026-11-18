@@ -1,4 +1,10 @@
 import type {Route} from './+types/lookbook';
+import {redirectHomeIfSingleProduct} from '~/lib/singleProduct';
+
+export function loader() {
+  redirectHomeIfSingleProduct();
+  return null;
+}
 
 export const meta: Route.MetaFunction = () => {
   return [{title: 'reda studio | lookbook'}];
