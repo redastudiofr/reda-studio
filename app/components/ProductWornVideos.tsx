@@ -17,17 +17,12 @@ import {RailArrows} from '~/components/RailArrows';
  * in that folder. Add a new one by dropping the file in unrenamed and
  * adding its path below; nothing else in the component depends on it.
  */
-const VIDEO_FILES = [
-  'ssstik.io_@mr.flared_1788699148494.mp4',
-  'ssstik.io_@cvndido_1788700037319.mp4',
-  'ssstik.io_@deluneatelier_1788700286824.mp4',
-  'ssstik.io_@jovenclothing_1788700524218.mp4',
-  'ssstik.io_@shoticallmxney_1788700356010.mp4',
-  'ssstik.io_@shoticallmxney_1788700468111.mp4',
-];
+// Nouvelle version : les vidéos du Royal Longsleeve envoyées par le
+// propriétaire (public/v2/videos/), à la place de celles des autres pièces.
+const VIDEO_FILES = ['/v2/videos/royal-01.mp4', '/v2/videos/royal-02.mp4'];
 
 const VIDEOS = VIDEO_FILES.map((file, index) => ({
-  src: `/videos/worn/${file}`,
+  src: file,
   label: `reda studio piece worn, clip ${index + 1}`,
 }));
 

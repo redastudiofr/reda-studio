@@ -29,7 +29,11 @@ import {
 } from '~/data/reviews';
 import {isPreorderHandle} from '~/lib/preorder';
 import {useT} from '~/lib/i18n';
-import {isProductVisible, MAIN_PRODUCT_PATH} from '~/lib/visibleProducts';
+import {
+  EXTRA_GALLERY_IMAGES,
+  isProductVisible,
+  MAIN_PRODUCT_PATH,
+} from '~/lib/visibleProducts';
 
 export const meta: Route.MetaFunction = ({data}) => {
   const product = data?.product;
@@ -236,11 +240,15 @@ export default function Product() {
   // of exactly the reviews listed further down, and says so.
   const reviewCount = reviewCountForProduct(product.id, product.createdAt);
 
-  const galleryImages = product.images.nodes.length
-    ? product.images.nodes
-    : selectedVariant?.image
-      ? [selectedVariant.image]
-      : [];
+  const galleryImages = [
+    ...(product.images.nodes.length
+      ? product.images.nodes
+      : selectedVariant?.image
+        ? [selectedVariant.image]
+        : []),
+    // Nouvelle version : les photos portées du propriétaire (visibleProducts.ts).
+    ...(EXTRA_GALLERY_IMAGES[product.handle] ?? []),
+  ];
 
   const available = Boolean(selectedVariant?.availableForSale);
 

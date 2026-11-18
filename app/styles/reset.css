@@ -9,6 +9,9 @@
 body {
   font-family: var(--font-mono);
   font-weight: 700;
+  /* Michroma n'a qu'une graisse : pas de faux gras ni de faux italique
+     dessinés par le navigateur, qui l'épaississent et la brouillent. */
+  font-synthesis: none;
   background: var(--color-paper);
   color: var(--color-ink);
   margin: 0;

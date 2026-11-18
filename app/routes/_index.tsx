@@ -1,18 +1,23 @@
+import {Await, useLoaderData} from 'react-router';
+import {Suspense} from 'react';
 import type {Route} from './+types/_index';
 import {AnimatedHero} from '~/components/AnimatedHero';
-import {CommunitySlider} from '~/components/CommunitySlider';
+import {CommunityV2} from '~/components/CommunityV2';
+import {ProductItem} from '~/components/ProductItem';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
 import {HomeReviews} from '~/components/HomeReviews';
 import {HelpFaq} from '~/components/HelpFaq';
-import {VISIBLE_PRODUCT_HANDLES} from '~/lib/visibleProducts';
+import {MAIN_PRODUCT_QUERY} from '~/lib/homeProductQueries';
+import {MAIN_PRODUCT_PATH, VISIBLE_PRODUCT_HANDLES} from '~/lib/visibleProducts';
 import {useT} from '~/lib/i18n';
 
 /*
  * Nouvelle version : l'accueil n'a plus de slider de collections, plus de
  * grille « tous les produits », plus de vitrines de collections (automne
- * drop, summer, best seller) ni leurs bannières. Il reste la bannière, les
- * avis, la communauté, la FAQ et la newsletter.
+ * drop, summer, best seller) ni leurs bannières. Il montre la bannière, les
+ * seuls produits en vente (VISIBLE_PRODUCT_HANDLES), les avis, le bloc
+ * communauté repris de Hustle Studio, la FAQ et la newsletter.
  */
 
 export const meta: Route.MetaFunction = () => {
@@ -23,44 +28,58 @@ export const meta: Route.MetaFunction = () => {
 };
 
 /**
- * Preload the hero image (LCP element on the homepage).
- *
- * One entry per breakpoint, each behind the same media query the <picture>
- * uses, so a phone only ever fetches the mobile photo and a desktop only the
- * desktop one.
+ * Preload the hero image (LCP element on the homepage), one per breakpoint,
+ * each behind the same media query the hero uses.
  */
 export function links() {
   return [
     {
       rel: 'preload',
       as: 'image',
-      href: '/images/hero3-mobile.webp',
+      href: HERO_IMAGE_MOBILE.src,
       media: '(max-width: 47.99em)',
     },
     {
       rel: 'preload',
       as: 'image',
-      href: '/images/home-hero-desktop-milan.webp',
+      href: HERO_IMAGE_DESKTOP.src,
       media: '(min-width: 48em)',
     },
   ];
 }
 
+// Les photos du Royal Longsleeve envoyées par le propriétaire : la même rue,
+// en paysage sur ordinateur et en vertical sur mobile (public/v2/).
 const HERO_IMAGE_MOBILE = {
-  src: '/images/hero3-mobile.webp',
-  alt: 'A man from behind in a reda studio t-shirt and jeans, looking out over a rooftop pool and the city skyline',
+  src: '/v2/banner-mobile.webp',
+  alt: 'Two men in the reda studio Royal Longsleeve, white with red embroidery on the sleeves, on a city street in autumn',
 };
 
 const HERO_IMAGE_DESKTOP = {
-  src: '/images/home-hero-desktop-milan.webp',
-  alt: 'A man in a black leopard-print zip hoodie, white tee and black baggy jeans, sitting on a block in front of a tower covered in greenery',
+  src: '/v2/banner-desktop.webp',
+  alt: 'Two men in the reda studio Royal Longsleeve, white with red embroidery on the sleeves, on a city street in autumn',
 };
 
-// Plus de catalogue à parcourir : « shop now » mène à la seule pièce en
-// vente (voir app/lib/visibleProducts.ts).
-const SHOP_NOW_HREF = `/products/${VISIBLE_PRODUCT_HANDLES[0]}`;
+export async function loader({context}: Route.LoaderArgs) {
+  // Les cartes des produits en vente, dans l'ordre de la liste. Différé :
+  // la section arrive après la bannière et ne la retarde jamais.
+  const products = Promise.all(
+    VISIBLE_PRODUCT_HANDLES.map((handle) =>
+      context.storefront
+        .query(MAIN_PRODUCT_QUERY, {variables: {handle}})
+        .then((data) => data?.product ?? null)
+        .catch((error: Error) => {
+          console.error(error);
+          return null;
+        }),
+    ),
+  ).then((list) => list.filter((product) => product !== null));
+
+  return {products};
+}
 
 export default function Homepage() {
+  const {products} = useLoaderData<typeof loader>();
   const t = useT();
 
   return (
@@ -76,13 +95,34 @@ export default function Homepage() {
         eyebrow={t('home.eyebrow')}
         title="reda studio"
         description={t('home.tagline')}
-        ctaButton={{text: t('home.shopNow'), href: SHOP_NOW_HREF}}
+        // Plus de catalogue à parcourir : « shop now » mène à la pièce.
+        ctaButton={{text: t('home.shopNow'), href: MAIN_PRODUCT_PATH}}
         secondaryCta={{text: t('home.ourStory'), href: '/about'}}
       />
 
+      {/* Les cartes à la taille de celles de prxclo.shop, comme demandé :
+          carrées, 4 par ligne dans 1200 px sur ordinateur, 2 par ligne avec
+          16 px de marge sur mobile (voir .v2-products dans app.css). */}
+      <section className="v2-products" aria-labelledby="v2-products-title">
+        <h2 className="v2-products__title" id="v2-products-title">
+          {t('v2.productsTitle')}
+        </h2>
+        <Suspense fallback={<div className="v2-products__grid" aria-hidden="true" />}>
+          <Await resolve={products}>
+            {(list) => (
+              <div className="v2-products__grid">
+                {list.map((product) => (
+                  <ProductItem key={product.id} product={product} loading="eager" />
+                ))}
+              </div>
+            )}
+          </Await>
+        </Suspense>
+      </section>
+
       <HomeReviews />
 
-      <CommunitySlider />
+      <CommunityV2 />
 
       <HelpFaq />
 

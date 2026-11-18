@@ -273,10 +273,10 @@ export function NewsletterPopup({enabled}: {enabled: boolean}) {
 
         <div className="popup__media">
           <img
-            src="/images/lookbook-casquette.webp"
-            alt="reda studio outfit: ecru top, washed flare jeans and blue cap"
-            width="788"
-            height="1200"
+            src="/v2/photo-studio.webp"
+            alt="Two men in the reda studio Royal Longsleeve in a white studio"
+            width="941"
+            height="1672"
             loading="lazy"
             decoding="async"
           />

@@ -59,10 +59,10 @@ export default function About() {
         <h1 className="about__title">reda studio</h1>
         <p className="about__lead">{t('about.lead')}</p>
         <BlockFigure
-          src="/images/histoire-piscine.webp"
-          alt={t('about.altPool')}
-          width={675}
-          height={1200}
+          src="/v2/photo-street.webp"
+          alt={t('v2.altStreet')}
+          width={1125}
+          height={2000}
         />
       </Reveal>
 
@@ -72,10 +72,10 @@ export default function About() {
         <p>{t('about.originP1')}</p>
         <p>{t('about.originP2')}</p>
         <BlockFigure
-          src="/images/histoire-cerisiers.webp"
-          alt={t('about.altBlossom')}
-          width={675}
-          height={1200}
+          src="/v2/photo-studio.webp"
+          alt={t('v2.altStudio')}
+          width={941}
+          height={1672}
         />
       </Reveal>
 
@@ -89,10 +89,10 @@ export default function About() {
         <p>{t('about.approachP1')}</p>
         <p>{t('about.approachP2')}</p>
         <BlockFigure
-          src="/images/histoire-chambre.webp"
-          alt={t('about.altRoom')}
-          width={675}
-          height={1200}
+          src="/v2/photo-river.webp"
+          alt={t('v2.altRiver')}
+          width={1400}
+          height={2489}
         />
       </Reveal>
 
@@ -102,10 +102,10 @@ export default function About() {
         <p>{t('about.detailP1')}</p>
         <p>{t('about.detailP2')}</p>
         <BlockFigure
-          src="/images/lookbook-denim.webp"
-          alt={t('about.altDenim')}
-          width={901}
-          height={1200}
+          src="/v2/photo-street-detail.webp"
+          alt={t('v2.altStreetDetail')}
+          width={706}
+          height={941}
         />
       </Reveal>
 

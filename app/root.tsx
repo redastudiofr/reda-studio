@@ -63,6 +63,15 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
  */
 export function links() {
   return [
+    // Michroma (app/styles/tailwind.css) : chargée dès le début, pour que le
+    // texte ne s'affiche pas d'abord en Arial puis change de police.
+    {
+      rel: 'preload',
+      as: 'font',
+      type: 'font/woff2',
+      href: '/fonts/michroma-latin.woff2',
+      crossOrigin: 'anonymous',
+    },
     {
       rel: 'preconnect',
       href: 'https://cdn.shopify.com',

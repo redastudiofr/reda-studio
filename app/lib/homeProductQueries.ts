@@ -7,7 +7,8 @@
  * une grille de produits.
  */
 
-export const ALL_PRODUCTS_QUERY = `#graphql
+/** Ce qu'une carte produit (ProductItem) affiche. */
+export const HOME_PRODUCT_FRAGMENT = `#graphql
   fragment HomeMoney on MoneyV2 {
     amount
     currencyCode
@@ -86,6 +87,9 @@ export const ALL_PRODUCTS_QUERY = `#graphql
       }
     }
   }
+` as const;
+
+export const ALL_PRODUCTS_QUERY = `#graphql
   query AllProducts ($country: CountryCode, $language: LanguageCode, $first: Int)
     @inContext(country: $country, language: $language) {
     products(first: $first, sortKey: UPDATED_AT, reverse: true) {
@@ -94,6 +98,21 @@ export const ALL_PRODUCTS_QUERY = `#graphql
       }
     }
   }
+  ${HOME_PRODUCT_FRAGMENT}
+` as const;
+
+/** Les cartes de l'accueil de la nouvelle version : un produit par handle. */
+export const MAIN_PRODUCT_QUERY = `#graphql
+  query HomeMainProduct(
+    $handle: String!
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    product(handle: $handle) {
+      ...HomeProduct
+    }
+  }
+  ${HOME_PRODUCT_FRAGMENT}
 ` as const;
 
 /**
