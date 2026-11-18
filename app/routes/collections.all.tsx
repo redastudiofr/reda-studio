@@ -6,12 +6,15 @@ import {ProductItem} from '~/components/ProductItem';
 import {TierNote} from '~/components/TierNote';
 import {useT} from '~/lib/i18n';
 import type {CollectionItemFragment} from 'storefrontapi.generated';
+import {redirectCatalogueToMainProduct} from '~/lib/visibleProducts';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: 'reda studio | shop'}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
+  // Nouvelle version : un seul produit montré (app/lib/visibleProducts.ts).
+  redirectCatalogueToMainProduct();
   const criticalData = await loadCriticalData(args);
   return {...criticalData};
 }

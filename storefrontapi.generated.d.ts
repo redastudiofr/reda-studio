@@ -501,93 +501,6 @@ export type NavCollectionsQuery = {
   };
 };
 
-export type SuggestedProductFragment = Pick<
-  StorefrontAPI.Product,
-  'id' | 'title' | 'handle' | 'availableForSale'
-> & {
-  featuredImage?: StorefrontAPI.Maybe<
-    Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
-  >;
-  priceRange: {
-    minVariantPrice: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
-  };
-  variants: {
-    nodes: Array<
-      Pick<
-        StorefrontAPI.ProductVariant,
-        'id' | 'title' | 'availableForSale'
-      > & {price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>}
-    >;
-  };
-};
-
-export type CartSuggestionsQueryVariables = StorefrontAPI.Exact<{
-  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
-  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
-  first?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['Int']['input']>;
-}>;
-
-export type CartSuggestionsQuery = {
-  products: {
-    nodes: Array<
-      Pick<
-        StorefrontAPI.Product,
-        'id' | 'title' | 'handle' | 'availableForSale'
-      > & {
-        featuredImage?: StorefrontAPI.Maybe<
-          Pick<
-            StorefrontAPI.Image,
-            'id' | 'url' | 'altText' | 'width' | 'height'
-          >
-        >;
-        priceRange: {
-          minVariantPrice: Pick<
-            StorefrontAPI.MoneyV2,
-            'amount' | 'currencyCode'
-          >;
-        };
-        variants: {
-          nodes: Array<
-            Pick<
-              StorefrontAPI.ProductVariant,
-              'id' | 'title' | 'availableForSale'
-            > & {price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>}
-          >;
-        };
-      }
-    >;
-  };
-};
-
-export type HomeCollectionFragment = Pick<
-  StorefrontAPI.Collection,
-  'id' | 'title' | 'handle'
-> & {
-  image?: StorefrontAPI.Maybe<
-    Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
-  >;
-};
-
-export type HomeCollectionsQueryVariables = StorefrontAPI.Exact<{
-  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
-  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
-}>;
-
-export type HomeCollectionsQuery = {
-  collections: {
-    nodes: Array<
-      Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'> & {
-        image?: StorefrontAPI.Maybe<
-          Pick<
-            StorefrontAPI.Image,
-            'id' | 'url' | 'altText' | 'width' | 'height'
-          >
-        >;
-      }
-    >;
-  };
-};
-
 export type HomeMoneyFragment = Pick<
   StorefrontAPI.MoneyV2,
   'amount' | 'currencyCode'
@@ -845,6 +758,64 @@ export type CollectionProductsQuery = {
       };
     }
   >;
+};
+
+export type SuggestedProductFragment = Pick<
+  StorefrontAPI.Product,
+  'id' | 'title' | 'handle' | 'availableForSale'
+> & {
+  featuredImage?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+  >;
+  priceRange: {
+    minVariantPrice: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+  };
+  variants: {
+    nodes: Array<
+      Pick<
+        StorefrontAPI.ProductVariant,
+        'id' | 'title' | 'availableForSale'
+      > & {price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>}
+    >;
+  };
+};
+
+export type CartSuggestionsQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+  first?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['Int']['input']>;
+}>;
+
+export type CartSuggestionsQuery = {
+  products: {
+    nodes: Array<
+      Pick<
+        StorefrontAPI.Product,
+        'id' | 'title' | 'handle' | 'availableForSale'
+      > & {
+        featuredImage?: StorefrontAPI.Maybe<
+          Pick<
+            StorefrontAPI.Image,
+            'id' | 'url' | 'altText' | 'width' | 'height'
+          >
+        >;
+        priceRange: {
+          minVariantPrice: Pick<
+            StorefrontAPI.MoneyV2,
+            'amount' | 'currencyCode'
+          >;
+        };
+        variants: {
+          nodes: Array<
+            Pick<
+              StorefrontAPI.ProductVariant,
+              'id' | 'title' | 'availableForSale'
+            > & {price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>}
+          >;
+        };
+      }
+    >;
+  };
 };
 
 export type ArticleQueryVariables = StorefrontAPI.Exact<{
@@ -1757,27 +1728,6 @@ export type PdpPairChoicesQuery = {
   };
 };
 
-export type PdpShowcaseCollectionsQueryVariables = StorefrontAPI.Exact<{
-  first?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['Int']['input']>;
-  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
-  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
-}>;
-
-export type PdpShowcaseCollectionsQuery = {
-  collections: {
-    nodes: Array<
-      Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'> & {
-        image?: StorefrontAPI.Maybe<
-          Pick<
-            StorefrontAPI.Image,
-            'id' | 'url' | 'altText' | 'width' | 'height'
-          >
-        >;
-      }
-    >;
-  };
-};
-
 export type PdpFallbackProductsQueryVariables = StorefrontAPI.Exact<{
   first?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['Int']['input']>;
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
@@ -2075,14 +2025,6 @@ interface GeneratedQueryTypes {
     return: NavCollectionsQuery;
     variables: NavCollectionsQueryVariables;
   };
-  '#graphql\n  fragment SuggestedProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    variants(first: 12) {\n      nodes {\n        id\n        title\n        availableForSale\n        price {\n          amount\n          currencyCode\n        }\n      }\n    }\n  }\n  query CartSuggestions($country: CountryCode, $language: LanguageCode, $first: Int)\n    @inContext(country: $country, language: $language) {\n    products(first: $first, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...SuggestedProduct\n      }\n    }\n  }\n': {
-    return: CartSuggestionsQuery;
-    variables: CartSuggestionsQueryVariables;
-  };
-  '#graphql\n  fragment HomeCollection on Collection {\n    id\n    title\n    handle\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n  query HomeCollections($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    # Fetched well above what the carousel shows, because\n    # withoutHomeHiddenCollections then removes several (the drops, and every\n    # collection that has its own showcase further down the page). At\n    # first: 10 those exclusions were eating into the ten most recently\n    # updated, so real categories — knit, short — silently never reached the\n    # carousel at all.\n    collections(first: 25, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...HomeCollection\n      }\n    }\n  }\n': {
-    return: HomeCollectionsQuery;
-    variables: HomeCollectionsQueryVariables;
-  };
   '#graphql\n  fragment HomeMoney on MoneyV2 {\n    amount\n    currencyCode\n  }\n  fragment HomeProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    priceRange {\n      minVariantPrice {\n        ...HomeMoney\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        ...HomeMoney\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    images(first: 2) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n    media(first: 3) {\n      nodes {\n        mediaContentType\n        ... on Video {\n          id\n          previewImage {\n            id\n            url\n            altText\n            width\n            height\n          }\n          sources {\n            url\n            mimeType\n            format\n          }\n        }\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    variants(first: 20) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        price {\n          ...HomeMoney\n        }\n        compareAtPrice {\n          ...HomeMoney\n        }\n      }\n    }\n  }\n  query AllProducts ($country: CountryCode, $language: LanguageCode, $first: Int)\n    @inContext(country: $country, language: $language) {\n    products(first: $first, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...HomeProduct\n      }\n    }\n  }\n': {
     return: AllProductsQuery;
     variables: AllProductsQueryVariables;
@@ -2090,6 +2032,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  fragment ShowcaseMoney on MoneyV2 {\n    amount\n    currencyCode\n  }\n  fragment ShowcaseProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    priceRange {\n      minVariantPrice {\n        ...ShowcaseMoney\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        ...ShowcaseMoney\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    images(first: 2) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    variants(first: 20) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        price {\n          ...ShowcaseMoney\n        }\n        compareAtPrice {\n          ...ShowcaseMoney\n        }\n      }\n    }\n  }\n  query CollectionProducts(\n    $handle: String!\n    $first: Int\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      products(first: $first) {\n        nodes {\n          ...ShowcaseProduct\n        }\n      }\n    }\n  }\n': {
     return: CollectionProductsQuery;
     variables: CollectionProductsQueryVariables;
+  };
+  '#graphql\n  fragment SuggestedProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    variants(first: 12) {\n      nodes {\n        id\n        title\n        availableForSale\n        price {\n          amount\n          currencyCode\n        }\n      }\n    }\n  }\n  query CartSuggestions($country: CountryCode, $language: LanguageCode, $first: Int)\n    @inContext(country: $country, language: $language) {\n    products(first: $first, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...SuggestedProduct\n      }\n    }\n  }\n': {
+    return: CartSuggestionsQuery;
+    variables: CartSuggestionsQueryVariables;
   };
   '#graphql\n  query Article(\n    $articleHandle: String!\n    $blogHandle: String!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    blog(handle: $blogHandle) {\n      handle\n      articleByHandle(handle: $articleHandle) {\n        handle\n        title\n        contentHtml\n        publishedAt\n        author: authorV2 {\n          name\n        }\n        image {\n          id\n          altText\n          url\n          width\n          height\n        }\n        seo {\n          description\n          title\n        }\n      }\n    }\n  }\n': {
     return: ArticleQuery;
@@ -2138,10 +2084,6 @@ interface GeneratedQueryTypes {
   '#graphql\n  query PdpPairChoices(\n    $first: Int\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    products(first: $first, sortKey: BEST_SELLING) {\n      nodes {\n        id\n        title\n        handle\n        availableForSale\n        featuredImage {\n          id\n          url\n          altText\n          width\n          height\n        }\n        variants(first: 10) {\n          nodes {\n            id\n            availableForSale\n            price {\n              amount\n              currencyCode\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: PdpPairChoicesQuery;
     variables: PdpPairChoicesQueryVariables;
-  };
-  '#graphql\n  query PdpShowcaseCollections(\n    $first: Int\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    collections(first: $first, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        id\n        title\n        handle\n        image {\n          id\n          url\n          altText\n          width\n          height\n        }\n      }\n    }\n  }\n': {
-    return: PdpShowcaseCollectionsQuery;
-    variables: PdpShowcaseCollectionsQueryVariables;
   };
   '#graphql\n  query PdpFallbackProducts(\n    $first: Int\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    products(first: $first, sortKey: BEST_SELLING) {\n      nodes {\n        ...RecoProduct\n      }\n    }\n  }\n  #graphql\n  fragment RecoMoney on MoneyV2 {\n    amount\n    currencyCode\n  }\n  fragment RecoProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    # Age-gates the illustrative-review fallback below — see reviewCountForAge.\n    createdAt\n    # Standard Shopify review metafields, written by review apps. Absent when\n    # the shop has no review app — the UI then shows no rating at all.\n    rating: metafield(namespace: "reviews", key: "rating") {\n      value\n    }\n    ratingCount: metafield(namespace: "reviews", key: "rating_count") {\n      value\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    images(first: 2) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n    priceRange {\n      minVariantPrice {\n        ...RecoMoney\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        ...RecoMoney\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    variants(first: 20) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        price {\n          ...RecoMoney\n        }\n        compareAtPrice {\n          ...RecoMoney\n        }\n      }\n    }\n  }\n\n': {
     return: PdpFallbackProductsQuery;

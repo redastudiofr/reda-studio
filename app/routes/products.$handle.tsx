@@ -1,4 +1,4 @@
-import {Await, useLoaderData} from 'react-router';
+import {Await, redirect, useLoaderData} from 'react-router';
 import {Suspense} from 'react';
 import type {Route} from './+types/products.$handle';
 import {
@@ -14,7 +14,6 @@ import {ProductPurchase} from '~/components/ProductPurchase';
 import {ProductDescription} from '~/components/ProductDescription';
 import {ProductWornVideos} from '~/components/ProductWornVideos';
 import {VisionSection} from '~/components/VisionSection';
-import {CollectionShowcase} from '~/components/CollectionShowcase';
 import {BundleOffer} from '~/components/BundleOffer';
 import type {SizeEntry} from '~/components/ProductSizeGuide';
 import {Accordion} from '~/components/Accordion';
@@ -23,7 +22,6 @@ import {RelatedProductsRail} from '~/components/RelatedProductsRail';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {getProductFaq} from '~/data/faq';
 import {parseRating} from '~/lib/rating';
-import {onlyShowcaseCollections} from '~/lib/collections';
 import {
   demoRatingsEnabled,
   fallbackRating,
@@ -31,6 +29,7 @@ import {
 } from '~/data/reviews';
 import {isPreorderHandle} from '~/lib/preorder';
 import {useT} from '~/lib/i18n';
+import {isProductVisible, MAIN_PRODUCT_PATH} from '~/lib/visibleProducts';
 
 export const meta: Route.MetaFunction = ({data}) => {
   const product = data?.product;
@@ -70,6 +69,12 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   if (!product?.id) {
     throw new Response(null, {status: 404});
+  }
+
+  // Nouvelle version : un produit masqué renvoie vers celui qui reste en
+  // vente (app/lib/visibleProducts.ts).
+  if (!isProductVisible(product.handle)) {
+    throw redirect(MAIN_PRODUCT_PATH, 302);
   }
 
   redirectIfHandleIsLocalized(request, {handle, data: product});
@@ -114,7 +119,13 @@ function loadDeferredData(
       // Recommending something the visitor can't actually buy defeats the
       // point of the row, so an out-of-stock product is skipped rather than
       // shown with a "sold out" badge here.
-      if (!item || seen.has(item.id) || item.handle === handle || !item.availableForSale) {
+      if (
+        !item ||
+        seen.has(item.id) ||
+        item.handle === handle ||
+        !item.availableForSale ||
+        !isProductVisible(item.handle)
+      ) {
         continue;
       }
       seen.add(item.id);
@@ -146,20 +157,6 @@ function loadDeferredData(
   });
 
   /*
-   * The "join the community" showcase closing the page. It is deliberately
-   * restricted to the drops named in ~/lib/collections — an allowlist, so a
-   * new collection created in Shopify does not silently appear here. Every
-   * tile still comes from a real Shopify collection, so none of them 404.
-   */
-  const showcaseCollections = context.storefront
-    .query(SHOWCASE_COLLECTIONS_QUERY, {variables: {first: 50}})
-    .then((data) => onlyShowcaseCollections(data?.collections?.nodes ?? []))
-    .catch((error: Error) => {
-      console.error(error);
-      return [];
-    });
-
-  /*
    * The pieces the customer can choose from as the second half of the pair.
    *
    * Was a single hardcoded search for "casquette" — which made the offer look
@@ -180,6 +177,7 @@ function loadDeferredData(
             // would, so it's the same purchase, just one page removed.
             node.handle !== handle &&
             !isPreorderHandle(node.handle) &&
+            isProductVisible(node.handle) &&
             node.availableForSale &&
             node.variants?.nodes?.some((variant) => variant.availableForSale),
         )
@@ -203,7 +201,7 @@ function loadDeferredData(
       return [];
     });
 
-  return {recommended, showcaseCollections, pairChoices};
+  return {recommended, pairChoices};
 }
 
 /** First sentence of the product description, for the short blurb in the buy box. */
@@ -216,7 +214,7 @@ function shortenDescription(description: string): string {
 }
 
 export default function Product() {
-  const {product, recommended, showcaseCollections, pairChoices, demoRatings} =
+  const {product, recommended, pairChoices, demoRatings} =
     useLoaderData<typeof loader>();
 
   const selectedVariant = useOptimisticVariant(
@@ -365,17 +363,9 @@ export default function Product() {
         />
       </div>
 
-      {/* Closing the page: full-bleed collection tiles. */}
-      <Suspense fallback={null}>
-        <Await resolve={showcaseCollections}>
-          {(collections) => (
-            <CollectionShowcase
-              collections={collections}
-              heading="join the community"
-            />
-          )}
-        </Await>
-      </Suspense>
+      {/* Plus de tuiles de collections en fin de page dans la nouvelle
+          version : les collections renvoient au seul produit montré
+          (app/lib/visibleProducts.ts). */}
 
       <Analytics.ProductView
         data={{
@@ -626,30 +616,6 @@ const PAIR_CHOICES_QUERY = `#graphql
               currencyCode
             }
           }
-        }
-      }
-    }
-  }
-` as const;
-
-/** Collections for the showcase tiles that close the product page. */
-const SHOWCASE_COLLECTIONS_QUERY = `#graphql
-  query PdpShowcaseCollections(
-    $first: Int
-    $country: CountryCode
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    collections(first: $first, sortKey: UPDATED_AT, reverse: true) {
-      nodes {
-        id
-        title
-        handle
-        image {
-          id
-          url
-          altText
-          width
-          height
         }
       }
     }

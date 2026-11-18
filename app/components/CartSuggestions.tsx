@@ -11,6 +11,7 @@ import {AddToCartButton} from '~/components/AddToCartButton';
 import type {CartLayout} from '~/components/CartMain';
 import {isPreorderHandle} from '~/lib/preorder';
 import {useT} from '~/lib/i18n';
+import {isProductVisible} from '~/lib/visibleProducts';
 
 /** How many suggestions the drawer offers before it starts nagging. */
 const MAX_SUGGESTIONS = 3;
@@ -53,7 +54,9 @@ export function CartSuggestions({
                 !inCart.has(product.id) &&
                 // Never suggest a pre-order-only product straight into the
                 // cart from here — see app/lib/preorder.ts.
-                !isPreorderHandle(product.handle),
+                !isPreorderHandle(product.handle) &&
+                // Nouvelle version : seulement les produits montrés.
+                isProductVisible(product.handle),
             )
             .slice(0, MAX_SUGGESTIONS);
 

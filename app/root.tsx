@@ -11,12 +11,12 @@ import {
   useRouteLoaderData,
 } from 'react-router';
 import type {Route} from './+types/root';
-import {FOOTER_QUERY, HEADER_QUERY, NAV_COLLECTIONS_QUERY} from '~/lib/fragments';
+import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import type {NavCollection} from '~/lib/nav';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
-import {withoutAutoCollections} from '~/lib/collections';
 import {I18nProvider} from '~/lib/i18n';
 import {consentChosen as hasConsentChoice} from '~/lib/cookieConsent';
 import {isInAppBrowser} from '~/lib/inAppBrowser';
@@ -122,21 +122,22 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
   const {storefront} = context;
   const locale = localeFromRequest(request);
 
-  const [header, {collections}] = await Promise.all([
+  const [header] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
       variables: {
         headerMenuHandle: 'main-menu', // Adjust to your header menu handle
       },
     }),
-    storefront.query(NAV_COLLECTIONS_QUERY, {cache: storefront.CacheLong()}),
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  // Shopify auto-creates a "Home page" collection on every store; it isn't a
-  // real product category. The rule lives in ~/lib/collections so the header
-  // and the collections index can't drift apart.
-  const navCollections = withoutAutoCollections(collections.nodes);
+  // Nouvelle version : plus de collections à parcourir (elles renvoient au
+  // seul produit montré, app/lib/visibleProducts.ts), donc plus de requête
+  // des collections du menu — il garde l'accueil et les liens de service.
+  // Sur le site en ligne : NAV_COLLECTIONS_QUERY, filtrée par
+  // withoutAutoCollections (~/lib/collections).
+  const navCollections: NavCollection[] = [];
 
   // Whether the language question has ever been answered — the pop-up is
   // rendered only when it hasn't, so it can't flash for someone who already

@@ -4,6 +4,7 @@ import {PackBuilder} from '~/components/PackBuilder';
 import {Reveal} from '~/components/Reveal';
 import {loadPack} from '~/lib/packProducts';
 import {useT} from '~/lib/i18n';
+import {redirectCatalogueToMainProduct} from '~/lib/visibleProducts';
 
 /**
  * The essential pack: choose a pair of jeans, a longsleeve and a tee, each in
@@ -36,6 +37,8 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export async function loader({context}: Route.LoaderArgs) {
+  // Nouvelle version : un seul produit montré (app/lib/visibleProducts.ts).
+  redirectCatalogueToMainProduct();
   return loadPack(context.storefront);
 }
 

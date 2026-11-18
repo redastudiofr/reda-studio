@@ -8,7 +8,7 @@ import {
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {useHeaderTone} from '~/lib/header-tone';
-import {BagIcon, BurgerIcon, SearchIcon} from '~/components/Icons';
+import {BagIcon, BurgerIcon} from '~/components/Icons';
 import {LanguageSwitcher} from '~/components/LanguageSwitcher';
 import {CURRENCY_SYMBOL, CURRENCY_CODE} from '~/lib/currency';
 import {useT} from '~/lib/i18n';
@@ -79,13 +79,8 @@ export function Header({header, cart, navCollections}: HeaderProps) {
       </NavLink>
 
       <div className="site-header__side site-header__side--end">
-        <button
-          className="site-header__icon-btn"
-          onClick={() => open('search')}
-          aria-label={t('nav.search')}
-        >
-          <SearchIcon />
-        </button>
+        {/* Nouvelle version : plus de recherche, un seul produit montré
+            (app/lib/visibleProducts.ts). */}
         <CartToggle cart={cart} />
       </div>
     </header>

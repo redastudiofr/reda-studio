@@ -1,4 +1,10 @@
 import type {Route} from './+types/lookbook';
+import {redirectCatalogueToMainProduct} from '~/lib/visibleProducts';
+
+// Nouvelle version : un seul produit montré (app/lib/visibleProducts.ts).
+export function loader() {
+  redirectCatalogueToMainProduct();
+}
 
 export const meta: Route.MetaFunction = () => {
   return [{title: 'reda studio | lookbook'}];
