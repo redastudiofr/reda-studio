@@ -7490,3 +7490,19 @@ a.pack-card__name:hover {
 .worn-rail {
   overflow-y: hidden;
 }
+
+/* Site à un seul produit (app/routes/_index.tsx) : en attendant une bannière
+   paysage, la photo portée est verticale ; sur grand écran on la cadre sur
+   le haut du corps, là où est la pièce, au lieu du bas de l'image réglé pour
+   l'ancienne bannière. */
+@media (min-width: 48em) {
+  .home--single .hero__img--desktop {
+    object-position: 50% 30%;
+  }
+}
+
+/* Le bouton de la bannière descend à l'achat : l'en-tête fixe ne doit pas
+   en recouvrir le haut. */
+#acheter {
+  scroll-margin-top: 4.5rem;
+}
