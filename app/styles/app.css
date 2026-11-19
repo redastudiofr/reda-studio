@@ -8282,27 +8282,53 @@ html .st-community .st-tiktok__video {
   }
 }
 
-/* Détails à gauche, produit à droite, à toutes les largeurs : sur un
-   téléphone, une colonne de texte à côté de la carte de 177 px. Le produit
-   garde la largeur d'une carte prxclo (297 px sur ordinateur). */
-.v2-products__layout {
+/* La pièce en photo portée et ses détails (app/routes/_index.tsx).
+   Ordinateur : le texte à gauche, la photo à droite, centrés ensemble.
+   Mobile : la photo d'abord, le texte en dessous. */
+.v2-feature {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) calc((100% - 4px) / 2);
-  align-items: center;
-  gap: 1rem;
-  max-width: 640px;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  max-width: 920px;
   margin: 0 auto;
 }
 
-@media (min-width: 48em) {
-  .v2-products__layout {
-    grid-template-columns: minmax(0, 1fr) 297px;
-    gap: 3rem;
-  }
+.v2-feature__media {
+  order: -1;
+  display: block;
+  width: min(100%, 420px);
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: var(--shadow-xs);
 }
 
-.v2-products__layout .v2-products__grid {
-  --v2-cols: 1;
+.v2-feature__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 400ms var(--ease-out-soft);
+}
+
+.v2-feature__media:hover img {
+  transform: scale(1.02);
+}
+
+.v2-feature .v2-products__details {
+  align-self: center;
+}
+
+@media (min-width: 48em) {
+  .v2-feature {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+    align-items: center;
+    gap: 4rem;
+  }
+
+  .v2-feature__media {
+    order: 0;
+    margin: 0;
+  }
 }
 
 .v2-products__details {

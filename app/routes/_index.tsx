@@ -1,23 +1,21 @@
-import {Await, useLoaderData} from 'react-router';
-import {Suspense, useEffect, useRef, useState} from 'react';
+import {Link} from 'react-router';
+import {useEffect, useRef, useState} from 'react';
 import type {Route} from './+types/_index';
 import {AnimatedHero} from '~/components/AnimatedHero';
 import {CommunityV2} from '~/components/CommunityV2';
-import {ProductItem} from '~/components/ProductItem';
 import {Reveal} from '~/components/Reveal';
 import {Newsletter} from '~/components/Newsletter';
 import {HomeReviews} from '~/components/HomeReviews';
 import {HelpFaq} from '~/components/HelpFaq';
-import {MAIN_PRODUCT_QUERY} from '~/lib/homeProductQueries';
-import {MAIN_PRODUCT_PATH, VISIBLE_PRODUCT_HANDLES} from '~/lib/visibleProducts';
+import {MAIN_PRODUCT_PATH} from '~/lib/visibleProducts';
 import {useT} from '~/lib/i18n';
 
 /*
  * Nouvelle version : l'accueil n'a plus de slider de collections, plus de
  * grille « tous les produits », plus de vitrines de collections (automne
- * drop, summer, best seller) ni leurs bannières. Il montre la bannière, les
- * seuls produits en vente (VISIBLE_PRODUCT_HANDLES), les avis, le bloc
- * communauté repris de Hustle Studio, la FAQ et la newsletter.
+ * drop, summer, best seller) ni leurs bannières. Il montre la bannière, la
+ * pièce en photo portée avec ses détails, le bloc communauté repris de
+ * Hustle Studio, les avis, la FAQ et la newsletter.
  */
 
 export const meta: Route.MetaFunction = () => {
@@ -68,26 +66,7 @@ const DETAILS = [
   'v2.detailStock',
 ] as const;
 
-export async function loader({context}: Route.LoaderArgs) {
-  // Les cartes des produits en vente, dans l'ordre de la liste. Différé :
-  // la section arrive après la bannière et ne la retarde jamais.
-  const products = Promise.all(
-    VISIBLE_PRODUCT_HANDLES.map((handle) =>
-      context.storefront
-        .query(MAIN_PRODUCT_QUERY, {variables: {handle}})
-        .then((data) => data?.product ?? null)
-        .catch((error: Error) => {
-          console.error(error);
-          return null;
-        }),
-    ),
-  ).then((list) => list.filter((product) => product !== null));
-
-  return {products};
-}
-
 export default function Homepage() {
-  const {products} = useLoaderData<typeof loader>();
   const t = useT();
 
   return (
@@ -108,28 +87,31 @@ export default function Homepage() {
         secondaryCta={{text: t('home.ourStory'), href: '/about'}}
       />
 
-      {/* Les cartes à la taille de celles de prxclo.shop, comme demandé :
-          carrées, 4 par ligne dans 1200 px sur ordinateur, 2 par ligne avec
-          16 px de marge sur mobile (voir .v2-products dans app.css). */}
+      {/* La pièce, en photo portée, avec ses détails : sur ordinateur le
+          texte à gauche et la photo à droite ; sur mobile la photo puis le
+          texte, qui apparaît ligne par ligne (voir .v2-feature dans app.css).
+          La photo mène à la fiche produit. */}
       <section className="v2-products" aria-labelledby="v2-products-title">
         <h2 className="v2-products__title" id="v2-products-title">
           {t('v2.productsTitle')}
         </h2>
-        {/* Les détails à gauche, qui apparaissent l'un après l'autre ; le
-            produit à droite, à la taille des cartes de prxclo.shop. */}
-        <div className="v2-products__layout">
+        <div className="v2-feature">
           <DetailsList />
-          <Suspense fallback={<div className="v2-products__grid" aria-hidden="true" />}>
-            <Await resolve={products}>
-              {(list) => (
-                <div className="v2-products__grid">
-                  {list.map((product) => (
-                    <ProductItem key={product.id} product={product} loading="eager" />
-                  ))}
-                </div>
-              )}
-            </Await>
-          </Suspense>
+          <Link
+            to={MAIN_PRODUCT_PATH}
+            prefetch="intent"
+            className="v2-feature__media"
+            aria-label={t('v2.viewProduct')}
+          >
+            <img
+              src="/v2/feature-selfie.webp"
+              alt={t('v2.altSelfie')}
+              width={800}
+              height={1421}
+              loading="lazy"
+              decoding="async"
+            />
+          </Link>
         </div>
       </section>
 
