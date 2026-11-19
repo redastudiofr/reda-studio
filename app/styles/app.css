@@ -8282,115 +8282,167 @@ html .st-community .st-tiktok__video {
   }
 }
 
-/* La pièce en photo portée et ses détails (app/routes/_index.tsx).
-   Ordinateur : le texte à gauche, la photo à droite, centrés ensemble.
-   Mobile : la photo d'abord, le texte en dessous. */
+/* La pièce seule, sur fond blanc, en grand (Packshot dans
+   app/routes/_index.tsx) : plus large qu'une carte produit (560 px au lieu
+   de 297 sur ordinateur), elle monte en se posant quand on arrive dessus. */
+.v2-packshot {
+  display: block;
+  width: min(560px, 92vw);
+  margin: 0 auto;
+  background: #fff;
+}
+
+.v2-packshot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 500ms var(--ease-out-soft);
+}
+
+.v2-packshot:hover img {
+  transform: scale(1.025);
+}
+
+.v2-packshot.is-armed {
+  opacity: 0;
+  transform: translateY(48px) scale(0.94);
+}
+
+.v2-packshot.is-in {
+  transition:
+    opacity 900ms var(--ease-out-soft),
+    transform 1100ms var(--ease-out-soft);
+}
+
+/* Les détails de la pièce et sa photo portée (FeatureSection). Ordinateur :
+   le texte à gauche, la photo à droite ; mobile : la photo puis le texte. */
 .v2-feature {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
-  max-width: 920px;
+  gap: 2.25rem;
+  max-width: 1100px;
   margin: 0 auto;
+  padding: 4rem 1rem;
 }
 
 .v2-feature__media {
   order: -1;
   display: block;
-  width: min(100%, 420px);
+  width: min(100%, 440px);
   margin: 0 auto;
   overflow: hidden;
   border-radius: 4px;
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
 }
 
 .v2-feature__media img {
   display: block;
   width: 100%;
   height: auto;
-  transition: transform 400ms var(--ease-out-soft);
 }
 
-.v2-feature__media:hover img {
-  transform: scale(1.02);
+.v2-feature__eyebrow {
+  margin: 0 0 0.6rem;
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
 }
 
-.v2-feature .v2-products__details {
-  align-self: center;
+.v2-feature__title {
+  margin: 0 0 1.75rem;
+  font-size: clamp(1.35rem, 3vw, 2.2rem);
+  font-weight: 400;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.v2-feature__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-line);
+}
+
+.v2-feature__line {
+  display: grid;
+  grid-template-columns: 2.75rem 1fr;
+  align-items: baseline;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-line);
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.v2-feature__num {
+  font-size: 0.62rem;
+  color: var(--color-muted);
+}
+
+.v2-feature__cta {
+  margin-top: 2rem;
 }
 
 @media (min-width: 48em) {
   .v2-feature {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
     align-items: center;
-    gap: 4rem;
+    gap: 5rem;
+    padding: 6rem 1.5rem;
   }
 
   .v2-feature__media {
     order: 0;
     margin: 0;
   }
-}
 
-.v2-products__details {
-  display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.v2-products__detail {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  font-size: 0.68rem;
-  font-weight: 400;
-  line-height: 1.5;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.v2-products__detail::before {
-  content: '';
-  flex: none;
-  width: 0.4rem;
-  height: 1px;
-  background: currentColor;
-  transform: translateY(-0.25em);
-}
-
-@media (min-width: 48em) {
-  .v2-products__detail {
-    font-size: 0.82rem;
+  .v2-feature__line {
+    font-size: 0.85rem;
+    padding: 1.15rem 0;
   }
 }
 
-/* Apparition une par une (DetailsList dans app/routes/_index.tsx) : armée
-   par JavaScript seulement, jouée quand la liste arrive à l'écran — chaque
-   ligne glisse depuis la gauche, 0,22 s après la précédente. */
-.v2-products__details--armed .v2-products__detail {
+/* L'animation, armée par JavaScript seulement (usePlayOnView) : la photo se
+   dévoile de bas en haut en se resserrant, puis le surtitre, le titre, les
+   lignes une à une et le bouton glissent depuis la gauche. */
+.v2-feature.is-armed .v2-feature__media {
+  clip-path: inset(100% 0 0 0);
+}
+
+.v2-feature.is-armed .v2-feature__media img {
+  transform: scale(1.18);
+}
+
+.v2-feature.is-armed :is(.v2-feature__eyebrow, .v2-feature__title, .v2-feature__line, .v2-feature__cta) {
   opacity: 0;
-  transform: translateX(-18px);
+  transform: translateX(-24px);
 }
 
-.v2-products__details--in .v2-products__detail {
+.v2-feature.is-in .v2-feature__media {
+  transition: clip-path 1100ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.v2-feature.is-in .v2-feature__media img {
+  transition: transform 1600ms var(--ease-out-soft);
+}
+
+.v2-feature.is-in :is(.v2-feature__eyebrow, .v2-feature__title, .v2-feature__line, .v2-feature__cta) {
   transition:
-    opacity 520ms var(--ease-out-soft),
-    transform 520ms var(--ease-out-soft);
+    opacity 600ms var(--ease-out-soft),
+    transform 600ms var(--ease-out-soft);
 }
 
-.v2-products__details--in .v2-products__detail:nth-child(2) {
-  transition-delay: 220ms;
-}
-
-.v2-products__details--in .v2-products__detail:nth-child(3) {
-  transition-delay: 440ms;
-}
-
-.v2-products__details--in .v2-products__detail:nth-child(4) {
-  transition-delay: 660ms;
-}
+.v2-feature.is-in .v2-feature__eyebrow { transition-delay: 250ms; }
+.v2-feature.is-in .v2-feature__title { transition-delay: 380ms; }
+.v2-feature.is-in .v2-feature__line:nth-child(1) { transition-delay: 560ms; }
+.v2-feature.is-in .v2-feature__line:nth-child(2) { transition-delay: 720ms; }
+.v2-feature.is-in .v2-feature__line:nth-child(3) { transition-delay: 880ms; }
+.v2-feature.is-in .v2-feature__line:nth-child(4) { transition-delay: 1040ms; }
+.v2-feature.is-in .v2-feature__cta { transition-delay: 1220ms; }
 
 .v2-products .product-card__title {
   font-size: 0.615rem;
