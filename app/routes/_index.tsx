@@ -60,6 +60,14 @@ const HERO_IMAGE_DESKTOP = {
   alt: 'Two men in the reda studio Royal Longsleeve, white with red embroidery on the sleeves, on a city street in autumn',
 };
 
+/** Les détails listés à gauche du produit, dans l'ordre, du dictionnaire. */
+const DETAILS = [
+  'v2.detailShipping',
+  'v2.detailQuality',
+  'v2.detailAmbition',
+  'v2.detailStock',
+] as const;
+
 export async function loader({context}: Route.LoaderArgs) {
   // Les cartes des produits en vente, dans l'ordre de la liste. Différé :
   // la section arrive après la bannière et ne la retarde jamais.
@@ -107,17 +115,33 @@ export default function Homepage() {
         <h2 className="v2-products__title" id="v2-products-title">
           {t('v2.productsTitle')}
         </h2>
-        <Suspense fallback={<div className="v2-products__grid" aria-hidden="true" />}>
-          <Await resolve={products}>
-            {(list) => (
-              <div className="v2-products__grid">
-                {list.map((product) => (
-                  <ProductItem key={product.id} product={product} loading="eager" />
-                ))}
-              </div>
-            )}
-          </Await>
-        </Suspense>
+        {/* Les détails à gauche, qui apparaissent l'un après l'autre ; le
+            produit à droite, à la taille des cartes de prxclo.shop. */}
+        <div className="v2-products__layout">
+          <ul className="v2-products__details">
+            {DETAILS.map((key, index) => (
+              <Reveal
+                as="li"
+                key={key}
+                className="v2-products__detail"
+                style={{transitionDelay: `${index * 220}ms`}}
+              >
+                {t(key)}
+              </Reveal>
+            ))}
+          </ul>
+          <Suspense fallback={<div className="v2-products__grid" aria-hidden="true" />}>
+            <Await resolve={products}>
+              {(list) => (
+                <div className="v2-products__grid">
+                  {list.map((product) => (
+                    <ProductItem key={product.id} product={product} loading="eager" />
+                  ))}
+                </div>
+              )}
+            </Await>
+          </Suspense>
+        </div>
       </section>
 
       <CommunityV2 />

@@ -9,7 +9,6 @@ import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu, type NavCollection} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
-import {NewsletterPopup} from '~/components/NewsletterPopup';
 import {LanguagePrompt} from '~/components/LanguagePrompt';
 import {useT} from '~/lib/i18n';
 import {SearchIcon} from '~/components/Icons';
@@ -42,7 +41,6 @@ export function PageLayout({
   navCollections,
   isLoggedIn,
   publicStoreDomain,
-  promoSignupEnabled = false,
   localeChosen = true,
   consentChosen = true,
 }: PageLayoutProps) {
@@ -70,7 +68,8 @@ export function PageLayout({
         )}
         <main className={isHome ? undefined : 'main--with-header-space'}>{children}</main>
         <Footer header={header} />
-        <NewsletterPopup enabled={promoSignupEnabled} />
+        {/* Nouvelle version : plus de pop-up newsletter, à la demande du
+            propriétaire (la newsletter reste en bas de l'accueil). */}
         {(!localeChosen || !consentChosen) && (
           <LanguagePrompt
             askLanguage={!localeChosen}

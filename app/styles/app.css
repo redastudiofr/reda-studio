@@ -8282,6 +8282,70 @@ html .st-community .st-tiktok__video {
   }
 }
 
+/* Détails à gauche, produit à droite, à toutes les largeurs : sur un
+   téléphone, une colonne de texte à côté de la carte de 177 px. Le produit
+   garde la largeur d'une carte prxclo (297 px sur ordinateur). */
+.v2-products__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) calc((100% - 4px) / 2);
+  align-items: center;
+  gap: 1rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+@media (min-width: 48em) {
+  .v2-products__layout {
+    grid-template-columns: minmax(0, 1fr) 297px;
+    gap: 3rem;
+  }
+}
+
+.v2-products__layout .v2-products__grid {
+  --v2-cols: 1;
+}
+
+.v2-products__details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.v2-products__detail {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.v2-products__detail::before {
+  content: '';
+  flex: none;
+  width: 0.4rem;
+  height: 1px;
+  background: currentColor;
+  transform: translateY(-0.25em);
+}
+
+@media (min-width: 48em) {
+  .v2-products__detail {
+    font-size: 0.82rem;
+  }
+}
+
+/* Chaque ligne glisse un peu depuis la gauche en apparaissant (Reveal fait
+   le reste : fondu, filet de sécurité qui affiche tout sans transition). */
+.js .v2-products__detail.reveal:not(.reveal--visible) {
+  transform: translateX(-14px);
+}
+
 .v2-products .product-card__title {
   font-size: 0.615rem;
   font-weight: 400;
