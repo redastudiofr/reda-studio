@@ -15,6 +15,7 @@ import {ProductDescription} from '~/components/ProductDescription';
 import {ProductWornVideos} from '~/components/ProductWornVideos';
 import {VisionSection} from '~/components/VisionSection';
 import {CommunityV2} from '~/components/CommunityV2';
+import {loadProductVideos} from '~/lib/productVideos';
 import {BundleOffer} from '~/components/BundleOffer';
 import type {SizeEntry} from '~/components/ProductSizeGuide';
 import {Accordion} from '~/components/Accordion';
@@ -42,7 +43,8 @@ export const meta: Route.MetaFunction = ({data}) => {
     {title: `reda studio | ${product?.title ?? ''}`},
     {
       name: 'description',
-      content: product?.seo?.description || product?.description?.slice(0, 155) || '',
+      content:
+        product?.seo?.description || product?.description?.slice(0, 155) || '',
     },
     {rel: 'canonical', href: `/products/${product?.handle}`},
   ];
@@ -66,10 +68,12 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     throw new Error('Expected product handle to be defined');
   }
 
-  const [{product}] = await Promise.all([
+  // Les vidéos ajoutées à la fiche Shopify du produit, en même temps.
+  const [{product}, videos] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
       variables: {handle, selectedOptions: getSelectedProductOptions(request)},
     }),
+    loadProductVideos(storefront, handle),
   ]);
 
   if (!product?.id) {
@@ -84,7 +88,11 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
-  return {product, demoRatings: demoRatingsEnabled(context.env, request)};
+  return {
+    product,
+    videos,
+    demoRatings: demoRatingsEnabled(context.env, request),
+  };
 }
 
 const MAX_RECOMMENDATIONS = 16;
@@ -219,7 +227,7 @@ function shortenDescription(description: string): string {
 }
 
 export default function Product() {
-  const {product, recommended, pairChoices, demoRatings} =
+  const {product, videos, recommended, pairChoices, demoRatings} =
     useLoaderData<typeof loader>();
 
   const selectedVariant = useOptimisticVariant(
@@ -314,7 +322,9 @@ export default function Product() {
                 {(choices) => (
                   <BundleOffer
                     productTitle={title}
-                    productImage={product.images.nodes[0] ?? selectedVariant?.image}
+                    productImage={
+                      product.images.nodes[0] ?? selectedVariant?.image
+                    }
                     productPrice={selectedVariant?.price}
                     productVariantId={selectedVariant?.id}
                     // Nouvelle version : un seul produit en vente, donc la
@@ -329,7 +339,8 @@ export default function Product() {
                               title,
                               handle: product.handle,
                               featuredImage:
-                                product.images.nodes[0] ?? selectedVariant?.image,
+                                product.images.nodes[0] ??
+                                selectedVariant?.image,
                               variantId: selectedVariant?.id,
                               price: selectedVariant?.price,
                             },
@@ -371,11 +382,13 @@ export default function Product() {
       {/* Directly under the FAQ, in document order — the FAQ itself lives in
           the narrow sticky column above, but a multi-video row needs the
           page's full width, which only starts here, once that column ends. */}
-      <ProductWornVideos />
+      <ProductWornVideos videos={videos} />
 
       <Suspense fallback={null}>
         <Await resolve={recommended}>
-          {(items) => (items.length ? <RelatedProductsRail items={items} /> : null)}
+          {(items) =>
+            items.length ? <RelatedProductsRail items={items} /> : null
+          }
         </Await>
       </Suspense>
 
@@ -383,7 +396,7 @@ export default function Product() {
 
       {/* Nouvelle version : le bloc communauté, puis les avis en dessous,
           comme sur l'accueil. */}
-      <CommunityV2 />
+      <CommunityV2 videos={videos} />
 
       <div className="pdp__reviews">
         <ProductReviews

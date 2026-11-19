@@ -5,6 +5,7 @@ import {INSTAGRAM_URL, TIKTOK_URL} from '~/lib/social';
 import {MAIN_PRODUCT_PATH} from '~/lib/visibleProducts';
 import {useT} from '~/lib/i18n';
 import {useHorizontalRail} from '~/lib/useHorizontalRail';
+import type {SiteVideo} from '~/lib/productVideos';
 
 /*
  * « Rejoins la communauté » — nouvelle version du site.
@@ -26,8 +27,16 @@ const LOOKS = [
   {src: '/v2/look-01-street.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
   {src: '/v2/look-02-studio.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
   {src: '/v2/look-03-river.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
-  {src: '/v2/look-04-street-left.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
-  {src: '/v2/look-05-street-right.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
+  {
+    src: '/v2/look-04-street-left.webp',
+    product: ROYAL,
+    href: MAIN_PRODUCT_PATH,
+  },
+  {
+    src: '/v2/look-05-street-right.webp',
+    product: ROYAL,
+    href: MAIN_PRODUCT_PATH,
+  },
   {src: '/v2/look-06.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
   {src: '/v2/look-07.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
   {src: '/v2/look-08.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
@@ -38,7 +47,7 @@ const LOOKS = [
  * for the web (540px wide, no sound — they play muted, on their own — H.264
  * with fast start), each with a poster frame shown until it plays.
  */
-const TIKTOK_VIDEOS = [
+const LOCAL_VIDEOS: SiteVideo[] = [
   {src: '/v2/videos/royal-01.mp4', poster: '/v2/videos/royal-01.webp'},
   {src: '/v2/videos/royal-02.mp4', poster: '/v2/videos/royal-02.webp'},
 ];
@@ -52,7 +61,12 @@ const TIKTOK_VIDEOS = [
  * no photos) and plays only when it is really on screen — there is no timer,
  * which used to play it before the visitor had scrolled down to it.
  */
-export function CommunityV2() {
+/**
+ * `videos` : celles de la fiche Shopify du produit (app/lib/productVideos.ts),
+ * montrées avant celles de public/v2/videos/.
+ */
+export function CommunityV2({videos = []}: {videos?: SiteVideo[]}) {
+  const allVideos = [...videos, ...LOCAL_VIDEOS];
   const t = useT();
   const ref = useRef<HTMLElement | null>(null);
   const [state, setState] = useState<'idle' | 'armed' | 'in'>('idle');
@@ -96,7 +110,7 @@ export function CommunityV2() {
           {t('v2.storyButton')}
         </Link>
       </div>
-      <FollowUs />
+      <FollowUs videos={allVideos} />
     </section>
   );
 }
@@ -104,10 +118,10 @@ export function CommunityV2() {
 /**
  * "follow us", inside the black block: the two accounts — Instagram and
  * TikTok — as bold links that open the profile, then the brand's videos
- * (TIKTOK_VIDEOS, above) in a row you can swipe, drag or move with the
+ * (`videos`) in a row you can swipe, drag or move with the
  * arrows.
  */
-function FollowUs() {
+function FollowUs({videos}: {videos: SiteVideo[]}) {
   const t = useT();
   const accounts = [
     {name: 'Instagram', href: INSTAGRAM_URL},
@@ -134,7 +148,7 @@ function FollowUs() {
         </p>
       )}
       <p className="st-tiktok__text">{t('v2.tiktokText')}</p>
-      {TIKTOK_VIDEOS.length > 0 && <VideoRail />}
+      {videos.length > 0 && <VideoRail videos={videos} />}
     </section>
   );
 }
@@ -155,7 +169,7 @@ function FollowUs() {
  */
 const COPIES = 5;
 
-function VideoRail() {
+function VideoRail({videos}: {videos: SiteVideo[]}) {
   const t = useT();
   // Drag and arrows from the shared hook; the endless wrap is done here, so
   // that it never fights a finger: see the effect below.
@@ -363,7 +377,7 @@ function VideoRail() {
       <div className="st-tiktok__rail" ref={ref}>
         <div className="st-tiktok__videos">
           {copies.map((copy) =>
-            TIKTOK_VIDEOS.map((video) => (
+            videos.map((video) => (
               <video
                 key={`${copy}-${video.src}`}
                 className="st-tiktok__video"

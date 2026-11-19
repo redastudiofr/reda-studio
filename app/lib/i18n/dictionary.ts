@@ -176,6 +176,9 @@ export const en = {
   'news.subscribe': 'sign up',
   'news.thanks': 'thank you — you’re in.',
   'news.error': 'something went wrong, please try again.',
+  'welcome.title': '-{percent}% on your first order',
+  'welcome.label': 'your welcome code',
+  'welcome.hint': 'one use per customer, at checkout.',
   'popup.title': '-15% off your first order',
   'popup.text':
     'leave your phone number and get your -15% code instantly.',
@@ -757,6 +760,9 @@ export const fr: Record<TranslationKey, string> = {
   'news.subscribe': 's’inscrire',
   'news.thanks': 'merci — vous êtes inscrit.',
   'news.error': 'une erreur est survenue, réessayez.',
+  'welcome.title': '-{percent} % sur ta première commande',
+  'welcome.label': 'ton code de bienvenue',
+  'welcome.hint': 'une utilisation par client, au paiement.',
   'popup.title': '-15 % sur votre première commande',
   'popup.text':
     'laissez votre numéro de téléphone et recevez immédiatement votre code de -15 %.',

@@ -829,6 +829,32 @@ export type CollectionProductsQuery = {
   >;
 };
 
+export type ProductVideosQueryVariables = StorefrontAPI.Exact<{
+  handle: StorefrontAPI.Scalars['String']['input'];
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type ProductVideosQuery = {
+  product?: StorefrontAPI.Maybe<{
+    media: {
+      nodes: Array<
+        | Pick<StorefrontAPI.ExternalVideo, 'mediaContentType'>
+        | Pick<StorefrontAPI.MediaImage, 'mediaContentType'>
+        | Pick<StorefrontAPI.Model3d, 'mediaContentType'>
+        | (Pick<StorefrontAPI.Video, 'id' | 'mediaContentType'> & {
+            previewImage?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Image, 'url'>
+            >;
+            sources: Array<
+              Pick<StorefrontAPI.VideoSource, 'url' | 'mimeType' | 'height'>
+            >;
+          })
+      >;
+    };
+  }>;
+};
+
 export type SuggestedProductFragment = Pick<
   StorefrontAPI.Product,
   'id' | 'title' | 'handle' | 'availableForSale'
@@ -2105,6 +2131,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  fragment ShowcaseMoney on MoneyV2 {\n    amount\n    currencyCode\n  }\n  fragment ShowcaseProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    priceRange {\n      minVariantPrice {\n        ...ShowcaseMoney\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        ...ShowcaseMoney\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    images(first: 2) {\n      nodes {\n        id\n        url\n        altText\n        width\n        height\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    variants(first: 20) {\n      nodes {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        price {\n          ...ShowcaseMoney\n        }\n        compareAtPrice {\n          ...ShowcaseMoney\n        }\n      }\n    }\n  }\n  query CollectionProducts(\n    $handle: String!\n    $first: Int\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      products(first: $first) {\n        nodes {\n          ...ShowcaseProduct\n        }\n      }\n    }\n  }\n': {
     return: CollectionProductsQuery;
     variables: CollectionProductsQueryVariables;
+  };
+  '#graphql\n  query ProductVideos(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    product(handle: $handle) {\n      media(first: 30) {\n        nodes {\n          mediaContentType\n          ... on Video {\n            id\n            previewImage {\n              url\n            }\n            sources {\n              url\n              mimeType\n              height\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+    return: ProductVideosQuery;
+    variables: ProductVideosQueryVariables;
   };
   '#graphql\n  fragment SuggestedProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    variants(first: 12) {\n      nodes {\n        id\n        title\n        availableForSale\n        price {\n          amount\n          currencyCode\n        }\n      }\n    }\n  }\n  query CartSuggestions($country: CountryCode, $language: LanguageCode, $first: Int)\n    @inContext(country: $country, language: $language) {\n    products(first: $first, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...SuggestedProduct\n      }\n    }\n  }\n': {
     return: CartSuggestionsQuery;

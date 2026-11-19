@@ -29,7 +29,7 @@ const OPEN_DELAY_MS = 1200;
  * the classic case), so every access fails soft: an unguarded read would take
  * the whole page down over a marketing pop-up.
  */
-function hasCookie(name: string): boolean {
+export function hasCookie(name: string): boolean {
   try {
     return document.cookie.split(';').some((entry) => entry.trim().startsWith(`${name}=`));
   } catch {
@@ -37,7 +37,7 @@ function hasCookie(name: string): boolean {
   }
 }
 
-function setCookie(name: string, maxAgeSeconds: number) {
+export function setCookie(name: string, maxAgeSeconds: number) {
   try {
     const secure = window.location.protocol === 'https:' ? '; Secure' : '';
     document.cookie = `${name}=1; path=/; max-age=${maxAgeSeconds}; SameSite=Lax${secure}`;
@@ -46,7 +46,7 @@ function setCookie(name: string, maxAgeSeconds: number) {
   }
 }
 
-function readStorage(key: string): string | null {
+export function readStorage(key: string): string | null {
   try {
     return window.localStorage.getItem(key);
   } catch {
@@ -54,7 +54,7 @@ function readStorage(key: string): string | null {
   }
 }
 
-function writeStorage(key: string, value: string) {
+export function writeStorage(key: string, value: string) {
   try {
     window.localStorage.setItem(key, value);
   } catch {
@@ -91,7 +91,7 @@ function rememberDismissal() {
  * Opera, isn't there at all — hence the execCommand fallback, which works from
  * a click on every browser this shop sees.
  */
-async function writeToClipboard(text: string): Promise<boolean> {
+export async function writeToClipboard(text: string): Promise<boolean> {
   try {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);

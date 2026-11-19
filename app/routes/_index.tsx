@@ -8,7 +8,11 @@ import {Newsletter} from '~/components/Newsletter';
 import {HomeReviews} from '~/components/HomeReviews';
 import {HelpFaq} from '~/components/HelpFaq';
 import {MAIN_PRODUCT_QUERY} from '~/lib/homeProductQueries';
-import {MAIN_PRODUCT_PATH, VISIBLE_PRODUCT_HANDLES} from '~/lib/visibleProducts';
+import {loadProductVideos} from '~/lib/productVideos';
+import {
+  MAIN_PRODUCT_PATH,
+  VISIBLE_PRODUCT_HANDLES,
+} from '~/lib/visibleProducts';
 import {useT} from '~/lib/i18n';
 
 /*
@@ -72,15 +76,20 @@ export async function loader({context}: Route.LoaderArgs) {
   // La photo de la pièce sur fond blanc : la première image Shopify du
   // produit en vente. Si Shopify ne répond pas, la section n'a que son titre.
   const handle = VISIBLE_PRODUCT_HANDLES[0];
-  const data = await context.storefront
-    .query(MAIN_PRODUCT_QUERY, {variables: {handle}})
-    .catch((error: Error) => {
-      console.error(error);
-      return null;
-    });
+  // Et ses vidéos, celles ajoutées à sa fiche dans Shopify.
+  const [data, videos] = await Promise.all([
+    context.storefront
+      .query(MAIN_PRODUCT_QUERY, {variables: {handle}})
+      .catch((error: Error) => {
+        console.error(error);
+        return null;
+      }),
+    loadProductVideos(context.storefront, handle),
+  ]);
   const product = data?.product;
   const image = product?.featuredImage;
   return {
+    videos,
     packshot: image
       ? {
           url: image.url,
@@ -93,7 +102,7 @@ export async function loader({context}: Route.LoaderArgs) {
 }
 
 export default function Homepage() {
-  const {packshot} = useLoaderData<typeof loader>();
+  const {packshot, videos} = useLoaderData<typeof loader>();
   const t = useT();
 
   return (
@@ -124,7 +133,7 @@ export default function Homepage() {
         {packshot && <Packshot image={packshot} />}
       </section>
 
-      <CommunityV2 />
+      <CommunityV2 videos={videos} />
 
       {/* Sous le bloc communauté et ses vidéos : les détails de la pièce et
           la photo portée, animés à l'arrivée (voir FeatureSection). */}
@@ -254,7 +263,11 @@ function FeatureSection() {
             </li>
           ))}
         </ol>
-        <Link to={MAIN_PRODUCT_PATH} prefetch="intent" className="btn v2-feature__cta">
+        <Link
+          to={MAIN_PRODUCT_PATH}
+          prefetch="intent"
+          className="btn v2-feature__cta"
+        >
           {t('v2.featureCta')}
         </Link>
       </div>

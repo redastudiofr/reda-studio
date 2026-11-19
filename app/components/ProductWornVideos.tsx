@@ -4,6 +4,7 @@ import {useHorizontalRail} from '~/lib/useHorizontalRail';
 import {useT} from '~/lib/i18n';
 import {useInAppBrowser} from '~/lib/inAppBrowser';
 import {RailArrows} from '~/components/RailArrows';
+import type {SiteVideo} from '~/lib/productVideos';
 
 /**
  * "Your Product Worn" — vertical UGC/TikTok-style clips of the piece
@@ -99,7 +100,18 @@ function WornVideoTile({
   );
 }
 
-export function ProductWornVideos() {
+/**
+ * `videos` : celles de la fiche Shopify du produit (app/lib/productVideos.ts),
+ * montrées avant celles de public/v2/videos/.
+ */
+export function ProductWornVideos({videos = []}: {videos?: SiteVideo[]}) {
+  const all = [
+    ...videos.map((video, index) => ({
+      src: video.src,
+      label: `reda studio piece worn, clip ${index + 1}`,
+    })),
+    ...VIDEOS,
+  ];
   const t = useT();
   const inApp = useInAppBrowser();
   const {ref, scrollByCard} = useHorizontalRail<HTMLDivElement>({loop: true});
@@ -111,11 +123,11 @@ export function ProductWornVideos() {
    * decoration. Every other browser still gets the row — see
    * app/lib/inAppBrowser.ts.
    */
-  if (inApp || !VIDEOS.length) return null;
+  if (inApp || !all.length) return null;
 
   // Three copies back to back so the rail can be scrolled infinitely in
   // either direction — see useHorizontalRail's loop mode.
-  const looped = [...VIDEOS, ...VIDEOS, ...VIDEOS];
+  const looped = [...all, ...all, ...all];
 
   return (
     <section className="pdp__worn" aria-labelledby="worn-heading">

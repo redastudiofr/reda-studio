@@ -8,6 +8,7 @@ import type {
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu, type NavCollection} from '~/components/Header';
+import {PromoPopup} from '~/components/PromoPopup';
 import {CartMain} from '~/components/CartMain';
 import {LanguagePrompt} from '~/components/LanguagePrompt';
 import {useT} from '~/lib/i18n';
@@ -68,8 +69,9 @@ export function PageLayout({
         )}
         <main className={isHome ? undefined : 'main--with-header-space'}>{children}</main>
         <Footer header={header} />
-        {/* Nouvelle version : plus de pop-up newsletter, à la demande du
-            propriétaire (la newsletter reste en bas de l'accueil). */}
+        {/* Nouvelle version : à la place du pop-up newsletter, le code de
+            bienvenue −10 %, montré une seule fois (PromoPopup). */}
+        <PromoPopup />
         {(!localeChosen || !consentChosen) && (
           <LanguagePrompt
             askLanguage={!localeChosen}
