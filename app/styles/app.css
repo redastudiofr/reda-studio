@@ -8341,6 +8341,20 @@ html .st-community .st-tiktok__video {
   height: auto;
 }
 
+/* Sur mobile, la photo verticale entière faisait presque deux écrans avant
+   le texte : recadrée en 4:5 sur le haut du corps, là où est la pièce. */
+@media (max-width: 47.99em) {
+  .v2-feature__media {
+    aspect-ratio: 4 / 5;
+  }
+
+  .v2-feature__media img {
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 18%;
+  }
+}
+
 .v2-feature__eyebrow {
   margin: 0 0 0.6rem;
   font-size: 0.66rem;
