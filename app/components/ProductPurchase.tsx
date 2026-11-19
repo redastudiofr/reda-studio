@@ -74,15 +74,12 @@ export function ProductPurchase({
       : 0;
 
   const state = stockState({available, quantityAvailable, seed: productId});
+  // Plus de « plus que N en stock » : retiré à la demande du propriétaire,
+  // un stock bas s'affiche simplement « en stock ».
   const stock =
     state.kind === 'out'
       ? {className: 'buybox__stock--out', label: t('product.soldOut')}
-      : state.kind === 'low'
-        ? {
-            className: 'buybox__stock--low',
-            label: t('product.lowStock', {count: state.count}),
-          }
-        : {className: 'buybox__stock--in', label: t('product.inStock')};
+      : {className: 'buybox__stock--in', label: t('product.inStock')};
 
   const lines = variantId ? [{merchandiseId: variantId, quantity}] : [];
 
