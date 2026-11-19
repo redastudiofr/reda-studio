@@ -1,5 +1,5 @@
-import {Await, useLoaderData} from 'react-router';
-import {Suspense} from 'react';
+import {Await, Link, useLoaderData} from 'react-router';
+import {Suspense, useEffect, useRef} from 'react';
 import type {Route} from './+types/_index';
 import {AnimatedHero} from '~/components/AnimatedHero';
 import {CommunityV2} from '~/components/CommunityV2';
@@ -111,13 +111,44 @@ export default function Homepage() {
           <Await resolve={products}>
             {(list) => (
               <div className="v2-products__grid">
+                {/* Une seule carte faisait trop vide : elle est encadrée d'une
+                    photo portée et d'une vidéo, de la même taille qu'elle.
+                    Sur mobile, la carte passe d'abord, seule sur sa ligne
+                    (v2-products__break), les deux médias en dessous. */}
+                <MediaTile
+                  kind="image"
+                  src="/v2/look-01-street.webp"
+                  label={t('v2.altStreet')}
+                />
                 {list.map((product) => (
-                  <ProductItem key={product.id} product={product} loading="eager" />
+                  <div className="v2-products__item" key={product.id}>
+                    <ProductItem product={product} loading="eager" />
+                  </div>
                 ))}
+                <span className="v2-products__break" aria-hidden="true" />
+                <MediaTile
+                  kind="video"
+                  src="/v2/videos/royal-01.mp4"
+                  poster="/v2/videos/royal-01.webp"
+                  label={t('v2.videoLabel')}
+                />
               </div>
             )}
           </Await>
         </Suspense>
+
+        <ul className="v2-products__facts">
+          <li>{t('v2.factCotton')}</li>
+          <li>{t('v2.factWeight')}</li>
+          <li>{t('v2.factMade')}</li>
+          <li>{t('v2.factEmbroidery')}</li>
+        </ul>
+
+        <div className="v2-products__cta">
+          <Link to={MAIN_PRODUCT_PATH} prefetch="intent" className="btn">
+            {t('v2.viewProduct')}
+          </Link>
+        </div>
       </section>
 
       <CommunityV2 />
@@ -131,5 +162,64 @@ export default function Homepage() {
         <Newsletter />
       </Reveal>
     </div>
+  );
+}
+
+/**
+ * Une photo ou une vidéo du Royal Longsleeve porté, carrée, à côté de la
+ * carte produit ; elle mène à la fiche. La vidéo, muette et en boucle, ne se
+ * charge et ne tourne que lorsqu'elle est à l'écran.
+ */
+function MediaTile({
+  kind,
+  src,
+  poster,
+  label,
+}: {
+  kind: 'image' | 'video';
+  src: string;
+  poster?: string;
+  label: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        video.muted = true;
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    });
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <Link
+      to={MAIN_PRODUCT_PATH}
+      prefetch="intent"
+      className="v2-products__media"
+      aria-label={label}
+    >
+      {kind === 'image' ? (
+        <img src={src} alt="" loading="lazy" decoding="async" />
+      ) : (
+        <video
+          ref={videoRef}
+          src={src}
+          poster={poster}
+          muted
+          loop
+          playsInline
+          preload="none"
+          aria-hidden="true"
+          tabIndex={-1}
+        />
+      )}
+    </Link>
   );
 }

@@ -8282,6 +8282,105 @@ html .st-community .st-tiktok__video {
   }
 }
 
+/* Photo et vidéo encadrant la carte : la largeur d'une colonne, carrées,
+   avec l'arrondi et l'ombre de l'image de la carte. */
+.v2-products__media {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--color-tile);
+  box-shadow: var(--shadow-xs);
+}
+
+.v2-products__media img,
+.v2-products__media video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 400ms var(--ease-out-soft);
+}
+
+.v2-products__media:hover img,
+.v2-products__media:hover video {
+  transform: scale(1.02);
+}
+
+.v2-products__grid {
+  align-items: flex-start;
+}
+
+/* Saut de ligne, mobile seulement : la carte passe seule en premier, centrée,
+   la photo et la vidéo côte à côte en dessous. */
+.v2-products__break {
+  flex-basis: 100%;
+  height: 0;
+}
+
+@media (max-width: 47.99em) {
+  .v2-products__item {
+    order: -2;
+  }
+
+  .v2-products__break {
+    order: -1;
+  }
+}
+
+@media (min-width: 48em) {
+  .v2-products__break {
+    display: none;
+  }
+}
+
+/* Ce que dit la fiche produit, en une ligne. */
+.v2-products__facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.75rem;
+  margin: 2.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.68rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.v2-products__facts li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.v2-products__facts li + li::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@media (max-width: 47.99em) {
+  .v2-products__facts {
+    gap: 0.6rem 1.1rem;
+  }
+
+  .v2-products__facts li + li::before {
+    display: none;
+  }
+}
+
+.v2-products__cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.75rem;
+}
+
 .v2-products .product-card__title {
   font-size: 0.615rem;
   font-weight: 400;
