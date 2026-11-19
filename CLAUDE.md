@@ -4,22 +4,17 @@ Boutique **Shopify Hydrogen** (React Router 7, Vite, Tailwind v4 en CSS-first),
 en ligne sur **redastudio.fr**. Streetwear français, premium et sobre : noir et
 blanc, minuscules, pas de bandeau promo, pas de compte à rebours.
 
-## ⚠️ Branche `nouvelle-version-ecom` : aperçus uniquement
+## Nouvelle version en ligne depuis le 19 novembre 2026
 
-Cette branche est une **copie du site en ligne** (partie du code publié le
-18 novembre 2026), que le propriétaire fait évoluer petit à petit vers sa
-nouvelle version e-commerce. Le site en ligne ne doit pas changer tant
-qu'il n'a pas dit que cette nouvelle version est prête.
+La nouvelle version e-commerce (une seule pièce, le Royal Longsleeve —
+White ; voir `app/lib/visibleProducts.ts`) a remplacé l'ancienne boutique
+sur redastudio.fr, à la demande du propriétaire.
 
-- **Ne jamais la déployer en production.** Depuis cette branche, seulement
-  `--preview` (commande plus bas), et donner au propriétaire le lien
-  d'aperçu. La consigne de déploiement automatique ci-dessous vaut pour la
-  branche du site en ligne (`claude/affectionate-planck-ulh53u`), pas pour
-  celle-ci.
-- **Ne jamais la fusionner ni la pousser sur `main`**, ni sur la branche du
-  site en ligne, tant que le propriétaire n'a pas demandé la mise en ligne.
-- Une correction du site en ligne se fait sur sa propre branche, puis se
-  reporte ici si besoin.
+- L'**ancienne boutique** est gardée de côté, intacte, sur la branche
+  `ancienne-boutique`. Ne pas la supprimer. Pour la remettre en ligne :
+  `git checkout ancienne-boutique`, puis la commande de production plus bas.
+- Le code en ligne vit désormais sur `claude/affectionate-planck-ulh53u`
+  (et `nouvelle-version-ecom`, au même point).
 
 ## Déploiement
 
@@ -59,7 +54,8 @@ tromper de code coûte de l'argent réel, en silence.
 | Offre | Code | Écrit dans |
 | --- | --- | --- |
 | Pack : 3 pièces, le tshirt Business After Hour offert | `FREEBSN` | `app/lib/packOffer.ts` |
-| Second produit −30 % (posé à partir de 2 articles) | `REDA1130` | `app/lib/offers.ts` |
+| Second Royal −15 % (posé à partir de 2 articles) | `ROYAL15` | `app/lib/offers.ts` |
+| Bienvenue −10 % sur la première commande (pop-up) | `REDA10` | `app/components/PromoPopup.tsx` |
 | Paliers 2ᵉ −20 % / 3ᵉ −30 % — **désactivés** (`TIER_ENABLED = false`) | — | `app/lib/tierDiscount.ts` |
 
 Un panier ne porte **jamais** deux codes d'offre : la règle est dans
@@ -96,5 +92,5 @@ affichage du stock, vidéos produit portées, e-mails, guide des tailles
   `app/lib/packOffer.ts`, à tenir à jour à la main.
 - Remplacer la photo d'ambiance du pack (`PACK_IMAGE` dans
   `app/routes/pack.tsx`), aujourd'hui une image d'archive.
-- Désactiver l'ancien code `REDA1120` et l'app de paliers dans l'admin :
-  seul `REDA1130` porte le −30 % du second produit.
+- Désactiver les anciens codes `REDA1120` / `REDA1130` et l'app de paliers
+  dans l'admin : seul `ROYAL15` porte la remise du second produit.
