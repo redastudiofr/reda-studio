@@ -1,5 +1,5 @@
 import {Await, useLoaderData} from 'react-router';
-import {Suspense} from 'react';
+import {Suspense, useEffect, useRef, useState} from 'react';
 import type {Route} from './+types/_index';
 import {AnimatedHero} from '~/components/AnimatedHero';
 import {CommunityV2} from '~/components/CommunityV2';
@@ -118,18 +118,7 @@ export default function Homepage() {
         {/* Les détails à gauche, qui apparaissent l'un après l'autre ; le
             produit à droite, à la taille des cartes de prxclo.shop. */}
         <div className="v2-products__layout">
-          <ul className="v2-products__details">
-            {DETAILS.map((key, index) => (
-              <Reveal
-                as="li"
-                key={key}
-                className="v2-products__detail"
-                style={{transitionDelay: `${index * 220}ms`}}
-              >
-                {t(key)}
-              </Reveal>
-            ))}
-          </ul>
+          <DetailsList />
           <Suspense fallback={<div className="v2-products__grid" aria-hidden="true" />}>
             <Await resolve={products}>
               {(list) => (
@@ -155,5 +144,64 @@ export default function Homepage() {
         <Newsletter />
       </Reveal>
     </div>
+  );
+}
+
+/**
+ * Les détails du produit, qui apparaissent l'un après l'autre quand la liste
+ * arrive à l'écran — pas avant, même si la page est ouverte depuis
+ * longtemps.
+ *
+ * Visibles par défaut : sans JavaScript, ou avec les animations réduites,
+ * rien n'est caché. JavaScript arme la liste (lignes en retrait) puis la
+ * joue quand elle est vraiment à l'écran. Si l'observateur ne répond jamais
+ * (onglet en arrière-plan, navigateur capricieux), un défilement qui la
+ * trouve à l'écran la joue aussi : elle ne peut pas rester cachée.
+ */
+function DetailsList() {
+  const t = useT();
+  const ref = useRef<HTMLUListElement | null>(null);
+  const [state, setState] = useState<'idle' | 'armed' | 'in'>('idle');
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || typeof IntersectionObserver === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    setState('armed');
+
+    const play = () => {
+      setState('in');
+      observer.disconnect();
+      window.removeEventListener('scroll', onScroll);
+    };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) play();
+      },
+      {threshold: 0.3},
+    );
+    const onScroll = () => {
+      const box = node.getBoundingClientRect();
+      if (box.top < window.innerHeight && box.bottom > 0) play();
+    };
+    observer.observe(node);
+    window.addEventListener('scroll', onScroll, {passive: true});
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  return (
+    <ul
+      ref={ref}
+      className={`v2-products__details ${state === 'armed' ? 'v2-products__details--armed' : ''} ${state === 'in' ? 'v2-products__details--in' : ''}`}
+    >
+      {DETAILS.map((key) => (
+        <li key={key} className="v2-products__detail">
+          {t(key)}
+        </li>
+      ))}
+    </ul>
   );
 }

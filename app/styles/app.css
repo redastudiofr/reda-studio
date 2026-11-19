@@ -8340,10 +8340,30 @@ html .st-community .st-tiktok__video {
   }
 }
 
-/* Chaque ligne glisse un peu depuis la gauche en apparaissant (Reveal fait
-   le reste : fondu, filet de sécurité qui affiche tout sans transition). */
-.js .v2-products__detail.reveal:not(.reveal--visible) {
-  transform: translateX(-14px);
+/* Apparition une par une (DetailsList dans app/routes/_index.tsx) : armée
+   par JavaScript seulement, jouée quand la liste arrive à l'écran — chaque
+   ligne glisse depuis la gauche, 0,22 s après la précédente. */
+.v2-products__details--armed .v2-products__detail {
+  opacity: 0;
+  transform: translateX(-18px);
+}
+
+.v2-products__details--in .v2-products__detail {
+  transition:
+    opacity 520ms var(--ease-out-soft),
+    transform 520ms var(--ease-out-soft);
+}
+
+.v2-products__details--in .v2-products__detail:nth-child(2) {
+  transition-delay: 220ms;
+}
+
+.v2-products__details--in .v2-products__detail:nth-child(3) {
+  transition-delay: 440ms;
+}
+
+.v2-products__details--in .v2-products__detail:nth-child(4) {
+  transition-delay: 660ms;
 }
 
 .v2-products .product-card__title {
