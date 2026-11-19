@@ -22,25 +22,17 @@ const ROYAL = 'Royal Longsleeve — White';
 /**
  * The looks in the "become part of the community" carousel: the brand's own
  * photos (560px wide, 3:4), each with the product it shows and a link to it.
+ * Six different shots — never two crops of the same photo, and neither of the
+ * banner's photos, which the visitor has just seen above.
  */
 const LOOKS = [
-  {src: '/v2/look-01-street.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
-  {src: '/v2/look-02-studio.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
-  {src: '/v2/look-03-river.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
-  {
-    src: '/v2/look-04-street-left.webp',
-    product: ROYAL,
-    href: MAIN_PRODUCT_PATH,
-  },
-  {
-    src: '/v2/look-05-street-right.webp',
-    product: ROYAL,
-    href: MAIN_PRODUCT_PATH,
-  },
-  {src: '/v2/look-06.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
-  {src: '/v2/look-07.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
-  {src: '/v2/look-08.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
-];
+  '/v2/look-09-hall.webp',
+  '/v2/look-07.webp',
+  '/v2/look-10-river.webp',
+  '/v2/look-08.webp',
+  '/v2/look-06.webp',
+  '/v2/look-05-street-right.webp',
+].map((src) => ({src, product: ROYAL, href: MAIN_PRODUCT_PATH}));
 
 /**
  * The brand's videos in the "follow us" row, in display order: re-encoded
@@ -411,29 +403,45 @@ function VideoRail({videos}: {videos: SiteVideo[]}) {
 }
 
 /**
- * The looks carousel: the card in the middle full size, its neighbours
- * smaller and tucked behind it. Native horizontal scrolling with centre
- * snapping — a finger swipes it, the mouse drags it, the arrows step it —
- * and each card's size follows its distance from the centre, frame by frame,
- * so it moves with the finger. Card centres are measured once (and on
- * resize), never during the scroll.
+ * How many times the looks are repeated in the endless row: with six
+ * photos, one copy is about three screens wide on a phone, and a strong swipe
+ * must never run out of row before it comes to rest.
+ */
+const LOOK_COPIES = 7;
+
+/**
+ * The looks carousel, on the same mechanics as the old reda studio
+ * community row (CommunitySlider): the browser's own scrolling, with its
+ * momentum, and a light snap (proximity) that settles near a photo without
+ * pulling the row back at every step. Endless both ways: useHorizontalRail
+ * moves the row back by whole copies once it is at rest. Nothing is computed
+ * while it moves, so the swipe is never held back.
  */
 function LookRail() {
   const t = useT();
-  const {ref, scrollByCard} = useLookRail();
+  const {ref, scrollByCard} = useHorizontalRail<HTMLDivElement>({
+    loop: true,
+    copies: LOOK_COPIES,
+  });
+  const cards = Array.from({length: LOOK_COPIES}, () => LOOKS).flat();
 
   return (
     <div className="hs-look">
       <div className="hs-look__rail" ref={ref}>
-        {LOOKS.map((look, index) => (
+        {cards.map((look, index) => (
           <Link
-            // Fixed list, never reordered.
+            // The same looks repeated: the position is the only stable key.
             // eslint-disable-next-line react/no-array-index-key
             key={index}
             to={look.href}
             prefetch="intent"
             className="hs-look__card"
             draggable={false}
+            // Only the middle copy is read out and reachable with Tab.
+            {...(Math.floor(index / LOOKS.length) !==
+            Math.floor(LOOK_COPIES / 2)
+              ? {'aria-hidden': true, tabIndex: -1}
+              : {})}
           >
             <img
               src={look.src}
@@ -475,126 +483,4 @@ function LookRail() {
       </button>
     </div>
   );
-}
-
-function useLookRail() {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const centres = useRef<number[]>([]);
-
-  useEffect(() => {
-    const rail = ref.current;
-    if (!rail) return;
-    const cards = [...rail.querySelectorAll<HTMLElement>('.hs-look__card')];
-    if (!cards.length) return;
-
-    const measure = () => {
-      centres.current = cards.map(
-        (card) => card.offsetLeft + card.offsetWidth / 2,
-      );
-    };
-    let frame = 0;
-    const paint = () => {
-      frame = 0;
-      const width = cards[0].offsetWidth || 1;
-      const middle = rail.scrollLeft + rail.clientWidth / 2;
-      cards.forEach((card, index) => {
-        const distance = Math.min(
-          3,
-          Math.abs(centres.current[index] - middle) / width,
-        );
-        card.style.setProperty('--look-scale', String(1 - distance * 0.13));
-        card.style.zIndex = String(30 - Math.round(distance * 10));
-      });
-    };
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(paint);
-    };
-
-    measure();
-    // Start on the middle look, with neighbours on both sides.
-    const first = Math.floor(cards.length / 2);
-    rail.scrollLeft = centres.current[first] - rail.clientWidth / 2;
-    paint();
-
-    const resized = new ResizeObserver(() => {
-      measure();
-      schedule();
-    });
-    resized.observe(rail);
-    rail.addEventListener('scroll', schedule, {passive: true});
-
-    // Mouse drag on a computer (touch scrolls natively).
-    let drag: {x: number; left: number; moved: boolean} | null = null;
-    const down = (event: PointerEvent) => {
-      if (event.pointerType !== 'mouse' || event.button !== 0) return;
-      drag = {x: event.clientX, left: rail.scrollLeft, moved: false};
-      rail.classList.add('is-dragging');
-    };
-    const move = (event: PointerEvent) => {
-      if (!drag) return;
-      const dx = event.clientX - drag.x;
-      if (Math.abs(dx) > 4) drag.moved = true;
-      rail.scrollLeft = drag.left - dx;
-    };
-    const up = () => {
-      if (!drag) return;
-      const moved = drag.moved;
-      drag = null;
-      rail.classList.remove('is-dragging');
-      // Settle on the nearest look.
-      const middle = rail.scrollLeft + rail.clientWidth / 2;
-      let best = 0;
-      centres.current.forEach((centre, index) => {
-        if (
-          Math.abs(centre - middle) < Math.abs(centres.current[best] - middle)
-        )
-          best = index;
-      });
-      rail.scrollTo({
-        left: centres.current[best] - rail.clientWidth / 2,
-        behavior: 'smooth',
-      });
-      if (moved) {
-        // A drag is not a click on the card under the pointer.
-        rail.addEventListener('click', (e) => e.preventDefault(), {
-          capture: true,
-          once: true,
-        });
-      }
-    };
-    rail.addEventListener('pointerdown', down);
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      resized.disconnect();
-      rail.removeEventListener('scroll', schedule);
-      rail.removeEventListener('pointerdown', down);
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-  }, []);
-
-  const scrollByCard = (step: number) => {
-    const rail = ref.current;
-    if (!rail || !centres.current.length) return;
-    const middle = rail.scrollLeft + rail.clientWidth / 2;
-    let current = 0;
-    centres.current.forEach((centre, index) => {
-      if (
-        Math.abs(centre - middle) < Math.abs(centres.current[current] - middle)
-      )
-        current = index;
-    });
-    const count = centres.current.length;
-    // Past either end, go round to the other.
-    const target = (current + step + count) % count;
-    rail.scrollTo({
-      left: centres.current[target] - rail.clientWidth / 2,
-      behavior: 'smooth',
-    });
-  };
-
-  return {ref, scrollByCard};
 }

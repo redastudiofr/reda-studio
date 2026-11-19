@@ -69,7 +69,6 @@ const DETAILS = [
   'v2.detailShipping',
   'v2.detailQuality',
   'v2.detailAmbition',
-  'v2.detailStock',
 ] as const;
 
 export async function loader({context}: Route.LoaderArgs) {

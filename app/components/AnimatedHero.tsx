@@ -95,22 +95,19 @@ export function AnimatedHero({
         animate={{opacity: 1, scale: 1}}
         transition={{duration: 1, ease: [0.16, 1, 0.3, 1]}}
       >
-        <img
-          src={imageMobile.src}
-          alt={imageMobile.alt}
-          fetchPriority="high"
-          loading="eager"
-          decoding="async"
-          className="hero__img hero__img--mobile"
-        />
-        <img
-          src={imageDesktop.src}
-          alt={imageDesktop.alt}
-          fetchPriority="high"
-          loading="eager"
-          decoding="async"
-          className="hero__img hero__img--desktop"
-        />
+        {/* One image, chosen by the browser for the screen: two <img> (one
+            hidden by CSS) made a phone download the desktop photo too. */}
+        <picture>
+          <source media="(min-width: 48em)" srcSet={imageDesktop.src} />
+          <img
+            src={imageMobile.src}
+            alt={imageMobile.alt}
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
+            className="hero__img hero__img--picture"
+          />
+        </picture>
         {/* A gradient scrim over the photo, not opacity on the photo — see
             .hero__scrim in app.css. */}
         <div className="hero__scrim" />

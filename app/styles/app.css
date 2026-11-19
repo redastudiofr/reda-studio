@@ -1116,6 +1116,19 @@ html {
   display: none;
 }
 
+/* La bannière en une seule image (<picture> dans AnimatedHero) : le cadrage
+   du mobile, puis celui de l'ordinateur au-delà de 48em. */
+.hero__img--picture {
+  object-fit: cover;
+  object-position: 45% 50%;
+}
+
+@media (min-width: 48em) {
+  .hero__img--picture {
+    object-position: 50% 80%;
+  }
+}
+
 /* Note Trustpilot au-dessus de « nouvelle collection » : en petit, l'image
    (fond transparent) porte son propre texte blanc. Les deux fichiers sont
    rognés au plus près, la largeur suffit à fixer la taille. */
@@ -8018,6 +8031,168 @@ a.pack-card__name:hover {
 html .st-community .st-tiktok__rail {
   scroll-snap-type: none;
   -webkit-overflow-scrolling: touch;
+}
+
+html .st-community .st-tiktok__video {
+  scroll-snap-align: none;
+}
+
+.st-community__track {
+  will-change: transform;
+}
+
+.st-community .st-community__photos,
+html .st-community .st-tiktok__rail {
+  contain: paint;
+}
+
+@media (max-width: 47.99em) {
+  .st-community .st-community__photos img,
+  .st-community .st-community__photos img:nth-child(n) {
+    border-width: 3px;
+    box-shadow: 0 8px 16px rgb(0 0 0 / 0.3);
+  }
+}
+
+/* Le carrousel des looks : la mécanique de l'ancienne rangée « notre
+   communauté » de reda studio (.community__rail) — défilement natif, élan du
+   doigt, accroche légère (proximity) — et des cartes plus petites. */
+.hs-look {
+  --look-w: min(22vw, 280px);
+  position: relative;
+  z-index: 1;
+  margin: 1.5rem calc(var(--sx-gutter, 24px) * -1) 2.5rem;
+}
+
+.hs-look__rail {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: 0.5rem 1.5rem 1.25rem;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+}
+
+.hs-look__rail:active {
+  cursor: grabbing;
+}
+
+.hs-look__rail::-webkit-scrollbar {
+  display: none;
+}
+
+.hs-look__card {
+  position: relative;
+  flex: 0 0 var(--look-w);
+  min-width: 0;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #222;
+  color: #fff;
+  text-decoration: none;
+  scroll-snap-align: start;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.3);
+}
+
+.hs-look__card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.hs-look__info {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 3rem 1rem 1rem;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0));
+  text-align: left;
+}
+
+.hs-look__name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hs-look__cta {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+
+.hs-look__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  transform: translateY(-50%);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.25);
+}
+
+.hs-look__arrow svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.hs-look__arrow--prev {
+  left: 1rem;
+}
+
+.hs-look__arrow--next {
+  right: 1rem;
+}
+
+@media (max-width: 63.99em) {
+  .hs-look {
+    --look-w: 34vw;
+  }
+}
+
+/* Téléphone : une carte et demie, pour que la rangée continue visiblement
+   et invite au geste. */
+@media (max-width: 47.99em) {
+  .hs-look {
+    --look-w: 54vw;
+    margin-block: 1rem 2rem;
+  }
+  .hs-look__rail {
+    gap: 0.6rem;
+    padding-inline: 1.25rem;
+  }
+  .hs-look__card {
+    box-shadow: 0 6px 14px rgb(0 0 0 / 0.28);
+  }
+  .hs-look__info {
+    padding: 2.25rem 0.75rem 0.75rem;
+  }
+  .hs-look__name {
+    font-size: 0.78rem;
+  }
+  .hs-look__cta {
+    font-size: 0.68rem;
+  }
+  .hs-look__arrow {
+    display: none;
+  }
 }
 
 html .st-community .st-tiktok__video {

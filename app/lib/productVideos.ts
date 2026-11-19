@@ -66,6 +66,15 @@ function pickMp4(
  * de les lire. Le même fichier est servi par cdn.shopify.com/videos/…,
  * autorisé, comme les images.
  */
+/**
+ * La vignette d'une vidéo, demandée à la taille où elle s'affiche : celle
+ * que Shopify donne est l'image d'origine (jusqu'à 670 Ko pour une vignette
+ * de 200 px de large sur la page).
+ */
+function sized(url: string, width: number): string {
+  return `${url}${url.includes('?') ? '&' : '?'}width=${width}`;
+}
+
 function onShopifyCdn(url: string): string {
   return url.replace(
     /^https:\/\/[^/]+\/cdn\/shop\/videos\//,
@@ -88,7 +97,9 @@ export async function loadProductVideos(
       if (!source) continue;
       videos.push({
         src: onShopifyCdn(source.url),
-        poster: node.previewImage?.url,
+        poster: node.previewImage?.url
+          ? sized(node.previewImage.url, 480)
+          : undefined,
       });
     }
     return videos;
