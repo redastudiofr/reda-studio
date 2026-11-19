@@ -59,6 +59,20 @@ function pickMp4(
   );
 }
 
+/**
+ * Shopify donne l'adresse des vidéos sur le domaine de la boutique
+ * (redastudio.myshopify.com/cdn/shop/videos/…), que la politique de sécurité
+ * du site (CSP, app/entry.server.tsx) n'autorise pas : le navigateur refusait
+ * de les lire. Le même fichier est servi par cdn.shopify.com/videos/…,
+ * autorisé, comme les images.
+ */
+function onShopifyCdn(url: string): string {
+  return url.replace(
+    /^https:\/\/[^/]+\/cdn\/shop\/videos\//,
+    'https://cdn.shopify.com/videos/',
+  );
+}
+
 export async function loadProductVideos(
   storefront: Storefront,
   handle: string,
@@ -72,7 +86,10 @@ export async function loadProductVideos(
       if (node.mediaContentType !== 'VIDEO' || !('sources' in node)) continue;
       const source = pickMp4(node.sources);
       if (!source) continue;
-      videos.push({src: source.url, poster: node.previewImage?.url});
+      videos.push({
+        src: onShopifyCdn(source.url),
+        poster: node.previewImage?.url,
+      });
     }
     return videos;
   } catch (error) {

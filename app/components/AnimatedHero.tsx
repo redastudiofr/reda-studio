@@ -22,7 +22,11 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: {y: 20, opacity: 0},
-  visible: {y: 0, opacity: 1, transition: {duration: 0.6, ease: 'easeOut' as const}},
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {duration: 0.6, ease: 'easeOut' as const},
+  },
 };
 
 // `hero__cta` carries the white text colour (see app.css). It can't be left
@@ -59,7 +63,7 @@ export function AnimatedHero({
   eyebrow?: string;
   title: ReactNode;
   description?: string;
-  ctaButton: HeroCta;
+  ctaButton?: HeroCta;
   secondaryCta?: HeroCta;
 }) {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -127,7 +131,10 @@ export function AnimatedHero({
           </motion.picture>
         )}
         {eyebrow && (
-          <motion.p variants={itemVariants} className="text-[11px] uppercase tracking-[0.14em] text-white/70 sm:text-xs">
+          <motion.p
+            variants={itemVariants}
+            className="text-[11px] uppercase tracking-[0.14em] text-white/70 sm:text-xs"
+          >
             {eyebrow}
           </motion.p>
         )}
@@ -137,16 +144,32 @@ export function AnimatedHero({
             attendent un titre principal. */}
         <h1 className="sr-only">{title}</h1>
         {description && (
-          <motion.p variants={itemVariants} className="mt-3 max-w-md text-sm leading-relaxed text-white/80 sm:text-base">
+          <motion.p
+            variants={itemVariants}
+            className="mt-3 max-w-md text-sm leading-relaxed text-white/80 sm:text-base"
+          >
             {description}
           </motion.p>
         )}
-        <motion.div variants={itemVariants} className="mt-7 flex flex-wrap items-center gap-3 sm:mt-9">
-          <Link to={ctaButton.href} prefetch="intent" className={glassButtonClassName}>
-            {ctaButton.text}
-          </Link>
+        <motion.div
+          variants={itemVariants}
+          className="mt-7 flex flex-wrap items-center gap-3 sm:mt-9"
+        >
+          {ctaButton && (
+            <Link
+              to={ctaButton.href}
+              prefetch="intent"
+              className={glassButtonClassName}
+            >
+              {ctaButton.text}
+            </Link>
+          )}
           {secondaryCta && (
-            <Link to={secondaryCta.href} prefetch="intent" className={glassButtonClassName}>
+            <Link
+              to={secondaryCta.href}
+              prefetch="intent"
+              className={glassButtonClassName}
+            >
               {secondaryCta.text}
             </Link>
           )}

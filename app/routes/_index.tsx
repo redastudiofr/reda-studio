@@ -52,11 +52,11 @@ export function links() {
   ];
 }
 
-// Les photos du Royal Longsleeve envoyées par le propriétaire : la même rue,
-// en paysage sur ordinateur et en vertical sur mobile (public/v2/).
+// Les photos du Royal Longsleeve envoyées par le propriétaire (public/v2/) :
+// la rue en paysage sur ordinateur, le studio blanc en vertical sur mobile.
 const HERO_IMAGE_MOBILE = {
   src: '/v2/banner-mobile.webp',
-  alt: 'Two men in the reda studio Royal Longsleeve, white with red embroidery on the sleeves, on a city street in autumn',
+  alt: 'Two men in the reda studio Royal Longsleeve, white with red embroidery on the sleeves, front and back, in a white studio',
 };
 
 const HERO_IMAGE_DESKTOP = {
@@ -118,8 +118,6 @@ export default function Homepage() {
         eyebrow={t('home.eyebrow')}
         title="reda studio"
         description={t('home.tagline')}
-        // Plus de catalogue à parcourir : « shop now » mène à la pièce.
-        ctaButton={{text: t('home.shopNow'), href: MAIN_PRODUCT_PATH}}
         secondaryCta={{text: t('home.ourStory'), href: '/about'}}
       />
 
