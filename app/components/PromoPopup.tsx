@@ -42,6 +42,13 @@ function rememberSeen() {
  * panier d'un clic. Il ne s'ouvre qu'une seule fois par visiteur : il est
  * noté comme vu dès qu'il s'affiche, qu'on le ferme ou non.
  */
+/**
+ * Les autres fenêtres quand elles sont ouvertes : langue et cookies, tiroir
+ * (panier, menu ; toujours dans la page, `.expanded` quand il est ouvert),
+ * précommande. Celle-ci n'est pas encore dans la page quand on cherche.
+ */
+const OTHER_OPEN_DIALOGS = '.lang-prompt, .overlay.expanded, .popup-overlay';
+
 export function PromoPopup() {
   const [open, setOpen] = useState(false);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>(
@@ -53,11 +60,22 @@ export function PromoPopup() {
 
   useEffect(() => {
     if (alreadySeen()) return;
-    const timer = setTimeout(() => {
+    // Jamais par-dessus une autre fenêtre (choix de la langue et des
+    // cookies à la première visite, panier ouvert…) : il serait noté vu sans
+    // avoir été lu. On attend qu'aucune ne soit ouverte depuis
+    // OPEN_DELAY_MS, puis il s'ouvre.
+    let calmSince = Date.now();
+    const timer = setInterval(() => {
+      if (document.querySelector(OTHER_OPEN_DIALOGS)) {
+        calmSince = Date.now();
+        return;
+      }
+      if (Date.now() - calmSince < OPEN_DELAY_MS) return;
+      clearInterval(timer);
       rememberSeen();
       setOpen(true);
-    }, OPEN_DELAY_MS);
-    return () => clearTimeout(timer);
+    }, 250);
+    return () => clearInterval(timer);
   }, []);
 
   const close = useCallback(() => setOpen(false), []);
