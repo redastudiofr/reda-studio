@@ -8423,6 +8423,9 @@ html .st-community .st-tiktok__video {
 }
 
 .v2-feature.is-in .v2-feature__media {
+  /* Une valeur d'arrivée explicite : de inset(100%) à « none », le
+     navigateur ne sait pas animer et la photo apparaissait d'un coup. */
+  clip-path: inset(0 0 0 0);
   transition: clip-path 1100ms cubic-bezier(0.65, 0, 0.35, 1);
 }
 
