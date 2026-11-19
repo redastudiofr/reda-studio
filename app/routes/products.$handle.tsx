@@ -14,6 +14,7 @@ import {ProductPurchase} from '~/components/ProductPurchase';
 import {ProductDescription} from '~/components/ProductDescription';
 import {ProductWornVideos} from '~/components/ProductWornVideos';
 import {VisionSection} from '~/components/VisionSection';
+import {CommunityV2} from '~/components/CommunityV2';
 import {BundleOffer} from '~/components/BundleOffer';
 import type {SizeEntry} from '~/components/ProductSizeGuide';
 import {Accordion} from '~/components/Accordion';
@@ -316,7 +317,24 @@ export default function Product() {
                     productImage={product.images.nodes[0] ?? selectedVariant?.image}
                     productPrice={selectedVariant?.price}
                     productVariantId={selectedVariant?.id}
-                    choices={choices}
+                    // Nouvelle version : un seul produit en vente, donc la
+                    // deuxième pièce de l'offre est ce même produit, dans la
+                    // taille choisie (2e à −15 %, app/lib/offers.ts).
+                    choices={
+                      choices.length
+                        ? choices
+                        : [
+                            {
+                              id: product.id,
+                              title,
+                              handle: product.handle,
+                              featuredImage:
+                                product.images.nodes[0] ?? selectedVariant?.image,
+                              variantId: selectedVariant?.id,
+                              price: selectedVariant?.price,
+                            },
+                          ]
+                    }
                     available={available}
                   />
                 )}
@@ -362,6 +380,10 @@ export default function Product() {
       </Suspense>
 
       <VisionSection />
+
+      {/* Nouvelle version : le bloc communauté, puis les avis en dessous,
+          comme sur l'accueil. */}
+      <CommunityV2 />
 
       <div className="pdp__reviews">
         <ProductReviews

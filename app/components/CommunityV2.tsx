@@ -28,6 +28,9 @@ const LOOKS = [
   {src: '/v2/look-03-river.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
   {src: '/v2/look-04-street-left.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
   {src: '/v2/look-05-street-right.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
+  {src: '/v2/look-06.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
+  {src: '/v2/look-07.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
+  {src: '/v2/look-08.webp', product: ROYAL, href: MAIN_PRODUCT_PATH},
 ];
 
 /**

@@ -7511,7 +7511,8 @@ a.pack-card__name:hover {
   --on-tile: #f3f3f3;
   --st-ink: #111111;
   --st-font: var(--font-sans);
-  --brand-wordmark: url('/images/logo-wordmark.png');
+  /* Le logo fleur envoyé par le propriétaire, détouré (public/v2/). */
+  --brand-wordmark: url('/v2/logo-flower.png');
 }
 
 .brand-wordmark {
@@ -8219,15 +8220,15 @@ html .st-community .st-tiktok__video {
 }
 
 /* Adaptations reda studio. Le bloc est ici pleine largeur (pas de marge de
-   page à compenser), et le logo reda studio est un bandeau large (537×72) :
-   plus large et moins haut que celui de Hustle dans le même rond. */
+   page à compenser), et le logo est la fleur reda studio, presque carrée
+   (400×409) : elle remplit le rond blanc en gardant une marge. */
 .st-community {
   margin-inline: 0;
 }
 
 .st-community__logo .brand-wordmark {
-  width: 86px;
-  height: 12px;
+  width: 68px;
+  height: 70px;
 }
 
 /*
@@ -8245,6 +8246,7 @@ html .st-community .st-tiktok__video {
 
 .v2-products__title {
   margin: 0 0 1.75rem;
+  text-align: center;
   font-size: clamp(1.4rem, 3.2vw, 2.25rem);
   font-weight: 400;
   text-transform: uppercase;
@@ -8252,21 +8254,31 @@ html .st-community .st-tiktok__video {
   line-height: 1.1;
 }
 
+/* Centrée : une ligne qui n'est pas pleine (aujourd'hui une seule carte) se
+   range au milieu, chaque carte gardant la largeur d'une colonne sur 2, 3
+   ou 4. Une grille la rangerait à gauche. */
 .v2-products__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  --v2-cols: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 4px;
+}
+
+.v2-products__grid > * {
+  flex: 0 0 calc((100% - (var(--v2-cols) - 1) * 4px) / var(--v2-cols));
+  min-width: 0;
 }
 
 @media (min-width: 48em) {
   .v2-products__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    --v2-cols: 3;
   }
 }
 
 @media (min-width: 64em) {
   .v2-products__grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    --v2-cols: 4;
   }
 }
 

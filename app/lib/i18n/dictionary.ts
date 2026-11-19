@@ -77,12 +77,12 @@ export const en = {
   'offer.heading': 'the offer',
   'offer.ribbon': '−{percent}% on your second piece',
   'offer.takeTwo': 'take two',
-  'offer.sub': 'add a second piece — any piece — and {percent}% comes off it',
+  'offer.sub': 'buy two longsleeves — {percent}% comes off the second',
   'offer.subOff': 'same aesthetic, same details',
   'offer.pick': 'pick your second piece',
   'offer.addBoth': 'add both to cart',
   'offer.noteCode':
-    'works with any second piece, not just this pair. we add code {code} to your cart for you — it stays visible there, and you can type it in yourself at any time.',
+    'from two longsleeves in your cart. we add code {code} for you — it stays visible there, and you can type it in yourself at any time.',
   'offer.noteAuto':
     'works with any second piece, not just this pair. no code needed — the reduction applies itself in your cart and at checkout.',
 
@@ -650,13 +650,12 @@ export const fr: Record<TranslationKey, string> = {
   'offer.heading': 'l’offre',
   'offer.ribbon': '−{percent} % sur votre deuxième pièce',
   'offer.takeTwo': 'prenez-en deux',
-  'offer.sub':
-    'ajoutez une deuxième pièce — celle que vous voulez — et {percent} % en sont déduits',
+  'offer.sub': 'achetez deux longsleeves — le deuxième à −{percent} %',
   'offer.subOff': 'même esthétique, mêmes finitions',
   'offer.pick': 'choisissez votre deuxième pièce',
   'offer.addBoth': 'ajouter les deux au panier',
   'offer.noteCode':
-    'valable avec n’importe quelle deuxième pièce, pas seulement ce duo. nous ajoutons le code {code} à votre panier — il y reste visible, et vous pouvez le saisir vous-même à tout moment.',
+    'dès deux longsleeves dans votre panier. nous ajoutons le code {code} pour vous — il y reste visible, et vous pouvez le saisir vous-même à tout moment.',
   'offer.noteAuto':
     'valable avec n’importe quelle deuxième pièce, pas seulement ce duo. aucun code à saisir — la réduction s’applique seule dans votre panier et au paiement.',
 

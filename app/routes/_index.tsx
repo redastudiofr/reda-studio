@@ -120,9 +120,10 @@ export default function Homepage() {
         </Suspense>
       </section>
 
-      <HomeReviews />
-
       <CommunityV2 />
+
+      {/* Sous le bloc communauté, à la demande du propriétaire. */}
+      <HomeReviews />
 
       <HelpFaq />
 

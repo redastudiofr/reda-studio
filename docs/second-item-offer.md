@@ -1,5 +1,18 @@
 # Second-piece offer — 30% off the second item
 
+> **Nouvelle version (branche `nouvelle-version-ecom`) : 2ᵉ Royal Longsleeve
+> à −15 %, code `ROYAL15`.** `app/lib/offers.ts` y vaut 15 % et `ROYAL15` ;
+> un panier portant `REDA1130` (le −30 % du site en ligne) passe à `ROYAL15`.
+> Sur la fiche, la boîte « prenez-en deux » propose deux Royal Longsleeve
+> dans la taille choisie.
+>
+> **À créer dans Shopify avant la mise en ligne** (sinon la page annonce
+> −15 % que le panier n'applique pas) : Remises → Créer une remise →
+> **Achetez X, obtenez Y** → Code `ROYAL15` → le client achète **1** article
+> du produit *Royal Longsleeve — White* → il obtient **1** article du même
+> produit → **Pourcentage 15** → cocher *Limiter à une utilisation par
+> commande* → Enregistrer. Le site en ligne, lui, n'ajoute jamais ce code.
+
 The product page shows a "take two" box: this piece plus a suggested second
 one, with 30% already taken off. The reduction then appears in the cart and at
 checkout on its own.

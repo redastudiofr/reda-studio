@@ -1,5 +1,7 @@
 /**
- * Second-piece offer — 30% off the second item in the basket.
+ * Second-piece offer — nouvelle version : 15% off the second Royal Longsleeve
+ * (the site's only piece), on the code ROYAL15. The live site runs 30% on
+ * REDA1130 from its own branch; see docs/second-item-offer.md.
  *
  * A storefront cannot change a price: what the customer pays is decided by
  * Shopify at cart and checkout. So the offer is driven by a real Shopify
@@ -15,7 +17,7 @@
  * Percentage taken off the second piece — what the code below is set to in
  * Shopify Admin. The two must always say the same number.
  */
-export const SECOND_ITEM_DISCOUNT_PERCENT = 30;
+export const SECOND_ITEM_DISCOUNT_PERCENT = 15;
 
 /** Set to false to switch the offer off across the storefront. */
 export const OFFER_ENABLED = true;
@@ -35,14 +37,16 @@ export const OFFER_ENABLED = true;
  * and an automatic discount for the same offer at once, or the reductions
  * stack.
  */
-export const OFFER_DISCOUNT_CODE: string = 'REDA1130';
+export const OFFER_DISCOUNT_CODE: string = 'ROYAL15';
 
 /**
  * Codes this offer ran on before, still possibly sitting on a basket saved in
  * a browser. The cart swaps them for the current code rather than letting the
  * two coexist or taking one for a code the customer typed.
  */
-export const RETIRED_OFFER_CODES: string[] = ['REDA1120'];
+// REDA1130 : le −30 % du site en ligne. Un panier ouvert sur le site en ligne
+// puis sur la nouvelle version le porterait encore ; il passe à ROYAL15.
+export const RETIRED_OFFER_CODES: string[] = ['REDA1120', 'REDA1130'];
 
 /**
  * How many pieces a basket holds before the code goes on: it is a second-piece
