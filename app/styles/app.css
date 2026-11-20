@@ -703,13 +703,23 @@ html {
    pas de hauteur réservée à un formulaire qu'il n'a pas. */
 @media (max-width: 39.99em) {
   .popup--welcome .popup__media {
-    aspect-ratio: 5 / 4;
+    aspect-ratio: 3 / 2;
   }
   .popup--welcome .popup__media img {
-    object-position: 50% 68%;
+    object-position: 50% 66%;
   }
+  /* Serré pour tenir sans défiler, jusqu'à un iPhone SE (568 px de haut). */
   .popup--welcome .popup__body {
     min-height: 0;
+    padding: 1.25rem 1.25rem 1.4rem;
+    gap: 0.6rem;
+  }
+  .popup--welcome .popup__body h2 {
+    font-size: 1.05rem;
+  }
+  .popup--welcome .popup__code {
+    margin-top: 0.25rem;
+    padding: 1rem 1rem 1.1rem;
   }
 }
 
