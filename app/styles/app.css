@@ -8319,7 +8319,7 @@ html .st-community .st-tiktok__video {
    de 297 sur ordinateur), elle monte en se posant quand on arrive dessus. */
 .v2-packshot {
   display: block;
-  width: min(560px, 92vw);
+  width: min(460px, 76vw);
   margin: 0 auto;
   background: #fff;
 }

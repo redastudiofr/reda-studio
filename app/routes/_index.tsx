@@ -218,7 +218,7 @@ function Packshot({
       <img
         src={sized(1100)}
         srcSet={`${sized(600)} 600w, ${sized(900)} 900w, ${sized(1100)} 1100w`}
-        sizes="(min-width: 48em) 560px, 92vw"
+        sizes="(min-width: 48em) 460px, 76vw"
         alt={image.altText}
         width={image.width}
         height={image.height}
