@@ -110,8 +110,8 @@ export default function Homepage() {
         imageMobile={HERO_IMAGE_MOBILE}
         imageDesktop={HERO_IMAGE_DESKTOP}
         badge={{
-          mobile: '/images/trustpilot-mobile.webp',
-          desktop: '/images/trustpilot-desktop.webp',
+          mobile: '/images/trustpilot-1200-mobile.webp',
+          desktop: '/images/trustpilot-1200-desktop.webp',
           alt: t('home.trustAlt'),
         }}
         eyebrow={t('home.eyebrow')}
