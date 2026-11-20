@@ -697,6 +697,22 @@ html {
   object-position: 50% 20%;
 }
 
+/* Le pop-up de bienvenue (PromoPopup) sur téléphone : la photo du terrain de
+   basket en bandeau un peu plus haut, cadré sur les deux garçons (le premier
+   plan à gauche, celui au téléphone à droite) plutôt que sur le ciel ; et
+   pas de hauteur réservée à un formulaire qu'il n'a pas. */
+@media (max-width: 39.99em) {
+  .popup--welcome .popup__media {
+    aspect-ratio: 5 / 4;
+  }
+  .popup--welcome .popup__media img {
+    object-position: 50% 68%;
+  }
+  .popup--welcome .popup__body {
+    min-height: 0;
+  }
+}
+
 .popup__body {
   padding: 2rem 1.5rem;
   display: flex;

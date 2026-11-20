@@ -143,10 +143,10 @@ export function PromoPopup() {
 
         <div className="popup__media">
           <img
-            src="/v2/photo-studio.webp"
+            src="/v2/popup-basket.webp"
             alt=""
-            width="941"
-            height="1672"
+            width="900"
+            height="1125"
             loading="lazy"
             decoding="async"
           />
