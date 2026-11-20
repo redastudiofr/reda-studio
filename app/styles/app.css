@@ -723,6 +723,17 @@ html {
   }
 }
 
+/* Petits écrans (iPhone SE, 568 px de haut) : la photo en bandeau plus bas,
+   pour que le code et ses deux boutons restent visibles sans défiler. */
+@media (max-width: 39.99em) and (max-height: 600px) {
+  .popup--welcome .popup__media {
+    aspect-ratio: 2 / 1;
+  }
+  .popup--welcome .popup__media img {
+    object-position: 50% 62%;
+  }
+}
+
 .popup__body {
   padding: 2rem 1.5rem;
   display: flex;
