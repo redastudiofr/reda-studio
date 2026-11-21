@@ -10,7 +10,6 @@ import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu, type NavCollection} from '~/components/Header';
 import {PromoPopup} from '~/components/PromoPopup';
 import {CartMain} from '~/components/CartMain';
-import {LanguagePrompt} from '~/components/LanguagePrompt';
 import {useT} from '~/lib/i18n';
 import {SearchIcon} from '~/components/Icons';
 import {HeaderToneProvider} from '~/lib/header-tone';
@@ -42,8 +41,6 @@ export function PageLayout({
   navCollections,
   isLoggedIn,
   publicStoreDomain,
-  localeChosen = true,
-  consentChosen = true,
 }: PageLayoutProps) {
   // The header is fixed (see .site-header), so it no longer reserves layout
   // space itself — every route needs that space reserved via padding,
@@ -72,12 +69,11 @@ export function PageLayout({
         {/* Nouvelle version : à la place du pop-up newsletter, le code de
             bienvenue −10 %, montré une seule fois (PromoPopup). */}
         <PromoPopup />
-        {(!localeChosen || !consentChosen) && (
-          <LanguagePrompt
-            askLanguage={!localeChosen}
-            askCookies={!consentChosen}
-          />
-        )}
+        {/* Plus de fenêtre langue et cookies à l'arrivée (LanguagePrompt) :
+            le propriétaire ne veut qu'un pop-up, celui du code REDA10. Le
+            site reste en anglais par défaut, la langue se change dans le
+            menu ; sans réponse sur les cookies, les statistiques de visite
+            de Shopify restent coupées (app/lib/cookieConsent.ts). */}
       </HeaderToneProvider>
     </Aside.Provider>
   );
